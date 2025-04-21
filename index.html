@@ -86,8 +86,8 @@
       z-index: 2;
       box-shadow: 0 0 2px #000;
     }
-	
-	.gps-marker .triangle {
+
+    .gps-marker .triangle {
   position: absolute;
   top: 0;
   left: 6px; /* center point */
@@ -100,8 +100,6 @@
   transform-origin: center;
   transition: transform 0.2s ease;
 }
-
-    
 
 .gps-marker .triangle::after {
   content: '';
@@ -239,7 +237,7 @@
 
             new maplibregl.Popup({ closeButton: false })
               .setLngLat(center)
-              .setHTML(<strong>${name}</strong>)
+              .setHTML(`<strong>${name}</strong>`)
               .addTo(map)
               .getElement().classList.add('popup-no-x');
           });
@@ -316,10 +314,10 @@
       const heading = 360 - e.alpha;
 
       map.rotateTo(heading, { duration: 100 });
-      iconCompass.style.transform = rotate(${heading}deg);
+      iconCompass.style.transform = `rotate(${heading}deg)`;
 
       if (gpsMarker && gpsMarker._element && gpsMarker._element._triangle) {
-        gpsMarker._element._triangle.style.transform = rotate(${heading}deg);
+        gpsMarker._element._triangle.style.transform = `rotate(${heading}deg)`;
       }
     });
   </script>
