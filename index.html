@@ -73,8 +73,8 @@
       width: 24px;
       height: 32px;
     }
-	
-	.gps-marker .circle {
+
+    .gps-marker .circle {
       width: 12px;
       height: 12px;
       background: #007BFF;
@@ -86,36 +86,33 @@
       z-index: 2;
       box-shadow: 0 0 2px #000;
     }
-	
-	.gps-marker .triangle {
-  position: absolute;
-  top: 0;
-  left: 6px; /* center point */
-  width: 0;
-  height: 0;
-  border-left: 7px solid transparent;
-  border-right: 7px solid transparent;
-  border-bottom: 15px solid white; /* outer white triangle */
-  z-index: 1;
-  transform-origin: center;
-  transition: transform 0.2s ease;
-}
 
-    
+    .gps-marker .triangle {
+      position: absolute;
+      top: 0;
+      left: 5px;
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 13px solid white;
+      z-index: 1;
+      transform-origin: center;
+      transition: transform 0.2s ease;
+    }
 
-.gps-marker .triangle::after {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: -6px; /* center the inner triangle */
-  width: 0;
-  height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-bottom: 11px solid #007BFF; /* inner blue triangle */
-  z-index: 2;
-}
-
+    .gps-marker .triangle::after {
+      content: '';
+      position: absolute;
+      top: 1px;
+      left: -5px;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-bottom: 11px solid #007BFF;
+      z-index: 2;
+    }
 
     .popup-no-x .maplibregl-popup-close-button {
       display: none;
@@ -172,7 +169,7 @@
     });
 
     map.setMaxBounds([
-      [102.66830,2.21776],
+      [102.66830, 2.21776],
       [102.69816, 2.25551]
     ]);
 
@@ -268,8 +265,6 @@
         iconGPS.style.display = "block";
         iconCompass.style.display = "none";
         iconGPS.setAttribute("fill", "white");
-        iconGPS.style.transform = "rotate(0deg)";
-        iconCompass.style.transform = "rotate(0deg)";
         if (gpsMarker) gpsMarker.remove(), gpsMarker = null;
         if (watchId) navigator.geolocation.clearWatch(watchId), watchId = null;
         map.resetNorth();
@@ -292,37 +287,20 @@
 
             el.appendChild(triangle);
             el.appendChild(circle);
-            el._triangle = triangle;
-
-            gpsMarker = new maplibregl.Marker({ element: el })
-              .setLngLat(lngLat)
-              .addTo(map);
+            gpsMarker = new maplibregl.Marker({ element: el }).setLngLat(lngLat).addTo(map);
           } else {
             gpsMarker.setLngLat(lngLat);
           }
 
           map.flyTo({ center: lngLat, zoom: 16 });
         });
+
       } else if (gpsMode === 2) {
         iconGPS.style.display = "none";
         iconCompass.style.display = "block";
         iconCompass.setAttribute("fill", "limegreen");
       }
     });
-
-    window.addEventListener("deviceorientationabsolute", (e) => {
-  if (gpsMode !== 2 || !e.absolute || e.alpha === null) return;
-
-  const heading = 360 - e.alpha;
-
-  map.rotateTo(heading, { duration: 100 });
-  iconCompass.style.transform = `rotate(${heading}deg)`;
-
-  if (gpsMarker && gpsMarker._element && gpsMarker._element._triangle) {
-    gpsMarker._element._triangle.style.transform = `rotate(${heading}deg)`;
-  }
-});
-
   </script>
 </body>
 </html>
