@@ -267,7 +267,7 @@
         iconCompass.style.display = "none";
         iconGPS.setAttribute("fill", "white");
         iconGPS.style.transform = "rotate(0deg)";
-        iconCompass.style.transform = "rotate(0deg)";
+        
         if (gpsMarker) gpsMarker.remove(), gpsMarker = null;
         if (watchId) navigator.geolocation.clearWatch(watchId), watchId = null;
         map.resetNorth();
@@ -309,17 +309,17 @@
     });
 
     window.addEventListener("deviceorientationabsolute", (e) => {
-      if (gpsMode !== 2 || !e.absolute || e.alpha === null) return;
+  if (gpsMode !== 2 || !e.absolute || e.alpha === null) return;
 
-      const heading = 360 - e.alpha;
+  const heading = 360 - e.alpha;
 
-      map.rotateTo(heading, { duration: 100 });
-      iconCompass.style.transform = `rotate(${heading}deg)`;
+  map.rotateTo(heading, { duration: 100 });
 
-      if (gpsMarker && gpsMarker._element && gpsMarker._element._triangle) {
-        gpsMarker._element._triangle.style.transform = `rotate(${heading}deg)`;
-      }
-    });
+  if (gpsMarker && gpsMarker._element && gpsMarker._element._triangle) {
+    gpsMarker._element._triangle.style.transform = `rotate(${heading}deg)`;
+  }
+});
+
   </script>
 </body>
 </html>
