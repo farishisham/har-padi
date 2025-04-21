@@ -87,95 +87,6 @@
       box-shadow: 0 0 2px #000;
     }
 	
-	<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Lot Kerja Har Padi Ent.</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-    }
-
-    #header {
-      position: absolute;
-      top: 0;
-      width: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      text-align: center;
-      padding: 10px 0;
-      font-family: Helvetica, sans-serif;
-      z-index: 1000;
-    }
-
-    #header h1 {
-      margin: 0;
-      font-size: 1.3rem;
-    }
-
-    #footer {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      text-align: center;
-      font-size: 0.6rem;
-      padding: 5px 0;
-      font-family: Helvetica, sans-serif;
-      z-index: 1000;
-    }
-
-    #map {
-      width: 100%;
-      height: 100vh;
-    }
-
-    #gpsButton {
-      position: absolute;
-      bottom: 5vh;
-      right: 5vw;
-      width: 44px;
-      height: 44px;
-      background-color: #333;
-      border: none;
-      border-radius: 50%;
-      z-index: 1001;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #gpsButton svg {
-      transition: transform 0.3s ease;
-    }
-
-    .gps-marker {
-      position: relative;
-      width: 24px;
-      height: 32px;
-    }
-
-    .gps-marker .circle {
-      width: 12px;
-      height: 12px;
-      background: #007BFF;
-      border: 1px solid white;
-      border-radius: 50%;
-      position: absolute;
-      bottom: 6px;
-      left: 6px;
-      z-index: 2;
-      box-shadow: 0 0 2px #000;
-    }
-	
 	.gps-marker .triangle {
   position: absolute;
   top: 0;
@@ -190,6 +101,8 @@
   transition: transform 0.2s ease;
 }
 
+    
+
 .gps-marker .triangle::after {
   content: '';
   position: absolute;
@@ -202,198 +115,6 @@
   border-bottom: 11px solid #007BFF; /* inner blue triangle */
   z-index: 2;
 }
-
-    .popup-no-x .maplibregl-popup-close-button {
-      display: none;
-    }
-  </style>
-</head>
-<body>
-
-  <div id="header">
-    <h1>LOT KERJA HAR PADI ENT. (in progress)</h1>
-  </div>
-
-  <div id="map"></div>
-
-  <div id="footer">
-    © 2025 Hisham
-  </div>
-
-  <button id="gpsButton" title="Toggle GPS Mode">
-    <svg id="gpsIconGPS" width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="https://www.w3.org/TR/SVG/">
-      <path d="M12 0a1.5 1.5 0 0 1 1.5 1.5V3.1a9.003 9.003 0 0 1 7.4 7.4h1.6a1.5 1.5 0 0 1 0 3h-1.6a9.003 9.003 0 0 1-7.4 7.4v1.6a1.5 1.5 0 0 1-3 0v-1.6a9.003 9.003 0 0 1-7.4-7.4H1.5a1.5 1.5 0 0 1 0-3H3.1a9.003 9.003 0 0 1 7.4-7.4V1.5A1.5 1.5 0 0 1 12 0Zm0 6a6 6 0 1 0 6 6a6 6 0 0 0-6-6Zm0 3a3 3 0 1 1-3 3a3 3 0 0 1 3-3Z"/>
-    </svg>
-    <svg id="gpsIconCompass" width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="https://www.w3.org/TR/SVG/" style="display: none;">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm4.68 14.49-6.66 3.06 3.06-6.66 6.66-3.06-3.06 6.66ZM12 13a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
-    </svg>
-  </button>
-
-  <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
-  <script>
-    const map = new maplibregl.Map({
-      container: 'map',
-      style: {
-        version: 8,
-        sources: {
-          'esri-satellite': {
-            type: 'raster',
-            tiles: [
-              'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-            ],
-            tileSize: 256,
-          }
-        },
-        layers: [{
-          id: 'esri-layer',
-          type: 'raster',
-          source: 'esri-satellite'
-        }]
-      },
-      center: [102.68379, 2.23708],
-      zoom: 15,
-      minZoom: 14,
-      maxZoom: 17.4
-    });
-
-    map.setMaxBounds([
-      [102.66830, 2.21776],
-      [102.69816, 2.25551]
-    ]);
-
-    map.on('load', () => {
-      fetch('sawahring.json')
-        .then(res => res.json())
-        .then(data => {
-          map.addSource('sawahring', { type: 'geojson', data });
-
-          map.addLayer({
-            id: 'sawahring-fill',
-            type: 'fill',
-            source: 'sawahring',
-            paint: { 'fill-color': '#00cc66', 'fill-opacity': 0.4 }
-          });
-
-          map.addLayer({
-            id: 'sawahring-outline',
-            type: 'line',
-            source: 'sawahring',
-            paint: { 'line-color': '#004d26', 'line-width': 2 }
-          });
-
-          map.addLayer({
-            id: 'sawahring-labels',
-            type: 'symbol',
-            source: 'sawahring',
-            layout: {
-              'text-field': ['get', 'name'],
-              'text-font': ['sans-serif'],
-              'text-size': 12,
-              'text-offset': [0, 0.6],
-              'text-anchor': 'top'
-            },
-            paint: {
-              'text-color': '#000',
-              'text-halo-color': '#fff',
-              'text-halo-width': 1
-            }
-          });
-
-          map.addLayer({
-            id: 'sawahring-highlight',
-            type: 'line',
-            source: 'sawahring',
-            paint: {
-              'line-color': '#ffcc00',
-              'line-width': 4
-            },
-            filter: ['==', 'name', '']
-          });
-
-          map.on('click', 'sawahring-fill', (e) => {
-            const feature = e.features[0];
-            const name = feature.properties.name;
-            const bounds = turf.bbox(feature);
-            const center = turf.center(feature).geometry.coordinates;
-
-            map.setFilter('sawahring-highlight', ['==', 'name', name]);
-            map.fitBounds([
-              [bounds[0], bounds[1]],
-              [bounds[2], bounds[3]]
-            ], { padding: 100, maxZoom: 17.4 });
-
-            new maplibregl.Popup({ closeButton: false })
-              .setLngLat(center)
-              .setHTML(`<strong>${name}</strong>`)
-              .addTo(map)
-              .getElement().classList.add('popup-no-x');
-          });
-
-          map.on('click', (e) => {
-            const features = map.queryRenderedFeatures(e.point, { layers: ['sawahring-fill'] });
-            if (features.length === 0) {
-              map.setFilter('sawahring-highlight', ['==', 'name', '']);
-              document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
-            }
-          });
-        });
-    });
-
-    let gpsMode = 0;
-    let gpsMarker = null;
-    let watchId = null;
-
-    const iconGPS = document.getElementById("gpsIconGPS");
-    const iconCompass = document.getElementById("gpsIconCompass");
-
-    document.getElementById("gpsButton").addEventListener("click", () => {
-      gpsMode = (gpsMode + 1) % 3;
-
-      if (gpsMode === 0) {
-        iconGPS.style.display = "block";
-        iconCompass.style.display = "none";
-        iconGPS.setAttribute("fill", "white");
-        if (gpsMarker) gpsMarker.remove(), gpsMarker = null;
-        if (watchId) navigator.geolocation.clearWatch(watchId), watchId = null;
-        map.resetNorth();
-      } else if (gpsMode === 1) {
-        iconGPS.style.display = "block";
-        iconCompass.style.display = "none";
-        iconGPS.setAttribute("fill", "limegreen");
-
-        watchId = navigator.geolocation.watchPosition((pos) => {
-          const lngLat = [pos.coords.longitude, pos.coords.latitude];
-          if (!gpsMarker) {
-            const el = document.createElement('div');
-            el.className = 'gps-marker';
-
-            const triangle = document.createElement('div');
-            triangle.className = 'triangle';
-
-            const circle = document.createElement('div');
-            circle.className = 'circle';
-
-            el.appendChild(triangle);
-            el.appendChild(circle);
-            gpsMarker = new maplibregl.Marker({ element: el }).setLngLat(lngLat).addTo(map);
-          } else {
-            gpsMarker.setLngLat(lngLat);
-          }
-
-          map.flyTo({ center: lngLat, zoom: 16 });
-        });
-
-      } else if (gpsMode === 2) {
-        iconGPS.style.display = "none";
-        iconCompass.style.display = "block";
-        iconCompass.setAttribute("fill", "limegreen");
-      }
-    });
-  </script>
-</body>
-</html>
-
 
 
     .popup-no-x .maplibregl-popup-close-button {
@@ -518,7 +239,7 @@
 
             new maplibregl.Popup({ closeButton: false })
               .setLngLat(center)
-              .setHTML(`<strong>${name}</strong>`)
+              .setHTML(<strong>${name}</strong>)
               .addTo(map)
               .getElement().classList.add('popup-no-x');
           });
@@ -590,18 +311,17 @@
     });
 
     window.addEventListener("deviceorientationabsolute", (e) => {
-  if (gpsMode !== 2 || !e.absolute || e.alpha === null) return;
+      if (gpsMode !== 2 || !e.absolute || e.alpha === null) return;
 
-  const heading = 360 - e.alpha;
+      const heading = 360 - e.alpha;
 
-  map.rotateTo(heading, { duration: 100 });
-  iconCompass.style.transform = `rotate(${heading}deg)`;
+      map.rotateTo(heading, { duration: 100 });
+      iconCompass.style.transform = rotate(${heading}deg);
 
-  if (gpsMarker && gpsMarker._element && gpsMarker._element._triangle) {
-    gpsMarker._element._triangle.style.transform = `rotate(${heading}deg)`;
-  }
-});
-
+      if (gpsMarker && gpsMarker._element && gpsMarker._element._triangle) {
+        gpsMarker._element._triangle.style.transform = rotate(${heading}deg);
+      }
+    });
   </script>
 </body>
 </html>
