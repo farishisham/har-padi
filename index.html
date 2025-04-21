@@ -14,8 +14,9 @@
     }
 
     #header {
-      position: absolute;
+      position: fixed;
       top: 0;
+      left: 0;
       width: 100%;
       background: rgba(0, 0, 0, 0.5);
       color: white;
@@ -31,8 +32,9 @@
     }
 
     #footer {
-      position: absolute;
+      position: fixed;
       bottom: 0;
+      left: 0;
       width: 100%;
       background: rgba(0, 0, 0, 0.5);
       color: white;
@@ -169,7 +171,7 @@
     });
 
     map.setMaxBounds([
-      [102.66830,2.21776],
+      [102.66830, 2.21776],
       [102.69816, 2.25551]
     ]);
 
@@ -307,7 +309,6 @@
       }
     });
 
-    // Orientation listener only rotates map + triangle (not the icon)
     window.addEventListener("deviceorientationabsolute", (e) => {
       if (gpsMode !== 2 || !e.absolute || e.alpha === null) return;
 
