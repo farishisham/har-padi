@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Lot Kerja Har Padi Ent.</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
   <style>
@@ -11,19 +11,22 @@
       margin: 0;
       padding: 0;
       height: 100%;
+      overflow: hidden;
     }
 
-    #header {
+    #header, #footer {
       position: fixed;
-      top: 0;
-      left: 0;
       width: 100%;
       background: rgba(0, 0, 0, 0.5);
       color: white;
-      text-align: center;
-      padding: 10px 0;
       font-family: Helvetica, sans-serif;
+      text-align: center;
       z-index: 1000;
+    }
+
+    #header {
+      top: 0;
+      padding: 10px 0;
     }
 
     #header h1 {
@@ -32,22 +35,14 @@
     }
 
     #footer {
-      position: fixed;
       bottom: 0;
-      left: 0;
-      width: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      text-align: center;
       font-size: 0.6rem;
       padding: 5px 0;
-      font-family: Helvetica, sans-serif;
-      z-index: 1000;
     }
 
     #map {
       width: 100%;
-      height: 100vh;
+      height: 100%; /* Dynamically set via JS */
     }
 
     #gpsButton {
@@ -145,6 +140,14 @@
   <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
   <script>
+    // Resize map on orientation change or resize
+    function resizeMap() {
+      document.getElementById('map').style.height = window.innerHeight + 'px';
+    }
+    window.addEventListener('load', resizeMap);
+    window.addEventListener('resize', resizeMap);
+    window.addEventListener('orientationchange', resizeMap);
+
     const map = new maplibregl.Map({
       container: 'map',
       style: {
@@ -175,90 +178,35 @@
       [102.69816, 2.25551]
     ]);
 
-    map.on('load', () => {
-      fetch('sawahring.json')
-        .then(res => res.json())
-        .then(data => {
-          map.addSource('sawahring', { type: 'geojson', data });
-
-          map.addLayer({
-            id: 'sawahring-fill',
-            type: 'fill',
-            source: 'sawahring',
-            paint: { 'fill-color': '#00cc66', 'fill-opacity': 0.4 }
-          });
-
-          map.addLayer({
-            id: 'sawahring-outline',
-            type: 'line',
-            source: 'sawahring',
-            paint: { 'line-color': '#004d26', 'line-width': 2 }
-          });
-
-          map.addLayer({
-            id: 'sawahring-labels',
-            type: 'symbol',
-            source: 'sawahring',
-            layout: {
-              'text-field': ['get', 'name'],
-              'text-font': ['sans-serif'],
-              'text-size': 12,
-              'text-offset': [0, 0.6],
-              'text-anchor': 'top'
-            },
-            paint: {
-              'text-color': '#000',
-              'text-halo-color': '#fff',
-              'text-halo-width': 1
-            }
-          });
-
-          map.addLayer({
-            id: 'sawahring-highlight',
-            type: 'line',
-            source: 'sawahring',
-            paint: {
-              'line-color': '#ffcc00',
-              'line-width': 4
-            },
-            filter: ['==', 'name', '']
-          });
-
-          map.on('click', 'sawahring-fill', (e) => {
-            const feature = e.features[0];
-            const name = feature.properties.name;
-            const bounds = turf.bbox(feature);
-            const center = turf.center(feature).geometry.coordinates;
-
-            map.setFilter('sawahring-highlight', ['==', 'name', name]);
-            map.fitBounds([
-              [bounds[0], bounds[1]],
-              [bounds[2], bounds[3]]
-            ], { padding: 100, maxZoom: 17.4 });
-
-            new maplibregl.Popup({ closeButton: false })
-              .setLngLat(center)
-              .setHTML(`<strong>${name}</strong>`)
-              .addTo(map)
-              .getElement().classList.add('popup-no-x');
-          });
-
-          map.on('click', (e) => {
-            const features = map.queryRenderedFeatures(e.point, { layers: ['sawahring-fill'] });
-            if (features.length === 0) {
-              map.setFilter('sawahring-highlight', ['==', 'name', '']);
-              document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
-            }
-          });
-        });
-    });
-
     let gpsMode = 0;
     let gpsMarker = null;
     let watchId = null;
 
     const iconGPS = document.getElementById("gpsIconGPS");
     const iconCompass = document.getElementById("gpsIconCompass");
+
+    function createGPSMarker() {
+      if (!gpsMarker) {
+        const el = document.createElement('div');
+        el.className = 'gps-marker';
+
+        const triangle = document.createElement('div');
+        triangle.className = 'triangle';
+
+        const circle = document.createElement('div');
+        circle.className = 'circle';
+
+        el.appendChild(triangle);
+        el.appendChild(circle);
+        el._triangle = triangle;
+
+        gpsMarker = new maplibregl.Marker({ element: el })
+          .setLngLat([102.68379, 2.23708])
+          .addTo(map);
+      }
+    }
+
+    createGPSMarker(); // always create it on load
 
     document.getElementById("gpsButton").addEventListener("click", () => {
       gpsMode = (gpsMode + 1) % 3;
@@ -268,7 +216,6 @@
         iconCompass.style.display = "none";
         iconGPS.setAttribute("fill", "white");
         iconGPS.style.transform = "rotate(0deg)";
-        if (gpsMarker) gpsMarker.remove(), gpsMarker = null;
         if (watchId) navigator.geolocation.clearWatch(watchId), watchId = null;
         map.resetNorth();
       } else if (gpsMode === 1) {
@@ -278,30 +225,10 @@
 
         watchId = navigator.geolocation.watchPosition((pos) => {
           const lngLat = [pos.coords.longitude, pos.coords.latitude];
-          if (!gpsMarker) {
-            const el = document.createElement('div');
-            el.className = 'gps-marker';
-
-            const triangle = document.createElement('div');
-            triangle.className = 'triangle';
-
-            const circle = document.createElement('div');
-            circle.className = 'circle';
-
-            el.appendChild(triangle);
-            el.appendChild(circle);
-            el._triangle = triangle;
-
-            gpsMarker = new maplibregl.Marker({ element: el })
-              .setLngLat(lngLat)
-              .addTo(map);
-          } else {
-            gpsMarker.setLngLat(lngLat);
-          }
-
+          createGPSMarker();
+          gpsMarker.setLngLat(lngLat);
           map.flyTo({ center: lngLat, zoom: 16 });
         });
-
       } else if (gpsMode === 2) {
         iconGPS.style.display = "none";
         iconCompass.style.display = "block";
@@ -313,7 +240,6 @@
       if (gpsMode !== 2 || !e.absolute || e.alpha === null) return;
 
       const heading = 360 - e.alpha;
-
       map.rotateTo(heading, { duration: 100 });
 
       if (gpsMarker && gpsMarker._element && gpsMarker._element._triangle) {
