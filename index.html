@@ -256,30 +256,6 @@
     let gpsMode = 0;
     let gpsMarker = null;
     let watchId = null;
-	
-	function createGPSMarkerIfNeeded() {
-  if (!gpsMarker) {
-    const el = document.createElement('div');
-    el.className = 'gps-marker';
-
-    const triangle = document.createElement('div');
-    triangle.className = 'triangle';
-
-    const circle = document.createElement('div');
-    circle.className = 'circle';
-
-    el.appendChild(triangle);
-    el.appendChild(circle);
-    el._triangle = triangle;
-
-    gpsMarker = new maplibregl.Marker({ element: el })
-      .setLngLat([102.68379, 2.23708]) // default center
-      .addTo(map);
-  }
-}
-
-createGPSMarkerIfNeeded(); // make sure it's visible at start
-
 
     const iconGPS = document.getElementById("gpsIconGPS");
     const iconCompass = document.getElementById("gpsIconCompass");
@@ -292,7 +268,7 @@ createGPSMarkerIfNeeded(); // make sure it's visible at start
         iconCompass.style.display = "none";
         iconGPS.setAttribute("fill", "white");
         iconGPS.style.transform = "rotate(0deg)";
-        //if (gpsMarker) gpsMarker.remove(), gpsMarker = null;//// Keep the GPS marker visible in mode 0
+        if (gpsMarker) gpsMarker.remove(), gpsMarker = null;
         if (watchId) navigator.geolocation.clearWatch(watchId), watchId = null;
         map.resetNorth();
       } else if (gpsMode === 1) {
