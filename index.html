@@ -67,7 +67,7 @@
     .gps-marker {
       position: relative;
       width: 24px;
-      height: 32px;
+      height: 24px;
     }
 
     .gps-marker .circle {
@@ -77,41 +77,12 @@
       border: 1px solid white;
       border-radius: 50%;
       position: absolute;
-      bottom: 0px;
-      left: 0px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       z-index: 2;
       box-shadow: 0 0 2px #000;
     }
-
-    /* Triangle is hidden for now */
-    /*
-    .gps-marker .triangle {
-      position: absolute;
-      top: 0;
-      left: 6px;
-      width: 0;
-      height: 0;
-      border-left: 7px solid transparent;
-      border-right: 7px solid transparent;
-      border-bottom: 15px solid white;
-      z-index: 1;
-      transform-origin: center;
-      transition: transform 0.2s ease;
-    }
-
-    .gps-marker .triangle::after {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: -6px;
-      width: 0;
-      height: 0;
-      border-left: 6px solid transparent;
-      border-right: 6px solid transparent;
-      border-bottom: 11px solid #007BFF;
-      z-index: 2;
-    }
-    */
 
     .popup-no-x .maplibregl-popup-close-button {
       display: none;
@@ -132,7 +103,7 @@
 
 <button id="gpsButton" title="Toggle GPS Mode">
   <svg id="gpsIconGPS" width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="https://www.w3.org/TR/SVG/">
-    <path d="M12 0a1.5 1.5 0 0 1 1.5 1.5V3.1a9.003 9.003 0 0 1 7.4 7.4h1.6a1.5 1.5 0 0 1 0 3h-1.6a9.003 9.003 0 0 1-7.4 7.4v1.6a1.5 1.5 0 0 1-3 0v-1.6a9.003 9.003 0 0 1-7.4-7.4H1.5a1.5 1.5 0 0 1 0-3H3.1a9.003 9.003 0 0 1 7.4-7.4V1.5A1.5 1.5 0 0 1 12 0Zm0 6a6 6 0 1 0 6 6a6 6 0 0 0-6-6Zm0 3a3 3 0 1 1-3 3a3 3 0 0 1 3-3Z"/>
+    <path d="M12 0a1.5 1.5 0 0 1 1.5 1.5V3.1a9.003 9.003..."/>
   </svg>
 </button>
 
@@ -245,7 +216,7 @@
       });
   });
 
-  let gpsMode = 1; // 1 = off, 2 = tracking
+  let gpsMode = 1;
   let gpsMarker = null;
   let watchId = null;
 
@@ -285,16 +256,10 @@
           const el = document.createElement('div');
           el.className = 'gps-marker';
 
-          // const triangle = document.createElement('div');
-          // triangle.className = 'triangle';
-
           const circle = document.createElement('div');
           circle.className = 'circle';
 
-          // el.appendChild(triangle);
           el.appendChild(circle);
-          // el._triangle = triangle;
-
           gpsMarker = new maplibregl.Marker({ element: el })
             .setLngLat(lngLat)
             .addTo(map);
