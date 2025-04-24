@@ -179,21 +179,193 @@
 <div class="search-container" id="searchContainer">
   <input type="text" class="search-input" id="searchInput" placeholder="Cari...">
   <button class="search-btn" id="searchBtn" title="Search">
-    <svg viewBox="0 0 24 24">
-      <path d="M21.707 20.293l-5.388-5.388A7.935 7.935 0 0018 10a8 8 0 10-8 8 7.935 7.935 0 004.905-1.681l5.388 5.388a1 1 0 001.414-1.414zM4 10a6 6 0 1112 0 6 6 0 01-12 0z"/>
-    </svg>
+    <svg viewBox="0 0 24 24"><path d="M21.707 20.293l-5.388-5.388A7.935 7.935 0 0018 10a8 8 0 10-8 8 7.935 7.935 0 004.905-1.681l5.388 5.388a1 1 0 001.414-1.414zM4 10a6 6 0 1112 0 6 6 0 01-12 0z"/></svg>
   </button>
   <button class="close-btn" id="closeBtn" title="Tutup">
-    <svg viewBox="0 0 24 24">
-      <path d="M18.364 5.636a1 1 0 00-1.414 0L12 10.586 7.05 5.636a1 1 0 00-1.414 1.414L10.586 12l-4.95 4.95a1 1 0 101.414 1.414L12 13.414l4.95 4.95a1 1 0 001.414-1.414L13.414 12l4.95-4.95a1 1 0 000-1.414z"/>
-    </svg>
+    <svg viewBox="0 0 24 24"><path d="M18.364 5.636a1 1 0 00-1.414 0L12 10.586 7.05 5.636a1 1 0 00-1.414 1.414L10.586 12l-4.95 4.95a1 1 0 101.414 1.414L12 13.414l4.95 4.95a1 1 0 001.414-1.414L13.414 12l4.95-4.95a1 1 0 000-1.414z"/></svg>
   </button>
 </div>
 
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 <script>
-  // You can now define map and reattach any GPS or map logic as needed
+  const map = new maplibregl.Map({
+    container: 'map',
+    style: {
+      version: 8,
+      sources: {
+        'esri-satellite': {
+          type: 'raster',
+          tiles: [
+            'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+          ],
+          tileSize: 256,
+        }
+      },
+      layers: [{
+        id: 'esri-layer',
+        type: 'raster',
+        source: 'esri-satellite'
+      }]
+    },
+    center: [102.68379, 2.23708],
+    zoom: 13,
+    minZoom: 13,
+    maxZoom: 17.4
+  });
+
+  map.setMaxBounds([
+    [102.66830, 2.21776],
+    [102.69816, 2.25551]
+  ]);
+
+  let gpsMode = 1;
+  let gpsMarker = null;
+  let watchId = null;
+  const iconGPS = document.getElementById("gpsIconGPS");
+
+  function updateAccuracyCircle(center, accuracy) {
+    const geojson = turf.circle(center, accuracy / 1000, { steps: 64, units: 'kilometers' });
+    if (map.getSource('accuracy')) {
+      map.getSource('accuracy').setData(geojson);
+    } else {
+      map.addSource('accuracy', { type: 'geojson', data: geojson });
+      map.addLayer({
+        id: 'accuracy-circle',
+        type: 'fill',
+        source: 'accuracy',
+        paint: {
+          'fill-color': '#007BFF',
+          'fill-opacity': 0.2
+        }
+      });
+    }
+  }
+
+  document.getElementById("gpsButton").addEventListener("click", () => {
+    gpsMode = gpsMode === 2 ? 1 : 2;
+
+    if (gpsMode === 1) {
+      iconGPS.setAttribute("fill", "white");
+      if (watchId) navigator.geolocation.clearWatch(watchId), watchId = null;
+    } else {
+      iconGPS.setAttribute("fill", "limegreen");
+
+      watchId = navigator.geolocation.watchPosition((pos) => {
+        const lngLat = [pos.coords.longitude, pos.coords.latitude];
+
+        if (!gpsMarker) {
+          const el = document.createElement('div');
+          el.className = 'gps-marker';
+
+          const circle = document.createElement('div');
+          circle.className = 'circle';
+          el.appendChild(circle);
+
+          gpsMarker = new maplibregl.Marker({ element: el })
+            .setLngLat(lngLat)
+            .addTo(map);
+        } else {
+          gpsMarker.setLngLat(lngLat);
+        }
+
+        updateAccuracyCircle(lngLat, pos.coords.accuracy);
+        map.flyTo({ center: lngLat, zoom: 16 });
+      }, null, { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 });
+    }
+  });
+
+  map.on('dragstart', () => {
+    if (gpsMode === 2) {
+      gpsMode = 1;
+      iconGPS.setAttribute("fill", "white");
+      if (watchId) navigator.geolocation.clearWatch(watchId), watchId = null;
+    }
+  });
+
+  // Load GeoJSON for polygons
+  map.on('load', () => {
+    fetch('sawahring.json')
+      .then(res => res.json())
+      .then(data => {
+        map.addSource('sawahring', { type: 'geojson', data });
+
+        map.addLayer({
+          id: 'sawahring-fill',
+          type: 'fill',
+          source: 'sawahring',
+          paint: { 'fill-color': '#00cc66', 'fill-opacity': 0.4 }
+        });
+
+        map.addLayer({
+          id: 'sawahring-outline',
+          type: 'line',
+          source: 'sawahring',
+          paint: { 'line-color': '#004d26', 'line-width': 2 }
+        });
+
+        map.addLayer({
+          id: 'sawahring-labels',
+          type: 'symbol',
+          source: 'sawahring',
+          layout: {
+            'text-field': ['get', 'name'],
+            'text-font': ['sans-serif'],
+            'text-size': 12,
+            'text-offset': [0, 0.6],
+            'text-anchor': 'top'
+          },
+          paint: {
+            'text-color': '#000',
+            'text-halo-color': '#fff',
+            'text-halo-width': 1
+          }
+        });
+
+        map.addLayer({
+          id: 'sawahring-highlight',
+          type: 'line',
+          source: 'sawahring',
+          paint: {
+            'line-color': '#ffcc00',
+            'line-width': 4
+          },
+          filter: ['==', 'name', '']
+        });
+
+        map.on('click', 'sawahring-fill', (e) => {
+          const feature = e.features[0];
+          const name = feature.properties.name;
+          const bounds = turf.bbox(feature);
+          const center = turf.center(feature).geometry.coordinates;
+
+          // Turn off GPS when polygon is selected
+          gpsMode = 1;
+          iconGPS.setAttribute("fill", "white");
+          if (watchId) navigator.geolocation.clearWatch(watchId), watchId = null;
+
+          map.setFilter('sawahring-highlight', ['==', 'name', name]);
+          map.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], {
+            padding: 100,
+            maxZoom: 17.4
+          });
+
+          new maplibregl.Popup({ closeButton: false })
+            .setLngLat(center)
+            .setHTML(`<strong>${name}</strong>`)
+            .addTo(map)
+            .getElement().classList.add('popup-no-x');
+        });
+
+        map.on('click', (e) => {
+          const features = map.queryRenderedFeatures(e.point, { layers: ['sawahring-fill'] });
+          if (features.length === 0) {
+            map.setFilter('sawahring-highlight', ['==', 'name', '']);
+            document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
+          }
+        });
+      });
+  });
 
   document.getElementById("searchBtn").addEventListener("click", () => {
     document.getElementById("searchContainer").classList.add("active");
