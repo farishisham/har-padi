@@ -85,6 +85,10 @@
       box-shadow: 0 0 2px #000;
     }
 
+    .popup-no-x .maplibregl-popup-close-button {
+      display: none;
+    }
+
     .search-container {
       position: fixed;
       top: 44px;
@@ -120,6 +124,7 @@
     .search-input {
       width: 0;
       opacity: 0;
+      padding: 0;
       height: 46px;
       top: -2px;
       transform: translateX(2px);
@@ -151,23 +156,6 @@
     .close-btn {
       display: none;
     }
-
-    #zoomLevel {
-      position: fixed;
-      top: 6px;
-      left: 10px;
-      z-index: 1002;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      padding: 2px 6px;
-      font-size: 0.75rem;
-      font-family: Helvetica, sans-serif;
-      border-radius: 4px;
-    }
-
-    .popup-no-x .maplibregl-popup-close-button {
-      display: none;
-    }
   </style>
 </head>
 <body>
@@ -175,6 +163,12 @@
 <div id="header"><h1>LOT KERJA HAR PADI ENT. (in progress)</h1></div>
 <div id="map"></div>
 <div id="footer">© 2025 Hisham</div>
+
+<button id="gpsButton" title="Toggle GPS Mode">
+  <svg id="gpsIconGPS" width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="https://www.w3.org/TR/SVG/">
+    <path d="M12 0a1.5 1.5 0 0 1 1.5 1.5V3.1a9.003 9.003 0 0 1 7.4 7.4h1.6a1.5 1.5 0 0 1 0 3h-1.6a9.003 9.003 0 0 1-7.4 7.4v1.6a1.5 1.5 0 0 1-3 0v-1.6a9.003 9.003 0 0 1-7.4-7.4H1.5a1.5 1.5 0 0 1 0-3H3.1a9.003 9.003 0 0 1 7.4-7.4V1.5A1.5 1.5 0 0 1 12 0Zm0 6a6 6 0 1 0 6 6a6 6 0 0 0-6-6Zm0 3a3 3 0 1 1-3 3a3 3 0 0 1 3-3Z"/>
+  </svg>
+</button>
 
 <div class="search-container" id="searchContainer">
   <input type="text" class="search-input" id="searchInput" placeholder="Cari...">
@@ -185,14 +179,6 @@
     <svg viewBox="0 0 24 24"><path d="M18.364 5.636a1 1 0 00-1.414 0L12 10.586 7.05 5.636a1 1 0 00-1.414 1.414L10.586 12l-4.95 4.95a1 1 0 101.414 1.414L12 13.414l4.95 4.95a1 1 0 001.414-1.414L13.414 12l4.95-4.95a1 1 0 000-1.414z"/></svg>
   </button>
 </div>
-
-<div id="zoomLevel">Zoom: 13.0</div>
-
-<button id="gpsButton" title="Toggle GPS Mode">
-  <svg id="gpsIconGPS" width="20" height="20" viewBox="0 0 24 24" fill="white">
-    <path d="M12 0a1.5 1.5 0 0 1 1.5 1.5V3.1a9.003 9.003 0 0 1 7.4 7.4h1.6a1.5 1.5 0 0 1 0 3h-1.6a9.003 9.003 0 0 1-7.4 7.4v1.6a1.5 1.5 0 0 1-3 0v-1.6a9.003 9.003 0 0 1-7.4-7.4H1.5a1.5 1.5 0 0 1 0-3H3.1a9.003 9.003 0 0 1 7.4-7.4V1.5A1.5 1.5 0 0 1 12 0Zm0 6a6 6 0 1 0 6 6a6 6 0 0 0-6-6Zm0 3a3 3 0 1 1-3 3a3 3 0 0 1 3-3Z"/>
-  </svg>
-</button>
 
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
@@ -283,5 +269,6 @@
     document.getElementById('searchInput').value = '';
   });
 </script>
+
 </body>
 </html>
