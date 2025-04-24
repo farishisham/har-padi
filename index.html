@@ -11,7 +11,7 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      background-color: black;
+      background: black;
     }
 
     #header, #footer {
@@ -88,82 +88,74 @@
     .popup-no-x .maplibregl-popup-close-button {
       display: none;
     }
-	
-body, html {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background: black; /* background added */
-}
 
-.search-container {
-  position: absolute;
-  top: 44px;
-  right: 15px;
-  height: 48px;
-  z-index: 1003;
-}
+    .search-container {
+      position: absolute;
+      top: 44px;
+      right: 15px;
+      height: 48px;
+      z-index: 1003;
+    }
 
-.search-btn, .close-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: none;
-  background-color: #333;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  right: 0;
-  z-index: 1002;
-  padding: 0;
-}
+    .search-btn, .close-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background-color: #333;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      right: 0;
+      z-index: 1002;
+      padding: 0;
+    }
 
-.search-btn svg,
-.close-btn svg {
-  width: 18px;
-  height: 18px;
-  fill: white;
-}
+    .search-btn svg,
+    .close-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: white;
+    }
 
-.search-input {
-  width: 0;
-  opacity: 0;
-  padding: 0;
-  height: 46px;
-  top: -2px;
-  transform: translateX(2px);
-  border-radius: 30px;
-  border: 1px solid #ccc;
-  transition: all 0.3s ease;
-  background-color: white;
-  outline: none;
-  padding-left: 10px;
-  padding-right: 50px;
-  position: absolute;
-  right: 0;
-  z-index: 1001;
-}
+    .search-input {
+      width: 0;
+      opacity: 0;
+      padding: 0;
+      height: 46px;
+      top: -2px;
+      transform: translateX(2px);
+      border-radius: 30px;
+      border: 1px solid #ccc;
+      transition: all 0.3s ease;
+      background-color: white;
+      outline: none;
+      padding-left: 10px;
+      padding-right: 50px;
+      position: absolute;
+      right: 0;
+      z-index: 1001;
+    }
 
-.search-container.active .search-input {
-  width: 200px;
-  opacity: 1;
-}
+    .search-container.active .search-input {
+      width: 200px;
+      opacity: 1;
+    }
 
-.search-container.active .search-btn {
-  display: none;
-}
+    .search-container.active .search-btn {
+      display: none;
+    }
 
-.search-container.active .close-btn {
-  display: flex;
-}
+    .search-container.active .close-btn {
+      display: flex;
+    }
 
-.close-btn {
-  display: none;
-}
-
+    .close-btn {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -197,18 +189,6 @@ body, html {
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 <script>
-
-
-  document.getElementById("searchBtn").addEventListener("click", () => {
-    document.getElementById("searchContainer").classList.add("active");
-    document.getElementById("searchInput").focus();
-  });
-
-  document.getElementById("closeBtn").addEventListener("click", () => {
-    document.getElementById("searchContainer").classList.remove("active");
-    document.getElementById("searchInput").value = '';
-  });
-
   const map = new maplibregl.Map({
     container: 'map',
     style: {
@@ -239,7 +219,71 @@ body, html {
     [102.69816, 2.25551]
   ]);
 
-  // Load sawahring.json
+  let gpsMode = 1;
+  let gpsMarker = null;
+  let watchId = null;
+  const iconGPS = document.getElementById("gpsIconGPS");
+
+  function updateAccuracyCircle(center, accuracy) {
+    const geojson = turf.circle(center, accuracy / 1000, { steps: 64, units: 'kilometers' });
+    if (map.getSource('accuracy')) {
+      map.getSource('accuracy').setData(geojson);
+    } else {
+      map.addSource('accuracy', { type: 'geojson', data: geojson });
+      map.addLayer({
+        id: 'accuracy-circle',
+        type: 'fill',
+        source: 'accuracy',
+        paint: {
+          'fill-color': '#007BFF',
+          'fill-opacity': 0.2
+        }
+      });
+    }
+  }
+
+  document.getElementById("gpsButton").addEventListener("click", () => {
+    gpsMode = gpsMode === 2 ? 1 : 2;
+
+    if (gpsMode === 1) {
+      iconGPS.setAttribute("fill", "white");
+      if (watchId) navigator.geolocation.clearWatch(watchId), watchId = null;
+    } else {
+      iconGPS.setAttribute("fill", "limegreen");
+
+      watchId = navigator.geolocation.watchPosition((pos) => {
+        const lngLat = [pos.coords.longitude, pos.coords.latitude];
+
+        if (!gpsMarker) {
+          const el = document.createElement('div');
+          el.className = 'gps-marker';
+
+          const circle = document.createElement('div');
+          circle.className = 'circle';
+          el.appendChild(circle);
+
+          gpsMarker = new maplibregl.Marker({ element: el })
+            .setLngLat(lngLat)
+            .addTo(map);
+        } else {
+          gpsMarker.setLngLat(lngLat);
+        }
+
+        updateAccuracyCircle(lngLat, pos.coords.accuracy);
+        map.flyTo({ center: lngLat, zoom: 16 });
+      }, null, { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 });
+    }
+  });
+
+  map.on('dragstart', () => {
+    if (gpsMode === 2) {
+      gpsMode = 1;
+      iconGPS.setAttribute("fill", "white");
+      if (watchId) navigator.geolocation.clearWatch(watchId), watchId = null;
+    }
+  });
+
+  // Load GeoJSON for polygons
   map.on('load', () => {
     fetch('sawahring.json')
       .then(res => res.json())
@@ -295,8 +339,16 @@ body, html {
           const bounds = turf.bbox(feature);
           const center = turf.center(feature).geometry.coordinates;
 
+          // Turn off GPS when polygon is selected
+          gpsMode = 1;
+          iconGPS.setAttribute("fill", "white");
+          if (watchId) navigator.geolocation.clearWatch(watchId), watchId = null;
+
           map.setFilter('sawahring-highlight', ['==', 'name', name]);
-          map.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], { padding: 100, maxZoom: 17.4 });
+          map.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], {
+            padding: 100,
+            maxZoom: 17.4
+          });
 
           new maplibregl.Popup({ closeButton: false })
             .setLngLat(center)
@@ -315,69 +367,14 @@ body, html {
       });
   });
 
-  let gpsMode = 1;
-  let gpsMarker = null;
-  let watchId = null;
-
-  const iconGPS = document.getElementById("gpsIconGPS");
-
-  function updateAccuracyCircle(center, accuracy) {
-    const geojson = turf.circle(center, accuracy / 1000, { steps: 64, units: 'kilometers' });
-    if (map.getSource('accuracy')) {
-      map.getSource('accuracy').setData(geojson);
-    } else {
-      map.addSource('accuracy', { type: 'geojson', data: geojson });
-      map.addLayer({
-        id: 'accuracy-circle',
-        type: 'fill',
-        source: 'accuracy',
-        paint: {
-          'fill-color': '#007BFF',
-          'fill-opacity': 0.2
-        }
-      });
-    }
-  }
-
-  document.getElementById("gpsButton").addEventListener("click", () => {
-    gpsMode = gpsMode === 2 ? 1 : 2;
-
-    if (gpsMode === 1) {
-      iconGPS.setAttribute("fill", "white");
-      if (watchId) navigator.geolocation.clearWatch(watchId), watchId = null;
-    } else {
-      iconGPS.setAttribute("fill", "limegreen");
-
-      watchId = navigator.geolocation.watchPosition((pos) => {
-        const lngLat = [pos.coords.longitude, pos.coords.latitude];
-
-        if (!gpsMarker) {
-          const el = document.createElement('div');
-          el.className = 'gps-marker';
-
-          const circle = document.createElement('div');
-          circle.className = 'circle';
-
-          el.appendChild(circle);
-          gpsMarker = new maplibregl.Marker({ element: el })
-            .setLngLat(lngLat)
-            .addTo(map);
-        } else {
-          gpsMarker.setLngLat(lngLat);
-        }
-
-        updateAccuracyCircle(lngLat, pos.coords.accuracy);
-        map.flyTo({ center: lngLat, zoom: 16 });
-      }, null, { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 });
-    }
+  document.getElementById("searchBtn").addEventListener("click", () => {
+    document.getElementById("searchContainer").classList.add("active");
+    document.getElementById("searchInput").focus();
   });
 
-  map.on('dragstart', () => {
-    if (gpsMode === 2) {
-      gpsMode = 1;
-      iconGPS.setAttribute("fill", "white");
-      if (watchId) navigator.geolocation.clearWatch(watchId), watchId = null;
-    }
+  document.getElementById("closeBtn").addEventListener("click", () => {
+    document.getElementById("searchContainer").classList.remove("active");
+    document.getElementById("searchInput").value = '';
   });
 </script>
 </body>
