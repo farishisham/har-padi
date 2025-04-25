@@ -93,29 +93,24 @@
     .search-btn svg, .close-btn svg {
       width: 18px; height: 18px; fill: white;
     }
-    .search-container.active .search-btn {
-      display: none;
-    }
-    .search-container.active .close-btn {
-      display: flex;
-    }
+    .search-container.active .search-btn { display: none; }
+    .search-container.active .close-btn { display: flex; }
     .close-btn { display: none; }
 
     .suggestion-list {
       position: absolute;
-      top: 44px; /* same as container top */
-      right: 15px;
-      margin-top: 40px; /* just under the 38px-high input */
+      top: 80px;        /* just below the 38px-high input */
+      right: 65px;      /* 15px + 50px */
       width: 220px;
       background: white;
       border-radius: 5px;
       z-index: 1002;
-      font-size: 1rem;
+      font-size: 0.9rem;      /* slightly smaller */
       font-family: Helvetica, sans-serif;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      max-height: 25vh; /* half of previous 50vh */
-      overflow-y: scroll; /* always show scroll on mobile */
-      -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+      max-height: 25vh;       /* half height */
+      overflow-y: scroll;     /* always scrollable */
+      -webkit-overflow-scrolling: touch;
     }
     .suggestion-list::-webkit-scrollbar {
       width: 6px;
@@ -154,10 +149,10 @@
   <div class="search-container" id="searchContainer">
     <input type="text" class="search-input" id="searchInput" placeholder="Cari...">
     <button class="search-btn" id="searchBtn" title="Search">
-      <svg viewBox="0 0 24 24"><path d="M21.707 20.293l-5.388-5.388A7.935 7.935 0 0018 10 a8 8 0 10-8 8 7.935 7.935 0 004.905-1.681 l5.388 5.388a1 1 0 001.414-1.414z M4 10a6 6 0 1112 0 6 6 0 01-12 0z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M21.707 20.293l-5.388-5.388A7.935 7.935 0 0018 10a8 8 0 10-8 8 7.935 7.935 0 004.905-1.681l5.388 5.388a1 1 0 001.414-1.414zM4 10a6 6 0 1112 0 6 6 0 01-12 0z"/></svg>
     </button>
     <button class="close-btn" id="closeBtn" title="Tutup">
-      <svg viewBox="0 0 24 24"><path d="M18.364 5.636a1 1 0 00-1.414 0L12 10.586 7.05 5.636a1 1 0 00-1.414 1.414L10.586 12 l-4.95 4.95a1 1 0 101.414 1.414L12 13.414l4.95 4.95a1 1 0 001.414-1.414L13.414 12l4.95-4.95a1 1 0 000-1.414z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M18.364 5.636a1 1 0 00-1.414 0L12 10.586 7.05 5.636a1 1 0 00-1.414 1.414L10.586 12l-4.95 4.95a1 1 0 101.414 1.414L12 13.414l4.95 4.95a1 1 0 001.414-1.414L13.414 12l4.95-4.95a1 1 0 000-1.414z"/></svg>
     </button>
   </div>
 
@@ -189,7 +184,6 @@
       maxZoom: 17.4
     });
 
-    // expand bounds slightly
     map.setMaxBounds([
       [102.665, 2.215],
       [102.701, 2.258]
@@ -298,7 +292,7 @@
           });
         });
 
-      // cancel GPS on map drag/touch
+      // cancel GPS on map interaction
       const canvas = map.getCanvas();
       ['mousedown','touchstart'].forEach(evt =>
         canvas.addEventListener(evt, ()=> {
@@ -306,13 +300,13 @@
             gpsMode = 1; setIconColor();
             if (watchId) navigator.geolocation.clearWatch(watchId);
             watchId = null;
-            window.removeEventListener('deviceorientation', rotateMap);
+            window.removeEventListener('deviceorientation',rotateMap);
           }
         })
       );
     });
 
-    // Search UI
+    // Search functionality
     const input = document.getElementById('searchInput');
     const list  = document.getElementById('suggestionList');
 
@@ -347,7 +341,7 @@
       input.value=''; list.style.display='none';
     });
 
-    // init
+    // initialize
     setIconColor();
   </script>
 </body>
