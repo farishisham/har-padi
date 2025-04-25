@@ -99,17 +99,16 @@
 
     .suggestion-list {
       position: absolute;
-      top: 80px;        /* just below the 38px-high input */
-      right: 65px;      /* 15px + 50px */
-      width: 220px;
+      top: 85px;      /* moved down by 5px */
+      right: 75px;    /* moved right by 10px */
+      width: 210px;   /* 10px narrower */
       background: white;
       border-radius: 5px;
       z-index: 1002;
-      font-size: 0.9rem;      /* slightly smaller */
-      font-family: Helvetica, sans-serif;
+      font-size: 0.9rem;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      max-height: 25vh;       /* half height */
-      overflow-y: scroll;     /* always scrollable */
+      max-height: 25vh;
+      overflow-y: scroll;
       -webkit-overflow-scrolling: touch;
     }
     .suggestion-list::-webkit-scrollbar {
@@ -152,7 +151,7 @@
       <svg viewBox="0 0 24 24"><path d="M21.707 20.293l-5.388-5.388A7.935 7.935 0 0018 10a8 8 0 10-8 8 7.935 7.935 0 004.905-1.681l5.388 5.388a1 1 0 001.414-1.414zM4 10a6 6 0 1112 0 6 6 0 01-12 0z"/></svg>
     </button>
     <button class="close-btn" id="closeBtn" title="Tutup">
-      <svg viewBox="0 0 24 24"><path d="M18.364 5.636a1 1 0 00-1.414 0L12 10.586 7.05 5.636a1 1 0 00-1.414 1.414L10.586 12l-4.95 4.95a1 1 0 101.414 1.414L12 13.414l4.95 4.95a1 1 0 001.414-1.414L13.414 12l4.95-4.95a1 1 0 000-1.414z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M18.364 5.636a1 1 0 00-1.414 0L12 10.586 7.05 5.636a1 1 0 00-1.414 1.414L10.586 12 l-4.95 4.95a1 1 0 101.414 1.414L12 13.414l4.95 4.95a1 1 0 001.414-1.414L13.414 12l4.95-4.95a1 1 0 000-1.414z"/></svg>
     </button>
   </div>
 
