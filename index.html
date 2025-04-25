@@ -86,6 +86,7 @@
       z-index: 1000;
       border-radius: 4px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      width: 240px;
     }
     .suggestions div {
       padding: 6px 12px;
@@ -104,9 +105,7 @@
 
 <div id="map"></div>
 
-<div id="footer">
-  © 2025 Hisham
-</div>
+<div id="footer">© 2025 Hisham</div>
 
 <button id="gpsButton" title="Toggle GPS Mode">
   <img id="gpsIconImg"
@@ -130,70 +129,70 @@
 <script>
   const map = new maplibregl.Map({
     container: 'map',
-    style:{
-      version:8,
-      sources:{
-        'esri-satellite':{
-          type:'raster',
-          tiles:['https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-          tileSize:256
+    style: {
+      version: 8,
+      sources: {
+        'esri-satellite': {
+          type: 'raster',
+          tiles: ['https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+          tileSize: 256
         }
       },
-      layers:[{
-        id:'esri-layer',
-        type:'raster',
-        source:'esri-satellite'
+      layers: [{
+        id: 'esri-layer',
+        type: 'raster',
+        source: 'esri-satellite'
       }]
     },
-    center:[102.68379,2.23708],
-    zoom:13,
-    minZoom:13,
-    maxZoom:17.4
+    center: [102.68379, 2.23708],
+    zoom: 13,
+    minZoom: 13,
+    maxZoom: 17.4
   });
 
-  let gpsMode=1, watchId=null, marker=null, allPolygons=[];
-  const iconImg=document.getElementById('gpsIconImg');
+  let gpsMode = 1, watchId = null, marker = null, allPolygons = [];
+  const iconImg = document.getElementById('gpsIconImg');
 
-  function setIconColor(){
+  function setIconColor() {
     iconImg.style.filter =
-      gpsMode===1
-        ? 'invert(100%)'
-        : gpsMode===2
-          ? 'invert(67%) sepia(92%) saturate(455%) hue-rotate(81deg)'
-          : 'invert(43%) sepia(100%) saturate(8000%) hue-rotate(1deg)';
+      gpsMode === 1 ? 'invert(100%)' :
+      gpsMode === 2 ? 'invert(67%) sepia(92%) saturate(455%) hue-rotate(81deg)' :
+                      'invert(43%) sepia(100%) saturate(8000%) hue-rotate(1deg)';
   }
 
-  function createMarker(lng,lat){
-    const el=document.createElement('div'); el.className='gps-marker';
-    const tri=document.createElement('div'); tri.className='triangle';
-    const cir=document.createElement('div'); cir.className='circle';
-    el.appendChild(tri); el.appendChild(cir);
-    marker=new maplibregl.Marker(el).setLngLat([lng,lat]).addTo(map);
+  function createMarker(lng, lat) {
+    const el = document.createElement('div');
+    el.className = 'gps-marker';
+    const triangle = document.createElement('div');
+    triangle.className = 'triangle';
+    const circle = document.createElement('div');
+    circle.className = 'circle';
+    el.appendChild(triangle);
+    el.appendChild(circle);
+    marker = new maplibregl.Marker(el).setLngLat([lng, lat]).addTo(map);
   }
 
-  function updateMarker(lng,lat){
-    marker
-      ? marker.setLngLat([lng,lat])
-      : createMarker(lng,lat);
+  function updateMarker(lng, lat) {
+    marker ? marker.setLngLat([lng, lat]) : createMarker(lng, lat);
   }
 
-  function handleOrientation(){
-    if(DeviceOrientationEvent.requestPermission){
-      DeviceOrientationEvent.requestPermission().then(r=>{
-        if(r==='granted') window.addEventListener('deviceorientation', rotateMap, true);
+  function handleOrientation() {
+    if (DeviceOrientationEvent.requestPermission) {
+      DeviceOrientationEvent.requestPermission().then(r => {
+        if (r === 'granted') window.addEventListener('deviceorientation', rotateMap, true);
       });
     } else {
       window.addEventListener('deviceorientation', rotateMap, true);
     }
   }
 
-  function rotateMap(e){
-    if(gpsMode!==3) return;
+  function rotateMap(e) {
+    if (gpsMode !== 3) return;
     const hd = e.webkitCompassHeading ?? (360 - e.alpha);
-    if(hd && !isNaN(hd)) map.rotateTo(hd, { duration:100 });
+    if (hd && !isNaN(hd)) map.rotateTo(hd, { duration: 100 });
   }
 
-  document.getElementById('gpsButton').addEventListener('click', ()=>{
+  document.getElementById('gpsButton').addEventListener('click', () => {
     map.dragPan.enable();
     map.scrollZoom.enable();
     map.touchZoomRotate.enable();
@@ -201,19 +200,19 @@
     gpsMode = (gpsMode % 3) + 1;
     setIconColor();
 
-    if(watchId) navigator.geolocation.clearWatch(watchId);
+    if (watchId) navigator.geolocation.clearWatch(watchId);
     watchId = null;
     window.removeEventListener('deviceorientation', rotateMap);
 
-    if(gpsMode === 1) return;
+    if (gpsMode === 1) return;
 
-    watchId = navigator.geolocation.watchPosition(pos=>{
-      const [lng,lat] = [pos.coords.longitude, pos.coords.latitude];
-      updateMarker(lng,lat);
-      if(gpsMode===2) map.setCenter([lng,lat]);
-    }, null, { enableHighAccuracy:true });
+    watchId = navigator.geolocation.watchPosition(pos => {
+      const [lng, lat] = [pos.coords.longitude, pos.coords.latitude];
+      updateMarker(lng, lat);
+      if (gpsMode === 2) map.setCenter([lng, lat]);
+    }, null, { enableHighAccuracy: true });
 
-    if(gpsMode===3) handleOrientation();
+    if (gpsMode === 3) handleOrientation();
   });
 
   function highlightPolygon(feature) {
@@ -234,6 +233,8 @@
       bearing: map.getBearing()
     });
 
+    document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
+
     new maplibregl.Popup({ closeButton: false })
       .setLngLat(center)
       .setHTML(`<strong>${name}</strong>`)
@@ -241,45 +242,42 @@
       .getElement().classList.add('popup-no-x');
   }
 
-  map.on('load', ()=>{
+  map.on('load', () => {
     map.dragPan.enable();
     map.scrollZoom.enable();
     map.touchZoomRotate.enable();
 
     fetch('sawahring.json')
-      .then(r=>r.json())
-      .then(data=>{
+      .then(r => r.json())
+      .then(data => {
         allPolygons = data.features;
 
-        map.addSource('sawahring',{type:'geojson',data});
+        map.addSource('sawahring', { type: 'geojson', data });
         map.addLayer({
-          id:'sawahring-fill', type:'fill', source:'sawahring',
-          paint:{'fill-color':'#00cc66','fill-opacity':0.4}
+          id: 'sawahring-fill', type: 'fill', source: 'sawahring',
+          paint: { 'fill-color': '#00cc66', 'fill-opacity': 0.4 }
         });
         map.addLayer({
-          id:'sawahring-outline', type:'line', source:'sawahring',
-          paint:{'line-color':'#004d26','line-width':2}
+          id: 'sawahring-outline', type: 'line', source: 'sawahring',
+          paint: { 'line-color': '#004d26', 'line-width': 2 }
         });
         map.addLayer({
-          id:'sawahring-highlight', type:'line', source:'sawahring',
-          paint:{'line-color':'#ffcc00','line-width':4},
-          filter:['==','name','']
+          id: 'sawahring-highlight', type: 'line', source: 'sawahring',
+          paint: { 'line-color': '#ffcc00', 'line-width': 4 },
+          filter: ['==', 'name', '']
         });
 
-        map.on('click','sawahring-fill',e=>{
-          highlightPolygon(e.features[0]);
-        });
+        map.on('click', 'sawahring-fill', e => highlightPolygon(e.features[0]));
 
-        map.on('click', e=>{
-          if(!map.queryRenderedFeatures(e.point,{layers:['sawahring-fill']}).length){
-            map.setFilter('sawahring-highlight',['==','name','']);
-            document.querySelectorAll('.maplibregl-popup').forEach(p=>p.remove());
+        map.on('click', e => {
+          if (!map.queryRenderedFeatures(e.point, { layers: ['sawahring-fill'] }).length) {
+            map.setFilter('sawahring-highlight', ['==', 'name', '']);
+            document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
           }
         });
       });
 
-    const canvas = map.getCanvas();
-    canvas.addEventListener('mousedown', () => {
+    map.getCanvas().addEventListener('mousedown', () => {
       if (gpsMode !== 1) {
         gpsMode = 1;
         setIconColor();
@@ -312,13 +310,14 @@
     });
   });
 
-  document.getElementById('searchBtn').addEventListener('click', ()=>{
+  document.getElementById('searchBtn').addEventListener('click', () => {
     document.getElementById('searchContainer').classList.add('active');
     input.focus();
   });
-  document.getElementById('closeBtn').addEventListener('click', ()=>{
+
+  document.getElementById('closeBtn').addEventListener('click', () => {
     document.getElementById('searchContainer').classList.remove('active');
-    input.value='';
+    input.value = '';
     suggest.innerHTML = '';
   });
 
