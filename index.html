@@ -1,20 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   <title>Lot Kerja Har Padi Ent.</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
   <style>
     html, body { margin: 0; padding: 0; height: 100%; background: black; }
     #map { width: 100%; height: 100%; }
     #header, #footer {
-      position: fixed; width: 100%; background: rgba(0,0,0,0.5);
-      color: white; font-family: Helvetica, sans-serif; text-align: center; z-index: 1000;
+      position: fixed;
+      width: 100%;
+      background: transparent;
+      color: white;
+      font-family: Helvetica, sans-serif;
+      text-align: center;
+      z-index: 1000;
+      text-shadow: 0 0 3px black;
     }
     #header { top: 0; padding: 6px 0; }
-    #header h1 { margin: 0; font-size: 1rem; text-shadow: 0 0 2px black; }
+    #header h1 { margin: 0; font-size: 0.9rem; }
     #footer { bottom: 0; font-size: 0.6rem; padding: 5px 10px; text-align: left; }
 
     #gpsButton {
@@ -45,21 +51,6 @@
       z-index: 1;
     }
 
-    #messageBox {
-      position: fixed;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #333;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-size: 14px;
-      display: none;
-      z-index: 2000;
-      font-family: Helvetica, sans-serif;
-    }
-
     .popup-no-x .maplibregl-popup-close-button { display: none; }
 
     .search-container {
@@ -76,11 +67,12 @@
     .search-btn svg, .close-btn svg { width: 18px; height: 18px; fill: white; }
     .search-input {
       position: absolute; right: 0; z-index: 1001;
-      width: 0; opacity: 0; height: 38px; top: -2px;
-      transform: translateX(2px); padding-left: 10px;
-      padding-right: 50px; border-radius: 30px;
-      border: 1px solid #ccc; background: white;
-      outline: none; transition: all .3s ease;
+      width: 0; opacity: 0; height: 41px; top: -2px;
+      transform: translateX(2px); padding-left: 10px; padding-right: 50px;
+      border-radius: 30px; border: 1px solid #ccc;
+      background: white; outline: none;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
     }
     .search-container.active .search-input {
       width: 200px; opacity: 1;
@@ -88,309 +80,353 @@
     .search-container.active .search-btn { display: none; }
     .search-container.active .close-btn { display: flex; }
     .close-btn { display: none; }
+
+    /* Suggestion Box */
+    #suggestions {
+      position: absolute;
+      top: 90px;
+      right: 83px;
+      width: 190px;
+      max-height: 150px;
+      overflow-y: auto;
+      background: white;
+      border-radius: 5px;
+      font-family: Helvetica, sans-serif;
+      font-size: 0.8rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      z-index: 1002;
+      display: none;
+    }
+    #suggestions div {
+      padding: 8px 10px;
+      cursor: pointer;
+    }
+    #suggestions div:hover {
+      background: #eee;
+    }
+
+    /* Message Box */
+    #messageBox {
+      position: fixed;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 5px;
+      font-family: Helvetica, sans-serif;
+      font-size: 0.85rem;
+      z-index: 1005;
+      display: none;
+    }
   </style>
 </head>
-
 <body>
 
-<div id="header">
-  <h1>LOT KERJA HAR PADI ENT. (in progress)</h1>
-</div>
-
+<div id="header"><h1>LOT KERJA HAR PADI ENT. (in progress)</h1></div>
 <div id="map"></div>
-
-<div id="footer">
-  © 2025 Hisham
-</div>
-
-<div id="messageBox">Anda berada di luar kawasan..</div>
+<div id="footer">© 2025 Hisham</div>
 
 <button id="gpsButton" title="Toggle GPS Mode">
-  <img id="gpsIconImg"
-       src="https://www.svgrepo.com/download/421169/gps-navigation-position.svg"
-       alt="GPS" />
+  <img id="gpsIconImg" src="https://www.svgrepo.com/download/421169/gps-navigation-position.svg" alt="GPS">
 </button>
 
 <div class="search-container" id="searchContainer">
   <input type="text" class="search-input" id="searchInput" placeholder="Cari...">
   <button class="search-btn" id="searchBtn" title="Search">
-    <svg viewBox="0 0 24 24"><path d="M21.707 20.293l-5.388-5.388A7.935 7.935 0 0018 10a8 8 0 10-8 8 7.935 7.935 0 004.905-1.681l5.388 5.388a1 1 0 001.414-1.414zM4 10a6 6 0 1112 0 6 6 0 01-12 0z"/></svg>
+    <svg viewBox="0 0 24 24"><path d="M21.707 20.293l-5.388-5.388A7.935 7.935 0 0018 10a8 8 0 10-8 8 7.935 7.935 0 004.905-1.681l5.388 5.388a1 1 0 001.414-1.414zM4 10a6 6 0 1112 0 6 6 0 01-12 0z"></path></svg>
   </button>
   <button class="close-btn" id="closeBtn" title="Tutup">
-    <svg viewBox="0 0 24 24"><path d="M18.364 5.636a1 1 0 00-1.414 0L12 10.586 7.05 5.636a1 1 0 00-1.414 1.414L10.586 12l-4.95 4.95a1 1 0 101.414 1.414L12 13.414l4.95 4.95a1 1 0 001.414-1.414L13.414 12l4.95-4.95a1 1 0 000-1.414z"/></svg>
+    <svg viewBox="0 0 24 24"><path d="M18.364 5.636a1 1 0 00-1.414 0L12 10.586 7.05 5.636a1 1 0 00-1.414 1.414L10.586 12l-4.95 4.95a1 1 0 101.414 1.414L12 13.414l4.95 4.95a1 1 0 001.414-1.414L13.414 12l4.95-4.95a1 1 0 000-1.414z"></path></svg>
   </button>
 </div>
+
+<div id="suggestions"></div>
+<div id="messageBox"></div>
 
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 <script>
-  const map = new maplibregl.Map({
-    container: 'map',
-    style: {
-      version: 8,
-      sources: {
-        'esri-satellite': {
-          type: 'raster',
-          tiles: ['https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-          tileSize: 256
-        }
-      },
-      layers: [{
-        id: 'esri-layer',
+const map = new maplibregl.Map({
+  container: 'map',
+  style: {
+    version: 8,
+    sources: {
+      'esri-satellite': {
         type: 'raster',
-        source: 'esri-satellite'
-      }]
-    },
-    center: [102.68379, 2.23708],
-    zoom: 13,
-    minZoom: 13,
-    maxZoom: 17.4
-  });
-
-  map.setMaxBounds([[102.66830, 2.21776], [102.69816, 2.25551]]);
-
-  const boundsPolygon = turf.bboxPolygon([102.66830, 2.21776, 102.69816, 2.25551]);
-
-  let gpsMode = 1, watchId = null, marker = null, lastHeading = null;
-  const iconImg = document.getElementById('gpsIconImg');
-  const gpsMsg = document.getElementById('gpsMessage');
-
-  function showGPSMessage() {
-    gpsMsg.style.display = 'block';
-    setTimeout(() => gpsMsg.style.display = 'none', 3000);
-  }
-
-  function setIconColor() {
-    iconImg.style.filter =
-      gpsMode === 1 ? 'invert(100%)' :
-      gpsMode === 2 ? 'invert(67%) sepia(92%) saturate(455%) hue-rotate(81deg)' :
-                      'invert(45%) sepia(100%) saturate(3000%) hue-rotate(5deg)';
-  }
-
-  function createMarker(lng, lat) {
-    const el = document.createElement('div');
-    el.className = 'gps-marker';
-    const tri = document.createElement('div');
-    tri.className = 'triangle';
-    const cir = document.createElement('div');
-    cir.className = 'circle';
-    el.appendChild(tri);
-    el.appendChild(cir);
-    marker = new maplibregl.Marker(el).setLngLat([lng, lat]).addTo(map);
-  }
-
-  function updateMarker(lng, lat) {
-    marker ? marker.setLngLat([lng, lat]) : createMarker(lng, lat);
-    if (gpsMode === 3) map.setCenter([lng, lat]);
-  }
-
-  function handleOrientation() {
-    if (DeviceOrientationEvent.requestPermission) {
-      DeviceOrientationEvent.requestPermission().then(r => {
-        if (r === 'granted') window.addEventListener('deviceorientation', rotateMap, true);
-      });
-    } else {
-      window.addEventListener('deviceorientation', rotateMap, true);
-    }
-  }
-
-  function rotateMap(e) {
-    if (gpsMode !== 3) return;
-    const hd = e.webkitCompassHeading ?? (360 - e.alpha);
-    if (hd && !isNaN(hd)) map.rotateTo(hd, { duration: 100 });
-  }
-
-  document.getElementById('gpsButton').addEventListener('click', () => {
-    gpsMode = (gpsMode % 3) + 1;
-    setIconColor();
-    if (watchId) navigator.geolocation.clearWatch(watchId);
-    watchId = null;
-    window.removeEventListener('deviceorientation', rotateMap);
-    if (gpsMode === 1) return;
-
-    watchId = navigator.geolocation.watchPosition(pos => {
-      const [lng, lat] = [pos.coords.longitude, pos.coords.latitude];
-      const pt = turf.point([lng, lat]);
-      if (!turf.booleanPointInPolygon(pt, boundsPolygon)) {
-        gpsMode = 1;
-        setIconColor();
-        showGPSMessage();
-        if (watchId) navigator.geolocation.clearWatch(watchId);
-        watchId = null;
-        return;
+        tiles: ['https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+        tileSize: 256
       }
-      updateMarker(lng, lat);
-      if (gpsMode === 2) map.setCenter([lng, lat]);
-    }, null, { enableHighAccuracy: true });
+    },
+    layers: [{
+      id: 'esri-layer',
+      type: 'raster',
+      source: 'esri-satellite'
+    }]
+  },
+  center: [102.68379, 2.23708],
+  zoom: 13,
+  minZoom: 13,
+  maxZoom: 17.4,
+  maxBounds: [
+    [102.66830, 2.21776],
+    [102.69816, 2.25551]
+  ]
+});
 
-    if (gpsMode === 3) handleOrientation();
-  });
+let gpsMode = 1;
+let watchId = null;
+let marker = null;
+const iconImg = document.getElementById('gpsIconImg');
+const messageBox = document.getElementById('messageBox');
 
-  map.on('dragstart', () => {
-    if (gpsMode !== 1) {
+function setIconColor() {
+  iconImg.style.filter =
+    gpsMode === 1 ? 'invert(100%)' :
+    gpsMode === 2 ? 'invert(67%) sepia(92%) saturate(455%) hue-rotate(81deg)' :
+    'invert(43%) sepia(100%) saturate(8000%) hue-rotate(1deg)';
+}
+
+function showMessage(text) {
+  messageBox.textContent = text;
+  messageBox.style.display = 'block';
+  setTimeout(() => {
+    messageBox.style.display = 'none';
+  }, 3000);
+}
+
+function createMarker(lng, lat) {
+  const el = document.createElement('div');
+  el.className = 'gps-marker';
+  const triangle = document.createElement('div');
+  triangle.className = 'triangle';
+  const circle = document.createElement('div');
+  circle.className = 'circle';
+  el.appendChild(triangle);
+  el.appendChild(circle);
+  marker = new maplibregl.Marker(el).setLngLat([lng, lat]).addTo(map);
+}
+
+function updateMarker(lng, lat) {
+  if (marker) {
+    marker.setLngLat([lng, lat]);
+  } else {
+    createMarker(lng, lat);
+  }
+}
+
+function handleOrientation() {
+  if (DeviceOrientationEvent.requestPermission) {
+    DeviceOrientationEvent.requestPermission().then(r => {
+      if (r === 'granted') {
+        window.addEventListener('deviceorientation', rotateMap, true);
+      }
+    });
+  } else {
+    window.addEventListener('deviceorientation', rotateMap, true);
+  }
+}
+
+function rotateMap(e) {
+  if (gpsMode !== 3) return;
+  const heading = e.webkitCompassHeading !== undefined ? e.webkitCompassHeading : (360 - e.alpha);
+  if (heading && !isNaN(heading)) {
+    map.rotateTo(heading, { duration: 100 });
+  }
+}
+
+document.getElementById('gpsButton').addEventListener('click', () => {
+  map.dragPan.enable();
+  map.scrollZoom.enable();
+  map.touchZoomRotate.enable();
+
+  gpsMode = (gpsMode % 3) + 1;
+  setIconColor();
+
+  if (watchId) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+  }
+  window.removeEventListener('deviceorientation', rotateMap);
+
+  if (gpsMode === 1) return;
+
+  watchId = navigator.geolocation.watchPosition(pos => {
+    const lng = pos.coords.longitude;
+    const lat = pos.coords.latitude;
+
+    // Check if outside bounds
+    const bounds = map.getMaxBounds();
+    if (lng < bounds.getWest() || lng > bounds.getEast() || lat < bounds.getSouth() || lat > bounds.getNorth()) {
+      showMessage('Anda berada di luar kawasan..');
       gpsMode = 1;
       setIconColor();
       if (watchId) navigator.geolocation.clearWatch(watchId);
       watchId = null;
-      window.removeEventListener('deviceorientation', rotateMap);
+      return;
     }
-  });
 
-  const groups = {
-    sawahring: 'sawahring.json',
-    blok: ['blok1.json', 'blok5.json']
-  };
+    updateMarker(lng, lat);
+    if (gpsMode === 2) {
+      map.setCenter([lng, lat]);
+    }
+  }, null, { enableHighAccuracy: true });
 
-  let allFeatures = [];
-
-  map.on('load', () => {
-    map.dragPan.enable();
-    map.scrollZoom.enable();
-    map.touchZoomRotate.enable();
-
-    Object.entries(groups).forEach(([group, files]) => {
-      (Array.isArray(files) ? files : [files]).forEach(filename => {
-        fetch(filename).then(r => r.json()).then(data => {
-          data.features.forEach((f, i) => f.properties._id = `${group}-${filename}-${i}`);
-          allFeatures.push(...data.features);
-          const sourceId = `${group}-${filename}`;
-          map.addSource(sourceId, { type: 'geojson', data });
-          const baseOpacity = group === 'sawahring' ? 0.4 : 0;
-map.addLayer({
-  id: `${sourceId}-fill`,
-  type: 'fill',
-  source: sourceId,
-  paint: {
-    'fill-color': ['get', 'fill'],
-    'fill-opacity': [
-      'interpolate',
-      ['linear'],
-      ['zoom'],
-      13, baseOpacity,
-      14, baseOpacity,
-      15, baseOpacity === 0.4 ? 0.2 : 0.2,
-      16, baseOpacity === 0.4 ? 0 : 0.4
-              ]
-            }
-          });
-          map.addLayer({
-            id: `${sourceId}-line`, type: 'line', source: sourceId,
-            paint: { 'line-color': '#004d26', 'line-width': 2 }
-          });
-          map.addLayer({
-            id: `${sourceId}-highlight`, type: 'line', source: sourceId,
-            paint: { 'line-color': '#ffcc00', 'line-width': 4 },
-            filter: ['==', '_id', '']
-          });
-
-          map.on('click', `${sourceId}-fill`, e => {
-            const f = e.features[0];
-            highlightFeature(f);
-          });
-        });
-      });
-    });
-  });
-
-  function highlightFeature(f) {
-    Object.entries(groups).forEach(([group, files]) => {
-      (Array.isArray(files) ? files : [files]).forEach(filename => {
-        const id = `${group}-${filename}`;
-        const filter = f.properties._id.startsWith(id) ? ['==', '_id', f.properties._id] : ['==', '_id', ''];
-        map.setFilter(`${id}-highlight`, filter);
-      });
-    });
-    document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
-    gpsMode = 1; setIconColor();
-    const center = turf.center(f).geometry.coordinates;
-    map.fitBounds(turf.bbox(f), { padding: 100, maxZoom: 17.4 });
-    new maplibregl.Popup({ closeButton: false })
-      .setLngLat(center)
-      .setHTML(`<strong>${f.properties.name}</strong>`)
-      .addTo(map)
-      .getElement().classList.add('popup-no-x');
+  if (gpsMode === 3) {
+    handleOrientation();
   }
+});
 
-  map.on('click', e => {
-    const allLayers = [];
-    Object.entries(groups).forEach(([g, files]) => {
-      (Array.isArray(files) ? files : [files]).forEach(f => {
-        allLayers.push(`${g}-${f}-fill`);
-      });
-    });
-    const f = map.queryRenderedFeatures(e.point, { layers: allLayers })[0];
-    if (!f) {
-      Object.entries(groups).forEach(([g, files]) => {
-        (Array.isArray(files) ? files : [files]).forEach(f => {
-          map.setFilter(`${g}-${f}-highlight`, ['==', '_id', '']);
-        });
-      });
-      document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
+// Cancel GPS when user touches map
+map.on('dragstart', () => {
+  if (gpsMode !== 1) {
+    gpsMode = 1;
+    setIconColor();
+    if (watchId) navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+    window.removeEventListener('deviceorientation', rotateMap);
+  }
+});
+
+// Load polygons
+const allFeatures = [];
+let currentPopup = null;
+
+map.on('load', () => {
+  Promise.all([
+    fetch('sawahring.json').then(r => r.json()),
+    fetch('blok1.json').then(r => r.json()),
+    fetch('blok5.json').then(r => r.json())
+  ]).then(([sawahring, blok1, blok5]) => {
+
+    addGroup('sawahring', sawahring, 'sawahring');
+    addGroup('blok1', blok1, 'blok');
+    addGroup('blok5', blok5, 'blok');
+
+    updateSearchList();
+  });
+});
+
+function addGroup(sourceId, data, group) {
+  map.addSource(sourceId, { type: 'geojson', data: data });
+
+  const baseOpacity = group === 'sawahring' ? 0.4 : 0;
+  map.addLayer({
+    id: `${sourceId}-fill`,
+    type: 'fill',
+    source: sourceId,
+    paint: {
+      'fill-color': ['get', 'fill'],
+      'fill-opacity': [
+        'interpolate', ['linear'], ['zoom'],
+        14, baseOpacity,
+        16, baseOpacity === 0.4 ? 0 : 0.4
+      ]
     }
   });
 
-  // SEARCH
-  const input = document.getElementById('searchInput');
-  const container = document.getElementById('searchContainer');
-  const list = document.getElementById('suggestions');
-
-  input.addEventListener('input', () => {
-    const q = input.value.trim().toLowerCase();
-    list.innerHTML = '';
-    if (!q) return;
-    const matches = allFeatures.filter(f => f.properties.name?.toLowerCase().includes(q));
-    matches.forEach(f => {
-      const div = document.createElement('div');
-      div.textContent = f.properties.name;
-      div.addEventListener('click', () => {
-        input.value = '';
-        container.classList.remove('active');
-        list.innerHTML = '';
-        highlightFeature(f);
-      });
-      list.appendChild(div);
-    });
+  map.addLayer({
+    id: `${sourceId}-outline`,
+    type: 'line',
+    source: sourceId,
+    paint: {
+      'line-color': '#ffcc00',
+      'line-width': 2
+    }
   });
 
-  document.getElementById('searchBtn').addEventListener('click', () => {
-    container.classList.add('active');
-    input.focus();
-  });
-  document.getElementById('closeBtn').addEventListener('click', () => {
-    container.classList.remove('active');
-    input.value = '';
-    list.innerHTML = '';
+  map.on('click', `${sourceId}-fill`, e => {
+    const feature = e.features[0];
+    selectFeature(feature);
   });
 
+  allFeatures.push(...data.features.map(f => ({
+    name: f.properties.name,
+    group: group,
+    id: f.properties.id,
+    sourceId: sourceId,
+    geometry: f.geometry
+  })));
+}
+
+function selectFeature(feature) {
+  gpsMode = 1;
   setIconColor();
-
-// messageBox logic
-function showMessage(msg) {
-  const box = document.getElementById('messageBox');
-  box.textContent = msg;
-  box.style.display = 'block';
-  setTimeout(() => {
-    box.style.display = 'none';
-  }, 3000);
-}
-
-// example usage when GPS outside bounds
-function checkIfInsideBounds(lng, lat) {
-  const bounds = [
-    [102.66830, 2.21776],
-    [102.69816, 2.25551]
-  ];
-  if (lng < bounds[0][0] || lng > bounds[1][0] ||
-      lat < bounds[0][1] || lat > bounds[1][1]) {
-    showMessage('Anda berada di luar kawasan..');
-    return false;
+  if (watchId) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
   }
-  return true;
+  window.removeEventListener('deviceorientation', rotateMap);
+
+  if (currentPopup) {
+    currentPopup.remove();
+    currentPopup = null;
+  }
+
+  const bounds = turf.bbox(feature);
+  const center = turf.center(feature).geometry.coordinates;
+  map.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], { padding: 100, maxZoom: 17.4, bearing: map.getBearing() });
+
+  currentPopup = new maplibregl.Popup({ closeButton: false })
+    .setLngLat(center)
+    .setHTML(`<strong>${feature.properties.name}</strong>`)
+    .addTo(map)
+    .getElement().classList.add('popup-no-x');
 }
 
-// in your GPS position update, call checkIfInsideBounds(lng,lat)
-// if outside, show message and stop GPS mode
+// Search
+const searchInput = document.getElementById('searchInput');
+const suggestions = document.getElementById('suggestions');
+
+function updateSearchList() {
+  searchInput.addEventListener('input', () => {
+    const value = searchInput.value.trim().toLowerCase();
+    suggestions.innerHTML = '';
+
+    if (value.length === 0) {
+      suggestions.style.display = 'none';
+      return;
+    }
+
+    const filtered = allFeatures.filter(f => f.name.toLowerCase().includes(value));
+
+    filtered.forEach(f => {
+      const div = document.createElement('div');
+      div.textContent = f.name;
+      div.addEventListener('click', () => {
+        suggestions.style.display = 'none';
+        searchInput.value = '';
+
+        const feature = {
+          properties: { name: f.name },
+          geometry: f.geometry
+        };
+        selectFeature(feature);
+      });
+      suggestions.appendChild(div);
+    });
+
+    if (filtered.length > 0) {
+      suggestions.style.display = 'block';
+    } else {
+      suggestions.style.display = 'none';
+    }
+  });
+}
+
+document.getElementById('searchBtn').addEventListener('click', () => {
+  document.getElementById('searchContainer').classList.add('active');
+  searchInput.focus();
+});
+
+document.getElementById('closeBtn').addEventListener('click', () => {
+  document.getElementById('searchContainer').classList.remove('active');
+  searchInput.value = '';
+  suggestions.style.display = 'none';
+});
 </script>
+
 
 </body>
 </html>
