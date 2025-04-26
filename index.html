@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <title>Lot Kerja Har Padi Enterprise</title>
@@ -9,17 +9,17 @@
   <style>
     html, body { margin:0; padding:0; height:100%; background:black; }
     #map { width:100%; height:100%; }
+
     #header, #footer {
       position:fixed; width:100%; background:transparent;
-      color:white; font-family:Helvetica,sans-serif;
-      text-align:center; z-index:1000; text-shadow: 1px 1px 0 black;
+      color:white; font-family:Helvetica,sans-serif; z-index:1000;
+      text-shadow:1px 1px 0 black;
     }
-    #header { top:0; padding:5px 0; }
+    #header { top:0; padding:5px 0; text-align:center; }
     #header h1 { margin:0; font-size:0.9rem; }
     #footer {
       bottom:0; font-size:0.6rem;
       padding:5px 10px; text-align:left;
-      background:transparent;
     }
 
     #gpsButton {
@@ -58,82 +58,57 @@
     }
     .search-btn, .close-btn {
       position:absolute; right:0; z-index:1002;
-      width:44px;height:44px;padding:0;
-      border:none;border-radius:50%;
-      background:#333;display:flex;
-      align-items:center;justify-content:center;
+      width:44px; height:44px; padding:0;
+      border:none; border-radius:50%;
+      background:#333; display:flex; align-items:center; justify-content:center;
       cursor:pointer;
     }
-    .search-btn svg, .close-btn svg { width:18px;height:18px;fill:white; }
+    .search-btn svg, .close-btn svg { width:18px; height:18px; fill:white; }
     .search-input {
       position:absolute; right:0; z-index:1001;
       width:0; opacity:0; height:38px; top:-2px;
-      transform:translateX(2px); padding-left:10px;
-      padding-right:50px; border-radius:30px;
-      border:1px solid #ccc; background:white;
+      transform:translateX(2px); padding-left:10px; padding-right:50px;
+      border-radius:30px; border:1px solid #ccc; background:white;
       outline:none; transition:all .3s ease;
+      font-family:Helvetica,sans-serif;
     }
-    .search-container.active .search-input {
-      width:200px; opacity:1;
-    }
+    .search-container.active .search-input { width:200px; opacity:1; }
     .search-container.active .search-btn { display:none; }
     .search-container.active .close-btn { display:flex; }
     .close-btn { display:none; }
 
     #suggestions {
-      position: absolute;
-      top: 48px;
-      right: 83px;
-      width: 190px;
-      max-height: 150px;
-      overflow-y: auto;
-      background: white;
-      border-radius: 5px;
-      font-family: Helvetica, sans-serif;
-      font-size: 13px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-      z-index: 1002;
+      position:absolute; top:48px; right:83px;
+      width:190px; max-height:150px; overflow-y:auto;
+      background:white; border-radius:5px;
+      font-family:Helvetica,sans-serif; font-size:13px;
+      box-shadow:0 2px 5px rgba(0,0,0,0.3);
+      z-index:1002;
     }
     #suggestions div {
-      padding: 5px 10px;
-      cursor: pointer;
+      padding:5px 10px; cursor:pointer;
     }
-    #suggestions div:hover {
-      background: #eee;
-    }
+    #suggestions div:hover { background:#eee; }
 
     #gpsMessage {
-      position: fixed;
-      bottom: 70px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #333;
-      color: white;
-      padding: 8px 15px;
-      border-radius: 6px;
-      font-family: Helvetica, sans-serif;
-      font-size: 13px;
-      z-index: 9999;
-      display: none;
+      position:fixed; bottom:70px; left:50%; transform:translateX(-50%);
+      background:#333; color:white; padding:8px 15px; border-radius:6px;
+      font-family:Helvetica,sans-serif; font-size:13px;
+      z-index:9999; display:none;
     }
   </style>
 </head>
 <body>
 
-<div id="header">
-  <h1>LOT KERJA HAR PADI ENTERPRISE</h1>
-</div>
-
+<div id="header"><h1>LOT KERJA HAR PADI ENTERPRISE</h1></div>
 <div id="map"></div>
-
 <div id="footer">© 2025 Hisham</div>
-
 <div id="gpsMessage">Anda berada di luar kawasan..</div>
 
 <button id="gpsButton" title="Toggle GPS Mode">
   <img id="gpsIconImg"
-       src="https://www.svgrepo.com/download/421169/gps-navigation-position.svg"
-       alt="GPS"/>
+    src="https://www.svgrepo.com/download/421169/gps-navigation-position.svg"
+    alt="GPS"/>
 </button>
 
 <div class="search-container" id="searchContainer">
@@ -150,246 +125,221 @@
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 <script>
-  const map = new maplibregl.Map({
-    container: 'map',
-    style: {
-      version: 8,
-      sources: {
-        'esri-satellite': {
-          type: 'raster',
-          tiles: ['https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-          tileSize: 256
-        }
-      },
-      layers: [{
-        id: 'esri-layer',
+const map = new maplibregl.Map({
+  container: 'map',
+  style: {
+    version: 8,
+    sources: {
+      'esri-satellite': {
         type: 'raster',
-        source: 'esri-satellite'
-      }]
-    },
-    center: [102.68379, 2.23708],
-    zoom: 13,
-    minZoom: 13,
-    maxZoom: 17.4
-  });
-
-  map.setMaxBounds([[102.66830, 2.21776], [102.69816, 2.25551]]);
-
-  const boundsPolygon = turf.bboxPolygon([102.66830, 2.21776, 102.69816, 2.25551]);
-
-  let gpsMode = 1, watchId = null, marker = null, lastHeading = null;
-  const iconImg = document.getElementById('gpsIconImg');
-  const gpsMsg = document.getElementById('gpsMessage');
-
-  function showGPSMessage() {
-    gpsMsg.style.display = 'block';
-    setTimeout(() => gpsMsg.style.display = 'none', 3000);
-  }
-
-  function setIconColor() {
-    iconImg.style.filter =
-      gpsMode === 1 ? 'invert(100%)' :
-      gpsMode === 2 ? 'invert(67%) sepia(92%) saturate(455%) hue-rotate(81deg)' :
-                      'invert(45%) sepia(100%) saturate(3000%) hue-rotate(5deg)';
-  }
-
-  function createMarker(lng, lat) {
-    const el = document.createElement('div');
-    el.className = 'gps-marker';
-    const tri = document.createElement('div');
-    tri.className = 'triangle';
-    const cir = document.createElement('div');
-    cir.className = 'circle';
-    el.appendChild(tri);
-    el.appendChild(cir);
-    marker = new maplibregl.Marker(el).setLngLat([lng, lat]).addTo(map);
-  }
-
-  function updateMarker(lng, lat) {
-    marker ? marker.setLngLat([lng, lat]) : createMarker(lng, lat);
-    if (gpsMode === 3) map.setCenter([lng, lat]);
-  }
-
-  function handleOrientation() {
-    if (DeviceOrientationEvent.requestPermission) {
-      DeviceOrientationEvent.requestPermission().then(r => {
-        if (r === 'granted') window.addEventListener('deviceorientation', rotateMap, true);
-      });
-    } else {
-      window.addEventListener('deviceorientation', rotateMap, true);
-    }
-  }
-
-  function rotateMap(e) {
-    if (gpsMode !== 3) return;
-    const hd = e.webkitCompassHeading ?? (360 - e.alpha);
-    if (hd && !isNaN(hd)) map.rotateTo(hd, { duration: 100 });
-  }
-
-  document.getElementById('gpsButton').addEventListener('click', () => {
-    gpsMode = (gpsMode % 3) + 1;
-    setIconColor();
-    if (watchId) navigator.geolocation.clearWatch(watchId);
-    watchId = null;
-    window.removeEventListener('deviceorientation', rotateMap);
-    if (gpsMode === 1) return;
-
-    watchId = navigator.geolocation.watchPosition(pos => {
-      const [lng, lat] = [pos.coords.longitude, pos.coords.latitude];
-      const pt = turf.point([lng, lat]);
-      if (!turf.booleanPointInPolygon(pt, boundsPolygon)) {
-        gpsMode = 1;
-        setIconColor();
-        showGPSMessage();
-        if (watchId) navigator.geolocation.clearWatch(watchId);
-        watchId = null;
-        return;
+        tiles: ['https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+        tileSize: 256
       }
-      updateMarker(lng, lat);
-      if (gpsMode === 2) map.setCenter([lng, lat]);
-    }, null, { enableHighAccuracy: true });
+    },
+    layers: [{ id: 'esri-layer', type: 'raster', source: 'esri-satellite' }]
+  },
+  center: [102.68379, 2.23708],
+  zoom: 13,
+  minZoom: 13,
+  maxZoom: 17.4
+});
 
-    if (gpsMode === 3) handleOrientation();
-  });
+map.setMaxBounds([[102.66830, 2.21776], [102.69816, 2.25551]]);
+const boundsPolygon = turf.bboxPolygon([102.66830, 2.21776, 102.69816, 2.25551]);
 
-  map.on('dragstart', () => {
-    if (gpsMode !== 1) {
-      gpsMode = 1;
-      setIconColor();
-      if (watchId) navigator.geolocation.clearWatch(watchId);
-      watchId = null;
-      window.removeEventListener('deviceorientation', rotateMap);
-    }
-  });
+let gpsMode=1, watchId=null, marker=null;
+const iconImg=document.getElementById('gpsIconImg');
+const gpsMsg=document.getElementById('gpsMessage');
 
-  const groups = {
-    sawahring: 'sawahring.json',
-    blok: ['blok1.json', 'blok5.json']
-  };
+function showGPSMessage(){
+  gpsMsg.style.display='block';
+  setTimeout(()=>gpsMsg.style.display='none',3000);
+}
 
-  let allFeatures = [];
+function setIconColor(){
+  iconImg.style.filter=
+    gpsMode===1 ? 'invert(100%)' :
+    gpsMode===2 ? 'invert(67%) sepia(92%) saturate(455%) hue-rotate(81deg)' :
+                  'invert(45%) sepia(100%) saturate(3000%) hue-rotate(5deg)';
+}
 
-  map.on('load', () => {
-    map.dragPan.enable();
-    map.scrollZoom.enable();
-    map.touchZoomRotate.enable();
+function createMarker(lng,lat){
+  const el=document.createElement('div');
+  el.className='gps-marker';
+  el.innerHTML='<div class="triangle"></div><div class="circle"></div>';
+  marker=new maplibregl.Marker(el).setLngLat([lng,lat]).addTo(map);
+}
 
-    Object.entries(groups).forEach(([group, files]) => {
-      (Array.isArray(files) ? files : [files]).forEach(filename => {
-        fetch(filename).then(r => r.json()).then(data => {
-          data.features.forEach((f, i) => f.properties._id = `${group}-${filename}-${i}`);
-          allFeatures.push(...data.features);
-          const sourceId = `${group}-${filename}`;
-          map.addSource(sourceId, { type: 'geojson', data });
-          const baseOpacity = group === 'sawahring' ? 0.4 : 0;
-map.addLayer({
-  id: `${sourceId}-fill`,
-  type: 'fill',
-  source: sourceId,
-  paint: {
-    'fill-color': ['get', 'fill'],
-    'fill-opacity': [
-      'interpolate',
-      ['linear'],
-      ['zoom'],
-      13, baseOpacity,
-      14, baseOpacity,
-      15, baseOpacity === 0.4 ? 0.2 : 0.2,
-      16, baseOpacity === 0.4 ? 0 : 0.4
-              ]
-            }
-          });
-          map.addLayer({
-            id: `${sourceId}-line`, type: 'line', source: sourceId,
-            paint: { 'line-color': '#004d26', 'line-width': 2 }
-          });
-          map.addLayer({
-            id: `${sourceId}-highlight`, type: 'line', source: sourceId,
-            paint: { 'line-color': '#ffcc00', 'line-width': 4 },
-            filter: ['==', '_id', '']
-          });
+function updateMarker(lng,lat){
+  marker ? marker.setLngLat([lng,lat]) : createMarker(lng,lat);
+  if(gpsMode===3) map.setCenter([lng,lat]);
+}
 
-          map.on('click', `${sourceId}-fill`, e => {
-            const f = e.features[0];
-            highlightFeature(f);
-          });
-        });
-      });
+function handleOrientation(){
+  if(DeviceOrientationEvent.requestPermission){
+    DeviceOrientationEvent.requestPermission().then(r=>{
+      if(r==='granted') window.addEventListener('deviceorientation',rotateMap,true);
     });
-  });
+  }else window.addEventListener('deviceorientation',rotateMap,true);
+}
 
-  function highlightFeature(f) {
-    Object.entries(groups).forEach(([group, files]) => {
-      (Array.isArray(files) ? files : [files]).forEach(filename => {
-        const id = `${group}-${filename}`;
-        const filter = f.properties._id.startsWith(id) ? ['==', '_id', f.properties._id] : ['==', '_id', ''];
-        map.setFilter(`${id}-highlight`, filter);
-      });
-    });
-    document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
-    gpsMode = 1; setIconColor();
-    const center = turf.center(f).geometry.coordinates;
-    map.fitBounds(turf.bbox(f), { padding: 100, maxZoom: 17.4 });
-    new maplibregl.Popup({ closeButton: false })
-      .setLngLat(center)
-      .setHTML(`<strong>${f.properties.name}</strong>`)
-      .addTo(map)
-      .getElement().classList.add('popup-no-x');
-  }
+function rotateMap(e){
+  if(gpsMode!==3) return;
+  const hd=e.webkitCompassHeading??(360-e.alpha);
+  if(hd && !isNaN(hd)) map.rotateTo(hd,{duration:100});
+}
 
-  map.on('click', e => {
-    const allLayers = [];
-    Object.entries(groups).forEach(([g, files]) => {
-      (Array.isArray(files) ? files : [files]).forEach(f => {
-        allLayers.push(`${g}-${f}-fill`);
-      });
-    });
-    const f = map.queryRenderedFeatures(e.point, { layers: allLayers })[0];
-    if (!f) {
-      Object.entries(groups).forEach(([g, files]) => {
-        (Array.isArray(files) ? files : [files]).forEach(f => {
-          map.setFilter(`${g}-${f}-highlight`, ['==', '_id', '']);
-        });
-      });
-      document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
-    }
-  });
-
-  // SEARCH
-  const input = document.getElementById('searchInput');
-  const container = document.getElementById('searchContainer');
-  const list = document.getElementById('suggestions');
-
-  input.addEventListener('input', () => {
-    const q = input.value.trim().toLowerCase();
-    list.innerHTML = '';
-    if (!q) return;
-    const matches = allFeatures.filter(f => f.properties.name?.toLowerCase().includes(q));
-    matches.forEach(f => {
-      const div = document.createElement('div');
-      div.textContent = f.properties.name;
-      div.addEventListener('click', () => {
-        input.value = '';
-        container.classList.remove('active');
-        list.innerHTML = '';
-        highlightFeature(f);
-      });
-      list.appendChild(div);
-    });
-  });
-
-  document.getElementById('searchBtn').addEventListener('click', () => {
-    container.classList.add('active');
-    input.focus();
-  });
-  document.getElementById('closeBtn').addEventListener('click', () => {
-    container.classList.remove('active');
-    input.value = '';
-    list.innerHTML = '';
-  });
-
+document.getElementById('gpsButton').addEventListener('click',()=>{
+  gpsMode=(gpsMode%3)+1;
   setIconColor();
-</script>
+  if(watchId) navigator.geolocation.clearWatch(watchId);
+  watchId=null;
+  window.removeEventListener('deviceorientation',rotateMap);
+  if(gpsMode===1) return;
 
+  watchId=navigator.geolocation.watchPosition(pos=>{
+    const [lng,lat]=[pos.coords.longitude,pos.coords.latitude];
+    const pt=turf.point([lng,lat]);
+    if(!turf.booleanPointInPolygon(pt,boundsPolygon)){
+      gpsMode=1;
+      setIconColor();
+      showGPSMessage();
+      if(watchId) navigator.geolocation.clearWatch(watchId);
+      watchId=null;
+      return;
+    }
+    updateMarker(lng,lat);
+    if(gpsMode===2) map.setCenter([lng,lat]);
+  },null,{enableHighAccuracy:true});
+
+  if(gpsMode===3) handleOrientation();
+});
+
+map.on('dragstart',()=>{
+  if(gpsMode!==1){
+    gpsMode=1;
+    setIconColor();
+    if(watchId) navigator.geolocation.clearWatch(watchId);
+    watchId=null;
+    window.removeEventListener('deviceorientation',rotateMap);
+  }
+});
+
+const groups={
+  sawahring:'sawahring.json',
+  blok:['blok1.json','blok5.json']
+};
+
+let allFeatures=[];
+
+map.on('load',()=>{
+  Object.entries(groups).forEach(([group,files])=>{
+    (Array.isArray(files)?files:[files]).forEach(file=>{
+      fetch(file).then(r=>r.json()).then(data=>{
+        data.features.forEach((f,i)=>f.properties._id=`${group}-${file}-${i}`);
+        allFeatures.push(...data.features);
+        const sourceId=`${group}-${file}`;
+        map.addSource(sourceId,{type:'geojson',data});
+        const baseOpacity=group==='sawahring'?0.4:0;
+        map.addLayer({
+          id:`${sourceId}-fill`,
+          type:'fill',
+          source:sourceId,
+          paint:{
+            'fill-color':['get','fill'],
+            'fill-opacity':[
+              'interpolate',['linear'],['zoom'],
+              13,baseOpacity,
+              14,baseOpacity,
+              15,baseOpacity===0.4?0.2:0.2,
+              16,baseOpacity===0.4?0:0.4
+            ]
+          }
+        });
+        map.addLayer({id:`${sourceId}-line`,type:'line',source:sourceId,
+          paint:{'line-color':'#004d26','line-width':2}});
+        map.addLayer({id:`${sourceId}-highlight`,type:'line',source:sourceId,
+          paint:{'line-color':'#ffcc00','line-width':4},
+          filter:['==','_id','']
+        });
+        map.on('click',`${sourceId}-fill`,e=>{
+          highlightFeature(e.features[0]);
+        });
+      });
+    });
+  });
+});
+
+function highlightFeature(f){
+  Object.entries(groups).forEach(([group,files])=>{
+    (Array.isArray(files)?files:[files]).forEach(file=>{
+      const id=`${group}-${file}`;
+      const filter=f.properties._id.startsWith(id)?['==','_id',f.properties._id]:['==','_id',''];
+      map.setFilter(`${id}-highlight`,filter);
+    });
+  });
+  document.querySelectorAll('.maplibregl-popup').forEach(p=>p.remove());
+  gpsMode=1; setIconColor();
+  const center=turf.center(f).geometry.coordinates;
+  map.fitBounds(turf.bbox(f),{padding:100,maxZoom:17.4});
+  new maplibregl.Popup({closeButton:false})
+    .setLngLat(center)
+    .setHTML(`<strong>${f.properties.name}</strong>`)
+    .addTo(map)
+    .getElement().classList.add('popup-no-x');
+}
+
+map.on('click',e=>{
+  const allLayers=[];
+  Object.entries(groups).forEach(([g,files])=>{
+    (Array.isArray(files)?files:[files]).forEach(f=>{
+      allLayers.push(`${g}-${f}-fill`);
+    });
+  });
+  const f=map.queryRenderedFeatures(e.point,{layers:allLayers})[0];
+  if(!f){
+    Object.entries(groups).forEach(([g,files])=>{
+      (Array.isArray(files)?files:[files]).forEach(f=>{
+        map.setFilter(`${g}-${f}-highlight`,['==','_id','']);
+      });
+    });
+    document.querySelectorAll('.maplibregl-popup').forEach(p=>p.remove());
+  }
+});
+
+const input=document.getElementById('searchInput');
+const container=document.getElementById('searchContainer');
+const list=document.getElementById('suggestions');
+
+input.addEventListener('input',()=>{
+  const q=input.value.trim().toLowerCase();
+  list.innerHTML='';
+  if(!q) return;
+  const matches=allFeatures.filter(f=>f.properties.name?.toLowerCase().includes(q));
+  matches.forEach(f=>{
+    const div=document.createElement('div');
+    div.textContent=f.properties.name;
+    div.addEventListener('click',()=>{
+      input.value='';
+      container.classList.remove('active');
+      list.innerHTML='';
+      highlightFeature(f);
+    });
+    list.appendChild(div);
+  });
+});
+
+document.getElementById('searchBtn').addEventListener('click',()=>{
+  container.classList.add('active');
+  input.focus();
+});
+document.getElementById('closeBtn').addEventListener('click',()=>{
+  container.classList.remove('active');
+  input.value='';
+  list.innerHTML='';
+});
+
+setIconColor();
+</script>
 </body>
 </html>
