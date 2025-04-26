@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8"/>
   <title>Lot Kerja Har Padi Ent.</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet"/>
@@ -9,172 +9,112 @@
   <style>
     html, body { margin:0; padding:0; height:100%; background:black; }
     #map { width:100%; height:100%; }
-
     #header, #footer {
-      position: fixed;
-      width: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      font-family: Helvetica, sans-serif;
-      z-index: 1000;
+      position:fixed; width:100%; background:transparent;
+      color:white; font-family:Helvetica,sans-serif;
+      text-align:center; z-index:1000; text-shadow: 1px 1px 0 black;
     }
-
-    #header {
-      top: 0;
-      padding: 6px 0;
-      text-align: center;
-    }
-
-    #header h1 {
-      margin: 0;
-      font-size: 1rem;
-    }
-
+    #header { top:0; padding:5px 0; }
+    #header h1 { margin:0; font-size:0.9rem; }
     #footer {
-      bottom: 0;
-      font-size: 0.6rem;
-      padding: 5px 10px;
-      text-align: left;
-      background: transparent;
+      bottom:0; font-size:0.6rem;
+      padding:5px 10px; text-align:left;
+      background:transparent;
     }
 
     #gpsButton {
-      position: fixed;
-      bottom: 35px;
-      right: 15px;
-      width: 44px;
-      height: 44px;
-      background: #333;
-      border: none;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 1001;
+      position:fixed; bottom:35px; right:15px;
+      width:44px; height:44px; background:#333;
+      border:none; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; z-index:1001;
     }
-
-    #gpsIconImg {
-      width: 20px;
-      height: 20px;
-    }
+    #gpsIconImg { width:20px; height:20px; }
 
     .gps-marker {
-      position: relative;
-      width: 30px;
-      height: 30px;
+      position:relative; width:30px; height:30px;
     }
-
     .gps-marker .circle {
-      width: 13px;
-      height: 13px;
-      background: #007BFF;
-      border: 1px solid white;
-      border-radius: 50%;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 2;
+      width:13px; height:13px; background:#007BFF;
+      border:1px solid white; border-radius:50%;
+      position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-50%); z-index:2;
     }
-
     .gps-marker .triangle {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 7px solid transparent;
-      border-right: 7px solid transparent;
-      border-bottom: 15px solid white;
-      z-index: 1;
+      position:absolute; top:0; left:50%;
+      transform:translateX(-50%);
+      width:0; height:0;
+      border-left:6px solid transparent;
+      border-right:6px solid transparent;
+      border-bottom:11px solid white;
+      z-index:1;
     }
 
-    .popup-no-x .maplibregl-popup-close-button {
-      display: none;
-    }
+    .popup-no-x .maplibregl-popup-close-button { display:none; }
 
     .search-container {
-      position: absolute;
-      top: 44px;
-      right: 15px;
-      height: 48px;
-      z-index: 1003;
+      position:absolute; top:44px; right:15px;
+      height:48px; z-index:1003;
     }
-
     .search-btn, .close-btn {
-      position: absolute;
-      right: 0;
-      z-index: 1002;
-      width: 44px;
-      height: 44px;
-      padding: 0;
-      border: none;
-      border-radius: 50%;
-      background: #333;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
+      position:absolute; right:0; z-index:1002;
+      width:44px;height:44px;padding:0;
+      border:none;border-radius:50%;
+      background:#333;display:flex;
+      align-items:center;justify-content:center;
+      cursor:pointer;
     }
-
-    .search-btn svg, .close-btn svg {
-      width: 18px;
-      height: 18px;
-      fill: white;
-    }
-
+    .search-btn svg, .close-btn svg { width:18px;height:18px;fill:white; }
     .search-input {
-      position: absolute;
-      right: 0;
-      z-index: 1001;
-      width: 0;
-      opacity: 0;
-      height: 38px;
-      top: -2px;
-      transform: translateX(2px);
-      padding-left: 10px;
-      padding-right: 50px;
-      border-radius: 30px;
-      border: 1px solid #ccc;
-      background: white;
-      font-family: Helvetica, sans-serif;
-      outline: none;
-      transition: all 0.3s ease;
+      position:absolute; right:0; z-index:1001;
+      width:0; opacity:0; height:38px; top:-2px;
+      transform:translateX(2px); padding-left:10px;
+      padding-right:50px; border-radius:30px;
+      border:1px solid #ccc; background:white;
+      outline:none; transition:all .3s ease;
     }
-
     .search-container.active .search-input {
-      width: 200px;
-      opacity: 1;
+      width:200px; opacity:1;
     }
+    .search-container.active .search-btn { display:none; }
+    .search-container.active .close-btn { display:flex; }
+    .close-btn { display:none; }
 
-    .search-container.active .search-btn { display: none; }
-    .search-container.active .close-btn { display: flex; }
-    .close-btn { display: none; }
-
-    .search-suggestions {
+    #suggestions {
       position: absolute;
-      top: 41px;
+      top: 48px;
       right: 83px;
       width: 190px;
-      max-height: 140px;
+      max-height: 150px;
       overflow-y: auto;
       background: white;
       border-radius: 5px;
       font-family: Helvetica, sans-serif;
-      font-size: 12px;
+      font-size: 13px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
       z-index: 1002;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
     }
-
-    .search-suggestions div {
+    #suggestions div {
       padding: 5px 10px;
       cursor: pointer;
     }
-
-    .search-suggestions div:hover {
+    #suggestions div:hover {
       background: #eee;
+    }
+
+    #gpsMessage {
+      position: fixed;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 6px;
+      font-family: Helvetica, sans-serif;
+      font-size: 13px;
+      z-index: 9999;
+      display: none;
     }
   </style>
 </head>
@@ -186,9 +126,9 @@
 
 <div id="map"></div>
 
-<div id="footer">
-  © 2025 Hisham
-</div>
+<div id="footer">© 2025 Hisham</div>
+
+<div id="gpsMessage">Anda berada di luar kawasan..</div>
 
 <button id="gpsButton" title="Toggle GPS Mode">
   <img id="gpsIconImg"
@@ -198,7 +138,7 @@
 
 <div class="search-container" id="searchContainer">
   <input type="text" class="search-input" id="searchInput" placeholder="Cari...">
-  <div class="search-suggestions" id="searchSuggestions"></div>
+  <div id="suggestions"></div>
   <button class="search-btn" id="searchBtn" title="Search">
     <svg viewBox="0 0 24 24"><path d="M21.707 20.293l-5.388-5.388A7.935 7.935 0 0018 10a8 8 0 10-8 8 7.935 7.935 0 004.905-1.681l5.388 5.388a1 1 0 001.414-1.414zM4 10a6 6 0 1112 0 6 6 0 01-12 0z"/></svg>
   </button>
@@ -210,7 +150,7 @@
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 <script>
-  let map = new maplibregl.Map({
+  const map = new maplibregl.Map({
     container: 'map',
     style: {
       version: 8,
@@ -234,19 +174,23 @@
   });
 
   map.setMaxBounds([[102.66830, 2.21776], [102.69816, 2.25551]]);
-  map.dragPan.enable();
 
-  let gpsMode = 1;
-  let watchId = null;
-  let marker = null;
-  let allFeatures = [];
+  const boundsPolygon = turf.bboxPolygon([102.66830, 2.21776, 102.69816, 2.25551]);
+
+  let gpsMode = 1, watchId = null, marker = null, lastHeading = null;
   const iconImg = document.getElementById('gpsIconImg');
+  const gpsMsg = document.getElementById('gpsMessage');
+
+  function showGPSMessage() {
+    gpsMsg.style.display = 'block';
+    setTimeout(() => gpsMsg.style.display = 'none', 3000);
+  }
 
   function setIconColor() {
     iconImg.style.filter =
       gpsMode === 1 ? 'invert(100%)' :
       gpsMode === 2 ? 'invert(67%) sepia(92%) saturate(455%) hue-rotate(81deg)' :
-                      'invert(53%) sepia(100%) saturate(6500%) hue-rotate(1deg)';
+                      'invert(45%) sepia(100%) saturate(3000%) hue-rotate(5deg)';
   }
 
   function createMarker(lng, lat) {
@@ -262,11 +206,8 @@
   }
 
   function updateMarker(lng, lat) {
-    if (marker) {
-      marker.setLngLat([lng, lat]);
-    } else {
-      createMarker(lng, lat);
-    }
+    marker ? marker.setLngLat([lng, lat]) : createMarker(lng, lat);
+    if (gpsMode === 3) map.setCenter([lng, lat]);
   }
 
   function handleOrientation() {
@@ -285,25 +226,25 @@
     if (hd && !isNaN(hd)) map.rotateTo(hd, { duration: 100 });
   }
 
-  function clearGPS() {
+  document.getElementById('gpsButton').addEventListener('click', () => {
+    gpsMode = (gpsMode % 3) + 1;
+    setIconColor();
     if (watchId) navigator.geolocation.clearWatch(watchId);
     watchId = null;
     window.removeEventListener('deviceorientation', rotateMap);
-  }
-
-  document.getElementById('gpsButton').addEventListener('click', () => {
-    map.dragPan.enable();
-    map.scrollZoom.enable();
-    map.touchZoomRotate.enable();
-
-    gpsMode = (gpsMode % 3) + 1;
-    setIconColor();
-    clearGPS();
-
     if (gpsMode === 1) return;
 
     watchId = navigator.geolocation.watchPosition(pos => {
       const [lng, lat] = [pos.coords.longitude, pos.coords.latitude];
+      const pt = turf.point([lng, lat]);
+      if (!turf.booleanPointInPolygon(pt, boundsPolygon)) {
+        gpsMode = 1;
+        setIconColor();
+        showGPSMessage();
+        if (watchId) navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+        return;
+      }
       updateMarker(lng, lat);
       if (gpsMode === 2) map.setCenter([lng, lat]);
     }, null, { enableHighAccuracy: true });
@@ -311,129 +252,139 @@
     if (gpsMode === 3) handleOrientation();
   });
 
-  // Cancel GPS on drag/touch
-  const canvas = document.getElementById('map');
-  canvas.addEventListener('mousedown', () => { gpsMode = 1; setIconColor(); clearGPS(); });
-  canvas.addEventListener('touchstart', () => { gpsMode = 1; setIconColor(); clearGPS(); });
+  map.on('dragstart', () => {
+    if (gpsMode !== 1) {
+      gpsMode = 1;
+      setIconColor();
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+      window.removeEventListener('deviceorientation', rotateMap);
+    }
+  });
 
-  // Load polygons (sawahring and blok)
+  const groups = {
+    sawahring: 'sawahring.json',
+    blok: ['blok1.json', 'blok5.json']
+  };
+
+  let allFeatures = [];
+
   map.on('load', () => {
-    const sources = [
-      { id: 'sawahring', url: 'sawahring.json' },
-      { id: 'blok', url: 'blok5.json' }
-    ];
+    map.dragPan.enable();
+    map.scrollZoom.enable();
+    map.touchZoomRotate.enable();
 
-    sources.forEach(src => {
-      fetch(src.url)
-        .then(res => res.json())
-        .then(data => {
-          allFeatures = allFeatures.concat(data.features.map(f => ({...f, group: src.id})));
-
-          map.addSource(src.id, { type: 'geojson', data });
-
+    Object.entries(groups).forEach(([group, files]) => {
+      (Array.isArray(files) ? files : [files]).forEach(filename => {
+        fetch(filename).then(r => r.json()).then(data => {
+          data.features.forEach((f, i) => f.properties._id = `${group}-${filename}-${i}`);
+          allFeatures.push(...data.features);
+          const sourceId = `${group}-${filename}`;
+          map.addSource(sourceId, { type: 'geojson', data });
+          const baseOpacity = group === 'sawahring' ? 1 : 0;
           map.addLayer({
-            id: `${src.id}-fill`,
-            type: 'fill',
-            source: src.id,
+            id: `${sourceId}-fill`, type: 'fill', source: sourceId,
             paint: {
               'fill-color': ['get', 'fill'],
-              'fill-opacity': 0.4
+              'fill-opacity': [
+                'interpolate',
+                ['linear'], ['zoom'],
+                14, baseOpacity,
+                16, baseOpacity === 1 ? 0 : 1
+              ]
             }
           });
-
           map.addLayer({
-            id: `${src.id}-line`,
-            type: 'line',
-            source: src.id,
-            paint: {
-              'line-color': '#004d26',
-              'line-width': 2
-            }
+            id: `${sourceId}-line`, type: 'line', source: sourceId,
+            paint: { 'line-color': '#004d26', 'line-width': 2 }
+          });
+          map.addLayer({
+            id: `${sourceId}-highlight`, type: 'line', source: sourceId,
+            paint: { 'line-color': '#ffcc00', 'line-width': 4 },
+            filter: ['==', '_id', '']
           });
 
-          map.addLayer({
-            id: `${src.id}-highlight`,
-            type: 'line',
-            source: src.id,
-            paint: {
-              'line-color': '#ffcc00',
-              'line-width': 4
-            },
-            filter: ['==', 'name', '']
-          });
-
-          map.on('click', `${src.id}-fill`, e => {
-            const feature = e.features[0];
-            const name = feature.properties.name;
-            const bounds = turf.bbox(feature);
-            const center = turf.center(feature).geometry.coordinates;
-
-            gpsMode = 1; setIconColor(); clearGPS();
-
-            map.setFilter(`${src.id}-highlight`, ['==', 'name', name]);
-            map.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], { padding: 100, maxZoom: 17.4 });
-
-            document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
-            new maplibregl.Popup({ closeButton: false })
-              .setLngLat(center)
-              .setHTML(`<strong>${name}</strong>`)
-              .addTo(map)
-              .getElement().classList.add('popup-no-x');
+          map.on('click', `${sourceId}-fill`, e => {
+            const f = e.features[0];
+            highlightFeature(f);
           });
         });
+      });
     });
   });
 
-  // Search
+  function highlightFeature(f) {
+    Object.entries(groups).forEach(([group, files]) => {
+      (Array.isArray(files) ? files : [files]).forEach(filename => {
+        const id = `${group}-${filename}`;
+        const filter = f.properties._id.startsWith(id) ? ['==', '_id', f.properties._id] : ['==', '_id', ''];
+        map.setFilter(`${id}-highlight`, filter);
+      });
+    });
+    document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
+    gpsMode = 1; setIconColor();
+    const center = turf.center(f).geometry.coordinates;
+    map.fitBounds(turf.bbox(f), { padding: 100, maxZoom: 17.4 });
+    new maplibregl.Popup({ closeButton: false })
+      .setLngLat(center)
+      .setHTML(`<strong>${f.properties.name}</strong>`)
+      .addTo(map)
+      .getElement().classList.add('popup-no-x');
+  }
+
+  map.on('click', e => {
+    const allLayers = [];
+    Object.entries(groups).forEach(([g, files]) => {
+      (Array.isArray(files) ? files : [files]).forEach(f => {
+        allLayers.push(`${g}-${f}-fill`);
+      });
+    });
+    const f = map.queryRenderedFeatures(e.point, { layers: allLayers })[0];
+    if (!f) {
+      Object.entries(groups).forEach(([g, files]) => {
+        (Array.isArray(files) ? files : [files]).forEach(f => {
+          map.setFilter(`${g}-${f}-highlight`, ['==', '_id', '']);
+        });
+      });
+      document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
+    }
+  });
+
+  // SEARCH
   const input = document.getElementById('searchInput');
-  const suggestions = document.getElementById('searchSuggestions');
+  const container = document.getElementById('searchContainer');
+  const list = document.getElementById('suggestions');
 
   input.addEventListener('input', () => {
-    const value = input.value.trim().toLowerCase();
-    suggestions.innerHTML = '';
-
-    if (!value) return;
-
-    const matched = allFeatures.filter(f => f.properties.name.toLowerCase().includes(value));
-    matched.forEach(f => {
+    const q = input.value.trim().toLowerCase();
+    list.innerHTML = '';
+    if (!q) return;
+    const matches = allFeatures.filter(f => f.properties.name?.toLowerCase().includes(q));
+    matches.forEach(f => {
       const div = document.createElement('div');
       div.textContent = f.properties.name;
       div.addEventListener('click', () => {
-        const bounds = turf.bbox(f);
-        const center = turf.center(f).geometry.coordinates;
-
-        gpsMode = 1; setIconColor(); clearGPS();
-
-        map.setFilter(`${f.group}-highlight`, ['==', 'name', f.properties.name]);
-        map.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], { padding: 100, maxZoom: 17.4 });
-
-        document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
-        new maplibregl.Popup({ closeButton: false })
-          .setLngLat(center)
-          .setHTML(`<strong>${f.properties.name}</strong>`)
-          .addTo(map)
-          .getElement().classList.add('popup-no-x');
-
-        suggestions.innerHTML = '';
         input.value = '';
-        document.getElementById('searchContainer').classList.remove('active');
+        container.classList.remove('active');
+        list.innerHTML = '';
+        highlightFeature(f);
       });
-      suggestions.appendChild(div);
+      list.appendChild(div);
     });
   });
 
   document.getElementById('searchBtn').addEventListener('click', () => {
-    document.getElementById('searchContainer').classList.add('active');
+    container.classList.add('active');
     input.focus();
   });
-
   document.getElementById('closeBtn').addEventListener('click', () => {
-    document.getElementById('searchContainer').classList.remove('active');
+    container.classList.remove('active');
     input.value = '';
-    suggestions.innerHTML = '';
+    list.innerHTML = '';
   });
 
   setIconColor();
 </script>
+
 </body>
 </html>
