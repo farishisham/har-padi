@@ -281,16 +281,21 @@
           allFeatures.push(...data.features);
           const sourceId = `${group}-${filename}`;
           map.addSource(sourceId, { type: 'geojson', data });
-          const baseOpacity = group === 'sawahring' ? 1 : 0;
-          map.addLayer({
-            id: `${sourceId}-fill`, type: 'fill', source: sourceId,
-            paint: {
-              'fill-color': ['get', 'fill'],
-              'fill-opacity': [
-                'interpolate',
-                ['linear'], ['zoom'],
-                14, baseOpacity,
-                16, baseOpacity === 1 ? 0 : 1
+          const baseOpacity = group === 'sawahring' ? 0.4 : 0;
+map.addLayer({
+  id: `${sourceId}-fill`,
+  type: 'fill',
+  source: sourceId,
+  paint: {
+    'fill-color': ['get', 'fill'],
+    'fill-opacity': [
+      'interpolate',
+      ['linear'],
+      ['zoom'],
+      13, baseOpacity,
+      14, baseOpacity,
+      15, baseOpacity === 0.4 ? 0.2 : 0.2,
+      16, baseOpacity === 0.4 ? 0 : 0.4
               ]
             }
           });
