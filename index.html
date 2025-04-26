@@ -7,262 +7,372 @@
   <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
   <style>
-    html, body { margin:0; padding:0; height:100%; background:black; font-family: Helvetica, sans-serif; }
+    html, body { margin:0; padding:0; height:100%; background:black; }
     #map { width:100%; height:100%; }
 
     #header, #footer {
-      position:fixed; width:100%; z-index:1000;
-      background:rgba(0,0,0,0.5); color:white; text-align:center;
+      position: fixed;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      font-family: Helvetica, sans-serif;
+      z-index: 1000;
     }
-    #header { top:0; padding:6px 0; }
-    #header h1 { margin:0; font-size:1rem; }
+
+    #header {
+      top: 0;
+      padding: 6px 0;
+      text-align: center;
+    }
+
+    #header h1 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
     #footer {
-      bottom:0; font-size:0.6rem; padding:5px 8px;
+      bottom: 0;
+      font-size: 0.6rem;
+      padding: 5px 10px;
       text-align: left;
+      background: transparent;
     }
 
     #gpsButton {
-      position:fixed; bottom:35px; right:15px;
-      width:44px; height:44px; background:#333;
-      border:none; border-radius:50%; z-index:1001;
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer;
+      position: fixed;
+      bottom: 35px;
+      right: 15px;
+      width: 44px;
+      height: 44px;
+      background: #333;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1001;
     }
 
-    #gpsIconImg { width:20px; height:20px; }
+    #gpsIconImg {
+      width: 20px;
+      height: 20px;
+    }
 
     .gps-marker {
-      position:relative; width:30px; height:30px;
+      position: relative;
+      width: 30px;
+      height: 30px;
     }
 
     .gps-marker .circle {
-      width:13px; height:13px;
-      background:#007BFF; border:1px solid white;
-      border-radius:50%; z-index:2;
-      position:absolute; top:50%; left:50%;
-      transform:translate(-50%,-50%);
+      width: 13px;
+      height: 13px;
+      background: #007BFF;
+      border: 1px solid white;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
     }
 
     .gps-marker .triangle {
-      position:absolute; top:0; left:50%;
-      transform:translateX(-50%);
-      width:0; height:0;
-      border-left:6px solid transparent;
-      border-right:6px solid transparent;
-      border-bottom:11px solid white;
-      z-index:1;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-bottom: 15px solid white;
+      z-index: 1;
     }
 
-    .popup-no-x .maplibregl-popup-close-button { display:none; }
+    .popup-no-x .maplibregl-popup-close-button {
+      display: none;
+    }
 
     .search-container {
-      position:absolute; top:44px; right:15px; height:48px; z-index:1003;
-    }
-    .search-btn, .close-btn {
-      position:absolute; right:0; width:44px; height:44px;
-      border:none; border-radius:50%; background:#333;
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer; z-index:1002; padding:0;
-    }
-    .search-btn svg, .close-btn svg { width:18px; height:18px; fill:white; }
-    .close-btn { display:none; }
-
-    .search-input {
-      position:absolute; right:0; z-index:1001;
-      width:0; opacity:0; height:38px;
-      transform:translateX(2px); top:-2px;
-      padding-left:10px; padding-right:50px;
-      border-radius:30px; border:1px solid #ccc;
-      background:white; transition:all 0.3s ease;
-    }
-    .search-container.active .search-input {
-      width:200px; opacity:1;
-    }
-    .search-container.active .search-btn { display:none; }
-    .search-container.active .close-btn { display:flex; }
-
-    #suggestions {
       position: absolute;
-      top: 49px;
-      right: 83px;
-      width: 190px;
-      max-height: 150px;
-      overflow-y: auto;
-      background: white;
-      border-radius: 5px;
-      box-shadow: 0 0 4px rgba(0,0,0,0.3);
-      z-index: 1000;
-      font-size: 14px;
+      top: 44px;
+      right: 15px;
+      height: 48px;
+      z-index: 1003;
     }
 
-    #suggestions div {
-      padding: 6px 10px;
+    .search-btn, .close-btn {
+      position: absolute;
+      right: 0;
+      z-index: 1002;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
     }
 
-    #suggestions div:hover {
+    .search-btn svg, .close-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: white;
+    }
+
+    .search-input {
+      position: absolute;
+      right: 0;
+      z-index: 1001;
+      width: 0;
+      opacity: 0;
+      height: 38px;
+      top: -2px;
+      transform: translateX(2px);
+      padding-left: 10px;
+      padding-right: 50px;
+      border-radius: 30px;
+      border: 1px solid #ccc;
+      background: white;
+      font-family: Helvetica, sans-serif;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .search-container.active .search-input {
+      width: 200px;
+      opacity: 1;
+    }
+
+    .search-container.active .search-btn { display: none; }
+    .search-container.active .close-btn { display: flex; }
+    .close-btn { display: none; }
+
+    .search-suggestions {
+      position: absolute;
+      top: 41px;
+      right: 83px;
+      width: 190px;
+      max-height: 140px;
+      overflow-y: auto;
+      background: white;
+      border-radius: 5px;
+      font-family: Helvetica, sans-serif;
+      font-size: 12px;
+      z-index: 1002;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    }
+
+    .search-suggestions div {
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    .search-suggestions div:hover {
       background: #eee;
     }
   </style>
 </head>
 <body>
-  <div id="header">
-    <h1>LOT KERJA HAR PADI ENT. (in progress)</h1>
-  </div>
 
-  <div id="map"></div>
+<div id="header">
+  <h1>LOT KERJA HAR PADI ENT. (in progress)</h1>
+</div>
 
-  <div id="footer">
-    © 2025 Hisham
-  </div>
+<div id="map"></div>
 
-  <button id="gpsButton" title="Toggle GPS Mode">
-    <img id="gpsIconImg" src="https://www.svgrepo.com/download/421169/gps-navigation-position.svg" alt="GPS"/>
+<div id="footer">
+  © 2025 Hisham
+</div>
+
+<button id="gpsButton" title="Toggle GPS Mode">
+  <img id="gpsIconImg"
+       src="https://www.svgrepo.com/download/421169/gps-navigation-position.svg"
+       alt="GPS"/>
+</button>
+
+<div class="search-container" id="searchContainer">
+  <input type="text" class="search-input" id="searchInput" placeholder="Cari...">
+  <div class="search-suggestions" id="searchSuggestions"></div>
+  <button class="search-btn" id="searchBtn" title="Search">
+    <svg viewBox="0 0 24 24"><path d="M21.707 20.293l-5.388-5.388A7.935 7.935 0 0018 10a8 8 0 10-8 8 7.935 7.935 0 004.905-1.681l5.388 5.388a1 1 0 001.414-1.414zM4 10a6 6 0 1112 0 6 6 0 01-12 0z"/></svg>
   </button>
+  <button class="close-btn" id="closeBtn" title="Tutup">
+    <svg viewBox="0 0 24 24"><path d="M18.364 5.636a1 1 0 00-1.414 0L12 10.586 7.05 5.636a1 1 0 00-1.414 1.414L10.586 12l-4.95 4.95a1 1 0 101.414 1.414L12 13.414l4.95 4.95a1 1 0 001.414-1.414L13.414 12l4.95-4.95a1 1 0 000-1.414z"/></svg>
+  </button>
+</div>
 
-  <div class="search-container" id="searchContainer">
-    <input type="text" class="search-input" id="searchInput" placeholder="Cari...">
-    <button class="search-btn" id="searchBtn" title="Search">
-      <svg viewBox="0 0 24 24"><path d="M21.707 20.293l-5.388-5.388A7.935 7.935 0 0018 10a8 8 0 10-8 8 7.935 7.935 0 004.905-1.681l5.388 5.388a1 1 0 001.414-1.414zM4 10a6 6 0 1112 0 6 6 0 01-12 0z"/></svg>
-    </button>
-    <button class="close-btn" id="closeBtn" title="Tutup">
-      <svg viewBox="0 0 24 24"><path d="M18.364 5.636a1 1 0 00-1.414 0L12 10.586 7.05 5.636a1 1 0 00-1.414 1.414L10.586 12l-4.95 4.95a1 1 0 101.414 1.414L12 13.414l4.95 4.95a1 1 0 001.414-1.414L13.414 12l4.95-4.95a1 1 0 000-1.414z"/></svg>
-    </button>
-  </div>
-
-  <div id="suggestions"></div>
-
-  <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
-  <script>
-    const map = new maplibregl.Map({
-      container: 'map',
-      style: {
-        version: 8,
-        sources: {
-          'esri-satellite': {
-            type: 'raster',
-            tiles: [
-              'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-            ],
-            tileSize: 256,
-          }
-        },
-        layers: [{
-          id: 'esri-layer',
+<script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+<script>
+  let map = new maplibregl.Map({
+    container: 'map',
+    style: {
+      version: 8,
+      sources: {
+        'esri-satellite': {
           type: 'raster',
-          source: 'esri-satellite'
-        }]
+          tiles: ['https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+          tileSize: 256
+        }
       },
-      center: [102.68379, 2.23708],
-      zoom: 13,
-      minZoom: 13,
-      maxZoom: 17.4
-    });
+      layers: [{
+        id: 'esri-layer',
+        type: 'raster',
+        source: 'esri-satellite'
+      }]
+    },
+    center: [102.68379, 2.23708],
+    zoom: 13,
+    minZoom: 13,
+    maxZoom: 17.4
+  });
 
-    const groups = {
-      sawahring: 'sawahring.json',
-      blok5: 'blok5.json'
-    };
+  map.setMaxBounds([[102.66830, 2.21776], [102.69816, 2.25551]]);
+  map.dragPan.enable();
 
-    const featureIndex = [];
+  let gpsMode = 1;
+  let watchId = null;
+  let marker = null;
+  let allFeatures = [];
+  const iconImg = document.getElementById('gpsIconImg');
 
-    let gpsMode = 1;
-    let marker = null;
-    let watchId = null;
-    const iconImg = document.getElementById('gpsIconImg');
+  function setIconColor() {
+    iconImg.style.filter =
+      gpsMode === 1 ? 'invert(100%)' :
+      gpsMode === 2 ? 'invert(67%) sepia(92%) saturate(455%) hue-rotate(81deg)' :
+                      'invert(53%) sepia(100%) saturate(6500%) hue-rotate(1deg)';
+  }
 
-    function setIconColor() {
-      iconImg.style.filter =
-        gpsMode === 1
-          ? 'invert(100%)'
-          : gpsMode === 2
-            ? 'invert(67%) sepia(92%) saturate(455%) hue-rotate(81deg)'
-            : 'invert(43%) sepia(100%) saturate(8000%) hue-rotate(1deg)';
+  function createMarker(lng, lat) {
+    const el = document.createElement('div');
+    el.className = 'gps-marker';
+    const tri = document.createElement('div');
+    tri.className = 'triangle';
+    const cir = document.createElement('div');
+    cir.className = 'circle';
+    el.appendChild(tri);
+    el.appendChild(cir);
+    marker = new maplibregl.Marker(el).setLngLat([lng, lat]).addTo(map);
+  }
+
+  function updateMarker(lng, lat) {
+    if (marker) {
+      marker.setLngLat([lng, lat]);
+    } else {
+      createMarker(lng, lat);
     }
+  }
 
-    function createMarker(lng, lat) {
-      const el = document.createElement('div'); el.className = 'gps-marker';
-      const tri = document.createElement('div'); tri.className = 'triangle';
-      const cir = document.createElement('div'); cir.className = 'circle';
-      el.appendChild(tri); el.appendChild(cir);
-      marker = new maplibregl.Marker(el).setLngLat([lng, lat]).addTo(map);
+  function handleOrientation() {
+    if (DeviceOrientationEvent.requestPermission) {
+      DeviceOrientationEvent.requestPermission().then(r => {
+        if (r === 'granted') window.addEventListener('deviceorientation', rotateMap, true);
+      });
+    } else {
+      window.addEventListener('deviceorientation', rotateMap, true);
     }
+  }
 
-    function updateMarker(lng, lat) {
-      marker ? marker.setLngLat([lng, lat]) : createMarker(lng, lat);
-    }
+  function rotateMap(e) {
+    if (gpsMode !== 3) return;
+    const hd = e.webkitCompassHeading ?? (360 - e.alpha);
+    if (hd && !isNaN(hd)) map.rotateTo(hd, { duration: 100 });
+  }
 
-    function handleOrientation() {
-      if (DeviceOrientationEvent.requestPermission) {
-        DeviceOrientationEvent.requestPermission().then(r => {
-          if (r === 'granted') window.addEventListener('deviceorientation', rotateMap, true);
-        });
-      } else {
-        window.addEventListener('deviceorientation', rotateMap, true);
-      }
-    }
+  function clearGPS() {
+    if (watchId) navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+    window.removeEventListener('deviceorientation', rotateMap);
+  }
 
-    function rotateMap(e) {
-      if (gpsMode !== 3) return;
-      const hd = e.webkitCompassHeading ?? (360 - e.alpha);
-      if (hd && !isNaN(hd)) map.rotateTo(hd, { duration: 100 });
-    }
+  document.getElementById('gpsButton').addEventListener('click', () => {
+    map.dragPan.enable();
+    map.scrollZoom.enable();
+    map.touchZoomRotate.enable();
 
-    document.getElementById('gpsButton').addEventListener('click', () => {
-      gpsMode = (gpsMode % 3) + 1;
-      setIconColor();
-      if (watchId) navigator.geolocation.clearWatch(watchId);
-      watchId = null;
-      window.removeEventListener('deviceorientation', rotateMap);
-      if (gpsMode === 1) return;
-
-      watchId = navigator.geolocation.watchPosition(pos => {
-        const [lng, lat] = [pos.coords.longitude, pos.coords.latitude];
-        updateMarker(lng, lat);
-        if (gpsMode === 2) map.setCenter([lng, lat]);
-      }, null, { enableHighAccuracy: true });
-
-      if (gpsMode === 3) handleOrientation();
-    });
-
+    gpsMode = (gpsMode % 3) + 1;
     setIconColor();
+    clearGPS();
 
-    map.on('load', () => {
-      map.dragPan.enable();
-      map.scrollZoom.enable();
-      map.touchZoomRotate.enable();
+    if (gpsMode === 1) return;
 
-      Object.entries(groups).forEach(([groupName, file]) => {
-        fetch(file).then(res => res.json()).then(data => {
-          map.addSource(groupName, { type: 'geojson', data });
+    watchId = navigator.geolocation.watchPosition(pos => {
+      const [lng, lat] = [pos.coords.longitude, pos.coords.latitude];
+      updateMarker(lng, lat);
+      if (gpsMode === 2) map.setCenter([lng, lat]);
+    }, null, { enableHighAccuracy: true });
+
+    if (gpsMode === 3) handleOrientation();
+  });
+
+  // Cancel GPS on drag/touch
+  const canvas = document.getElementById('map');
+  canvas.addEventListener('mousedown', () => { gpsMode = 1; setIconColor(); clearGPS(); });
+  canvas.addEventListener('touchstart', () => { gpsMode = 1; setIconColor(); clearGPS(); });
+
+  // Load polygons (sawahring and blok)
+  map.on('load', () => {
+    const sources = [
+      { id: 'sawahring', url: 'sawahring.json' },
+      { id: 'blok', url: 'blok.json' }
+    ];
+
+    sources.forEach(src => {
+      fetch(src.url)
+        .then(res => res.json())
+        .then(data => {
+          allFeatures = allFeatures.concat(data.features.map(f => ({...f, group: src.id})));
+
+          map.addSource(src.id, { type: 'geojson', data });
 
           map.addLayer({
-            id: `${groupName}-fill`,
+            id: `${src.id}-fill`,
             type: 'fill',
-            source: groupName,
+            source: src.id,
             paint: {
-              'fill-color': ['get', 'fill'] || '#00cc66',
+              'fill-color': ['get', 'fill'],
               'fill-opacity': 0.4
             }
           });
 
           map.addLayer({
-            id: `${groupName}-outline`,
+            id: `${src.id}-line`,
             type: 'line',
-            source: groupName,
-            paint: { 'line-color': '#004d26', 'line-width': 2 }
+            source: src.id,
+            paint: {
+              'line-color': '#004d26',
+              'line-width': 2
+            }
           });
 
-          data.features.forEach(f => {
-            featureIndex.push({ name: f.properties.name, feature: f, group: groupName });
+          map.addLayer({
+            id: `${src.id}-highlight`,
+            type: 'line',
+            source: src.id,
+            paint: {
+              'line-color': '#ffcc00',
+              'line-width': 4
+            },
+            filter: ['==', 'name', '']
           });
 
-          map.on('click', `${groupName}-fill`, (e) => {
-            const f = e.features[0], name = f.properties.name;
-            const bounds = turf.bbox(f), center = turf.center(f).geometry.coordinates;
-            gpsMode = 1; setIconColor();
+          map.on('click', `${src.id}-fill`, e => {
+            const feature = e.features[0];
+            const name = feature.properties.name;
+            const bounds = turf.bbox(feature);
+            const center = turf.center(feature).geometry.coordinates;
+
+            gpsMode = 1; setIconColor(); clearGPS();
+
+            map.setFilter(`${src.id}-highlight`, ['==', 'name', name]);
             map.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], { padding: 100, maxZoom: 17.4 });
+
             document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
             new maplibregl.Popup({ closeButton: false })
               .setLngLat(center)
@@ -271,50 +381,59 @@
               .getElement().classList.add('popup-no-x');
           });
         });
+    });
+  });
+
+  // Search
+  const input = document.getElementById('searchInput');
+  const suggestions = document.getElementById('searchSuggestions');
+
+  input.addEventListener('input', () => {
+    const value = input.value.trim().toLowerCase();
+    suggestions.innerHTML = '';
+
+    if (!value) return;
+
+    const matched = allFeatures.filter(f => f.properties.name.toLowerCase().includes(value));
+    matched.forEach(f => {
+      const div = document.createElement('div');
+      div.textContent = f.properties.name;
+      div.addEventListener('click', () => {
+        const bounds = turf.bbox(f);
+        const center = turf.center(f).geometry.coordinates;
+
+        gpsMode = 1; setIconColor(); clearGPS();
+
+        map.setFilter(`${f.group}-highlight`, ['==', 'name', f.properties.name]);
+        map.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], { padding: 100, maxZoom: 17.4 });
+
+        document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
+        new maplibregl.Popup({ closeButton: false })
+          .setLngLat(center)
+          .setHTML(`<strong>${f.properties.name}</strong>`)
+          .addTo(map)
+          .getElement().classList.add('popup-no-x');
+
+        suggestions.innerHTML = '';
+        input.value = '';
+        document.getElementById('searchContainer').classList.remove('active');
       });
+      suggestions.appendChild(div);
     });
+  });
 
-    const searchInput = document.getElementById('searchInput');
-    const suggestions = document.getElementById('suggestions');
+  document.getElementById('searchBtn').addEventListener('click', () => {
+    document.getElementById('searchContainer').classList.add('active');
+    input.focus();
+  });
 
-    searchInput.addEventListener('input', () => {
-      const value = searchInput.value.toLowerCase();
-      suggestions.innerHTML = '';
-      if (value.length > 0) {
-        const filtered = featureIndex.filter(item => item.name.toLowerCase().includes(value));
-        filtered.forEach(item => {
-          const div = document.createElement('div');
-          div.textContent = item.name;
-          div.onclick = () => {
-            gpsMode = 1;
-            setIconColor();
-            const bounds = turf.bbox(item.feature);
-            const center = turf.center(item.feature).geometry.coordinates;
-            map.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], { padding: 100, maxZoom: 17.4 });
-            document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
-            new maplibregl.Popup({ closeButton: false })
-              .setLngLat(center)
-              .setHTML(`<strong>${item.name}</strong>`)
-              .addTo(map)
-              .getElement().classList.add('popup-no-x');
-            suggestions.innerHTML = '';
-            document.getElementById("searchContainer").classList.remove("active");
-          };
-          suggestions.appendChild(div);
-        });
-      }
-    });
+  document.getElementById('closeBtn').addEventListener('click', () => {
+    document.getElementById('searchContainer').classList.remove('active');
+    input.value = '';
+    suggestions.innerHTML = '';
+  });
 
-    document.getElementById("searchBtn").addEventListener("click", () => {
-      document.getElementById("searchContainer").classList.add("active");
-      searchInput.focus();
-    });
-
-    document.getElementById("closeBtn").addEventListener("click", () => {
-      document.getElementById("searchContainer").classList.remove("active");
-      searchInput.value = '';
-      suggestions.innerHTML = '';
-    });
-  </script>
+  setIconColor();
+</script>
 </body>
 </html>
