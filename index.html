@@ -4,12 +4,12 @@
   <meta charset="utf-8"/>
   <title>Lot Kerja Har Padi Enterprise</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" type="image/png" href="favicon.png"/>
   <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
   <style>
     html, body { margin:0; padding:0; height:100%; background:black; }
     #map { width:100%; height:100%; }
-
     #header, #footer {
       position:fixed; width:100%; background:transparent;
       color:white; font-family:Helvetica,sans-serif;
@@ -22,7 +22,6 @@
       padding:5px 10px; text-align:left;
       background:transparent;
     }
-
     #gpsButton {
       position:fixed; bottom:35px; right:15px;
       width:44px; height:44px; background:#333;
@@ -31,7 +30,6 @@
       cursor:pointer; z-index:1001;
     }
     #gpsIconImg { width:20px; height:20px; }
-
     .gps-marker {
       position:relative; width:30px; height:30px;
     }
@@ -50,9 +48,7 @@
       border-bottom:11px solid white;
       z-index:1;
     }
-
     .popup-no-x .maplibregl-popup-close-button { display:none; }
-
     .search-container {
       position:absolute; top:44px; right:15px;
       height:48px; z-index:1003;
@@ -80,65 +76,27 @@
     .search-container.active .search-btn { display:none; }
     .search-container.active .close-btn { display:flex; }
     .close-btn { display:none; }
-
-    #filterButtons {
-      position:absolute;
-      top:95px; right:15px;
-      display:flex; flex-direction:column;
-      gap:8px;
-      z-index:1003;
-    }
-    .filter-btn {
-      width:44px; height:44px;
-      background:#333; color:white;
-      border:none; border-radius:50%;
-      font-family:Helvetica,sans-serif;
-      font-size:11px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      transition:0.3s;
-    }
-    .filter-btn.active {
-      color:#00cc66;
-    }
-
     #suggestions {
-      position: absolute;
-      top: 48px;
-      right: 83px;
-      width: 190px;
-      max-height: 150px;
-      overflow-y: auto;
-      background: white;
-      border-radius: 5px;
-      font-family: Helvetica, sans-serif;
-      font-size: 13px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-      z-index: 1002;
+      position:absolute; top:48px; right:83px;
+      width:190px; max-height:150px;
+      overflow-y:auto; background:white;
+      border-radius:5px; font-family:Helvetica,sans-serif;
+      font-size:13px; box-shadow:0 2px 5px rgba(0,0,0,0.3);
+      z-index:1002;
     }
     #suggestions div {
-      padding: 5px 10px;
-      cursor: pointer;
+      padding:5px 10px; cursor:pointer;
     }
     #suggestions div:hover {
-      background: #eee;
+      background:#eee;
     }
-
     #gpsMessage {
-      position: fixed;
-      bottom: 70px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #333;
-      color: white;
-      padding: 8px 15px;
-      border-radius: 6px;
-      font-family: Helvetica, sans-serif;
-      font-size: 13px;
-      z-index: 9999;
-      display: none;
+      position:fixed; bottom:70px; left:50%;
+      transform:translateX(-50%);
+      background:#333; color:white;
+      padding:8px 15px; border-radius:6px;
+      font-family:Helvetica,sans-serif;
+      font-size:13px; z-index:9999; display:none;
     }
   </style>
 </head>
@@ -155,9 +113,7 @@
 <div id="gpsMessage">Anda berada di luar kawasan..</div>
 
 <button id="gpsButton" title="Toggle GPS Mode">
-  <img id="gpsIconImg"
-       src="https://www.svgrepo.com/download/421169/gps-navigation-position.svg"
-       alt="GPS"/>
+  <img id="gpsIconImg" src="https://www.svgrepo.com/download/421169/gps-navigation-position.svg" alt="GPS"/>
 </button>
 
 <div class="search-container" id="searchContainer">
@@ -169,13 +125,6 @@
   <button class="close-btn" id="closeBtn" title="Tutup">
     <svg viewBox="0 0 24 24"><path d="M18.364 5.636a1 1 0 00-1.414 0L12 10.586 7.05 5.636a1 1 0 00-1.414 1.414L10.586 12l-4.95 4.95a1 1 0 101.414 1.414L12 13.414l4.95 4.95a1 1 0 001.414-1.414L13.414 12l4.95-4.95a1 1 0 000-1.414z"/></svg>
   </button>
-</div>
-
-<div id="filterButtons">
-  <button class="filter-btn" id="filterBlok">Blok?</button>
-  <button class="filter-btn" id="filterBajak">Bajak</button>
-  <button class="filter-btn" id="filterCalit">Calit</button>
-  <button class="filter-btn" id="filterRacun">Racun</button>
 </div>
 
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
@@ -205,11 +154,11 @@ const map = new maplibregl.Map({
   maxZoom: 17.4
 });
 
+// Limit map bounds
 map.setMaxBounds([[102.66830, 2.21776], [102.69816, 2.25551]]);
-
 const boundsPolygon = turf.bboxPolygon([102.66830, 2.21776, 102.69816, 2.25551]);
 
-let gpsMode = 1, watchId = null, marker = null;
+let gpsMode = 1, watchId = null, marker = null, lastHeading = null;
 const iconImg = document.getElementById('gpsIconImg');
 const gpsMsg = document.getElementById('gpsMessage');
 
@@ -294,10 +243,12 @@ map.on('dragstart', () => {
   }
 });
 
-// --- Load polygon sources ---
+// ============================
+// Load Polygon Data
+// ============================
 const groups = {
   sawahring: 'sawahring.json',
-  blok: ['blok1.json', 'blok5.json']
+  blok: ['blok1.json', 'blok2.json', 'blok3.json', 'blok4.json', 'blok5.json', 'blok7.json', 'blok8.json', 'blok9.json', 'blok10.json', 'blok11.json', 'blok12.json', 'blok13.json', 'blok14.json', 'blok15.json', 'blok16.json', 'blok17.json', 'blok18.json', 'blok19.json']
 };
 
 let allFeatures = [];
@@ -314,7 +265,6 @@ map.on('load', () => {
         allFeatures.push(...data.features);
         const sourceId = `${group}-${filename}`;
         map.addSource(sourceId, { type: 'geojson', data });
-
         const baseOpacity = group === 'sawahring' ? 0.4 : 0;
         map.addLayer({
           id: `${sourceId}-fill`,
@@ -323,7 +273,9 @@ map.on('load', () => {
           paint: {
             'fill-color': ['get', 'fill'],
             'fill-opacity': [
-              'interpolate', ['linear'], ['zoom'],
+              'interpolate',
+              ['linear'],
+              ['zoom'],
               13, baseOpacity,
               14, baseOpacity,
               15, baseOpacity === 0.4 ? 0.2 : 0.2,
@@ -360,11 +312,15 @@ function highlightFeature(f) {
   });
   document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
   gpsMode = 1; setIconColor();
+
   const center = turf.center(f).geometry.coordinates;
+  const areaMeter = turf.area(f);
+  const areaAcre = (areaMeter / 4046.86).toFixed(2);
+
   map.fitBounds(turf.bbox(f), { padding: 100, maxZoom: 17.4 });
   new maplibregl.Popup({ closeButton: false })
     .setLngLat(center)
-    .setHTML(`<strong>${f.properties.name}</strong>`)
+    .setHTML(`<div style="font-size:13px;"><strong>${f.properties.name}</strong><br><span style="font-weight:normal;">${areaAcre} ekar</span></div>`)
     .addTo(map)
     .getElement().classList.add('popup-no-x');
 }
@@ -387,7 +343,9 @@ map.on('click', e => {
   }
 });
 
-// --- SEARCH feature ---
+// =======================
+// Search
+// =======================
 const input = document.getElementById('searchInput');
 const container = document.getElementById('searchContainer');
 const list = document.getElementById('suggestions');
@@ -414,46 +372,16 @@ document.getElementById('searchBtn').addEventListener('click', () => {
   container.classList.add('active');
   input.focus();
 });
+
 document.getElementById('closeBtn').addEventListener('click', () => {
   container.classList.remove('active');
   input.value = '';
   list.innerHTML = '';
 });
 
-// --- FILTER buttons ---
-const filters = {
-  filterBlok: f => f.properties.group === 'blok',
-  filterBajak: f => f.properties.description?.toLowerCase().includes('bajak'),
-  filterCalit: f => f.properties.description?.toLowerCase().includes('calit'),
-  filterRacun: f => f.properties.description?.toLowerCase().includes('racun')
-};
-
-Object.keys(filters).forEach(id => {
-  document.getElementById(id).addEventListener('click', () => {
-    Object.keys(filters).forEach(k => document.getElementById(k).classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-
-    const q = input.value.trim().toLowerCase();
-    list.innerHTML = '';
-
-    const matched = allFeatures.filter(filters[id]);
-    matched.forEach(f => {
-      const div = document.createElement('div');
-      div.textContent = f.properties.name;
-      div.addEventListener('click', () => {
-        input.value = '';
-        container.classList.remove('active');
-        list.innerHTML = '';
-        highlightFeature(f);
-      });
-      list.appendChild(div);
-    });
-  });
-});
-
 setIconColor();
-</script>
 
+</script>
 
 </body>
 </html>
