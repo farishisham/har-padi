@@ -5,15 +5,15 @@
   <title>Lot Kerja Har Padi Enterprise</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet"/>
-  <link rel="icon" type="image/png" href="favicon.png"/>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
   <style>
-    html, body { margin:0; padding:0; height:100%; background:black; overflow:hidden; }
+    html, body { margin:0; padding:0; height:100%; background:black; }
     #map { width:100%; height:100%; }
+
     #header, #footer {
       position:fixed; width:100%; background:transparent;
       color:white; font-family:Helvetica,sans-serif;
-      text-align:center; z-index:1000; text-shadow:1px 1px 0 black;
+      text-align:center; z-index:1000; text-shadow: 1px 1px 0 black;
     }
     #header { top:0; padding:5px 0; }
     #header h1 { margin:0; font-size:0.9rem; }
@@ -22,19 +22,14 @@
       padding:5px 10px; text-align:left;
       background:transparent;
     }
-    #gpsButton, .filter-btn {
-      position:fixed; width:44px; height:44px;
-      background:#333; border:none; border-radius:50%;
+
+    #gpsButton {
+      position:fixed; bottom:35px; right:15px;
+      width:44px; height:44px; background:#333;
+      border:none; border-radius:50%;
       display:flex; align-items:center; justify-content:center;
       cursor:pointer; z-index:1001;
-      font-family:Helvetica,sans-serif;
-      font-size:12px; color:white;
     }
-    #gpsButton { bottom:35px; right:15px; }
-    #filterBlok { bottom:90px; right:15px; }
-    #filterBajak { bottom:140px; right:15px; }
-    #filterCalit { bottom:190px; right:15px; }
-    #filterRacun { bottom:240px; right:15px; }
     #gpsIconImg { width:20px; height:20px; }
 
     .gps-marker {
@@ -59,22 +54,25 @@
     .popup-no-x .maplibregl-popup-close-button { display:none; }
 
     .search-container {
-      position:absolute; top:44px; right:15px; height:48px; z-index:1003;
+      position:absolute; top:44px; right:15px;
+      height:48px; z-index:1003;
     }
     .search-btn, .close-btn {
-      position:absolute; right:0; width:44px; height:44px;
-      background:#333; border:none; border-radius:50%;
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer; z-index:1002;
+      position:absolute; right:0; z-index:1002;
+      width:44px;height:44px;padding:0;
+      border:none;border-radius:50%;
+      background:#333;display:flex;
+      align-items:center;justify-content:center;
+      cursor:pointer;
     }
-    .search-btn svg, .close-btn svg { width:18px; height:18px; fill:white; }
+    .search-btn svg, .close-btn svg { width:18px;height:18px;fill:white; }
     .search-input {
-      position:absolute; right:0; width:0; opacity:0; height:38px;
-      transform:translateX(2px); top:-2px;
-      padding-left:10px; padding-right:50px;
-      background:white; border:1px solid #ccc;
-      border-radius:30px; transition:all 0.3s ease;
-      font-family:Helvetica,sans-serif;
+      position:absolute; right:0; z-index:1001;
+      width:0; opacity:0; height:38px; top:-2px;
+      transform:translateX(2px); padding-left:10px;
+      padding-right:50px; border-radius:30px;
+      border:1px solid #ccc; background:white;
+      outline:none; transition:all .3s ease;
     }
     .search-container.active .search-input {
       width:200px; opacity:1;
@@ -83,32 +81,67 @@
     .search-container.active .close-btn { display:flex; }
     .close-btn { display:none; }
 
-    #suggestions {
-      position:absolute; top:48px; right:83px; width:190px;
-      max-height:150px; overflow-y:auto;
-      background:white; border-radius:5px;
+    #filterButtons {
+      position:absolute;
+      top:95px; right:15px;
+      display:flex; flex-direction:column;
+      gap:8px;
+      z-index:1003;
+    }
+    .filter-btn {
+      width:44px; height:44px;
+      background:#333; color:white;
+      border:none; border-radius:50%;
       font-family:Helvetica,sans-serif;
-      font-size:13px; box-shadow:0 2px 5px rgba(0,0,0,0.3);
-      z-index:1002;
+      font-size:11px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      transition:0.3s;
+    }
+    .filter-btn.active {
+      color:#00cc66;
+    }
+
+    #suggestions {
+      position: absolute;
+      top: 48px;
+      right: 83px;
+      width: 190px;
+      max-height: 150px;
+      overflow-y: auto;
+      background: white;
+      border-radius: 5px;
+      font-family: Helvetica, sans-serif;
+      font-size: 13px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      z-index: 1002;
     }
     #suggestions div {
-      padding:5px 10px; cursor:pointer;
+      padding: 5px 10px;
+      cursor: pointer;
     }
     #suggestions div:hover {
-      background:#eee;
+      background: #eee;
     }
 
     #gpsMessage {
-      position:fixed; bottom:70px; left:50%;
-      transform:translateX(-50%);
-      background:#333; color:white;
-      padding:8px 15px; border-radius:6px;
-      font-family:Helvetica,sans-serif;
-      font-size:13px; z-index:9999; display:none;
+      position: fixed;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 6px;
+      font-family: Helvetica, sans-serif;
+      font-size: 13px;
+      z-index: 9999;
+      display: none;
     }
   </style>
 </head>
-
 <body>
 
 <div id="header">
@@ -122,13 +155,10 @@
 <div id="gpsMessage">Anda berada di luar kawasan..</div>
 
 <button id="gpsButton" title="Toggle GPS Mode">
-  <img id="gpsIconImg" src="https://www.svgrepo.com/download/421169/gps-navigation-position.svg" alt="GPS"/>
+  <img id="gpsIconImg"
+       src="https://www.svgrepo.com/download/421169/gps-navigation-position.svg"
+       alt="GPS"/>
 </button>
-
-<button id="filterBlok" class="filter-btn">Blok?</button>
-<button id="filterBajak" class="filter-btn">Bajak</button>
-<button id="filterCalit" class="filter-btn">Calit</button>
-<button id="filterRacun" class="filter-btn">Racun</button>
 
 <div class="search-container" id="searchContainer">
   <input type="text" class="search-input" id="searchInput" placeholder="Cari...">
@@ -139,6 +169,13 @@
   <button class="close-btn" id="closeBtn" title="Tutup">
     <svg viewBox="0 0 24 24"><path d="M18.364 5.636a1 1 0 00-1.414 0L12 10.586 7.05 5.636a1 1 0 00-1.414 1.414L10.586 12l-4.95 4.95a1 1 0 101.414 1.414L12 13.414l4.95 4.95a1 1 0 001.414-1.414L13.414 12l4.95-4.95a1 1 0 000-1.414z"/></svg>
   </button>
+</div>
+
+<div id="filterButtons">
+  <button class="filter-btn" id="filterBlok">Blok?</button>
+  <button class="filter-btn" id="filterBajak">Bajak</button>
+  <button class="filter-btn" id="filterCalit">Calit</button>
+  <button class="filter-btn" id="filterRacun">Racun</button>
 </div>
 
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
@@ -168,16 +205,13 @@ const map = new maplibregl.Map({
   maxZoom: 17.4
 });
 
-// Set limited bounds
 map.setMaxBounds([[102.66830, 2.21776], [102.69816, 2.25551]]);
+
 const boundsPolygon = turf.bboxPolygon([102.66830, 2.21776, 102.69816, 2.25551]);
 
-let gpsMode = 1, watchId = null, marker = null, lastHeading = null;
+let gpsMode = 1, watchId = null, marker = null;
 const iconImg = document.getElementById('gpsIconImg');
 const gpsMsg = document.getElementById('gpsMessage');
-let activeFilter = null;
-let currentHighlight = null;
-let allFeatures = [];
 
 function showGPSMessage() {
   gpsMsg.style.display = 'block';
@@ -204,8 +238,7 @@ function createMarker(lng, lat) {
 }
 
 function updateMarker(lng, lat) {
-  if (!marker) createMarker(lng, lat);
-  else marker.setLngLat([lng, lat]);
+  marker ? marker.setLngLat([lng, lat]) : createMarker(lng, lat);
   if (gpsMode === 3) map.setCenter([lng, lat]);
 }
 
@@ -261,17 +294,14 @@ map.on('dragstart', () => {
   }
 });
 
-// Groups and layers
+// --- Load polygon sources ---
 const groups = {
   sawahring: 'sawahring.json',
-  blok: [
-    'blok1.json', 'blok2.json', 'blok3.json', 'blok4.json', 'blok5.json', 'blok7.json', 'blok8.json', 
-    'blok9.json', 'blok10.json', 'blok11.json', 'blok12.json', 'blok13.json', 'blok14.json', 
-    'blok15.json', 'blok16.json', 'blok17.json', 'blok18.json', 'blok19.json'
-  ]
+  blok: ['blok1.json', 'blok5.json']
 };
 
-// Load layers
+let allFeatures = [];
+
 map.on('load', () => {
   map.dragPan.enable();
   map.scrollZoom.enable();
@@ -284,14 +314,16 @@ map.on('load', () => {
         allFeatures.push(...data.features);
         const sourceId = `${group}-${filename}`;
         map.addSource(sourceId, { type: 'geojson', data });
+
         const baseOpacity = group === 'sawahring' ? 0.4 : 0;
         map.addLayer({
-          id: `${sourceId}-fill`, type: 'fill', source: sourceId,
+          id: `${sourceId}-fill`,
+          type: 'fill',
+          source: sourceId,
           paint: {
             'fill-color': ['get', 'fill'],
             'fill-opacity': [
-              'interpolate',
-              ['linear'], ['zoom'],
+              'interpolate', ['linear'], ['zoom'],
               13, baseOpacity,
               14, baseOpacity,
               15, baseOpacity === 0.4 ? 0.2 : 0.2,
@@ -320,25 +352,42 @@ map.on('load', () => {
 
 function highlightFeature(f) {
   Object.entries(groups).forEach(([group, files]) => {
-    (Array.isArray(files) ? files : [files]).forEach(file => {
-      const id = `${group}-${file}`;
+    (Array.isArray(files) ? files : [files]).forEach(filename => {
+      const id = `${group}-${filename}`;
       const filter = f.properties._id.startsWith(id) ? ['==', '_id', f.properties._id] : ['==', '_id', ''];
       map.setFilter(`${id}-highlight`, filter);
     });
   });
   document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
-  gpsMode = 1;
-  setIconColor();
+  gpsMode = 1; setIconColor();
   const center = turf.center(f).geometry.coordinates;
   map.fitBounds(turf.bbox(f), { padding: 100, maxZoom: 17.4 });
   new maplibregl.Popup({ closeButton: false })
     .setLngLat(center)
-    .setHTML(`<strong>${f.properties.name}</strong><br><small>${f.properties.area} ekar</small>`)
+    .setHTML(`<strong>${f.properties.name}</strong>`)
     .addTo(map)
     .getElement().classList.add('popup-no-x');
 }
 
-// Search box
+map.on('click', e => {
+  const allLayers = [];
+  Object.entries(groups).forEach(([g, files]) => {
+    (Array.isArray(files) ? files : [files]).forEach(f => {
+      allLayers.push(`${g}-${f}-fill`);
+    });
+  });
+  const f = map.queryRenderedFeatures(e.point, { layers: allLayers })[0];
+  if (!f) {
+    Object.entries(groups).forEach(([g, files]) => {
+      (Array.isArray(files) ? files : [files]).forEach(f => {
+        map.setFilter(`${g}-${f}-highlight`, ['==', '_id', '']);
+      });
+    });
+    document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
+  }
+});
+
+// --- SEARCH feature ---
 const input = document.getElementById('searchInput');
 const container = document.getElementById('searchContainer');
 const list = document.getElementById('suggestions');
@@ -370,151 +419,39 @@ document.getElementById('closeBtn').addEventListener('click', () => {
   input.value = '';
   list.innerHTML = '';
 });
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('#searchContainer')) {
-    container.classList.remove('active');
-    input.value = '';
+
+// --- FILTER buttons ---
+const filters = {
+  filterBlok: f => f.properties.group === 'blok',
+  filterBajak: f => f.properties.description?.toLowerCase().includes('bajak'),
+  filterCalit: f => f.properties.description?.toLowerCase().includes('calit'),
+  filterRacun: f => f.properties.description?.toLowerCase().includes('racun')
+};
+
+Object.keys(filters).forEach(id => {
+  document.getElementById(id).addEventListener('click', () => {
+    Object.keys(filters).forEach(k => document.getElementById(k).classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+
+    const q = input.value.trim().toLowerCase();
     list.innerHTML = '';
-  }
-});
 
-// Filter buttons
-const blokBtn = document.getElementById('filterBlok');
-const bajakBtn = document.getElementById('filterBajak');
-const calitBtn = document.getElementById('filterCalit');
-const racunBtn = document.getElementById('filterRacun');
-
-// To be continued with full filter behavior next...
-
-// Filter states
-let activeTextFilter = null;
-let selectedBlok = null;
-
-// Filter Buttons
-const blokBtn = document.getElementById('filterBlok');
-const bajakBtn = document.getElementById('filterBajak');
-const calitBtn = document.getElementById('filterCalit');
-const racunBtn = document.getElementById('filterRacun');
-
-function resetTextFilter() {
-  activeTextFilter = null;
-  bajakBtn.style.color = 'white';
-  calitBtn.style.color = 'white';
-  racunBtn.style.color = 'white';
-  applyFilters();
-}
-
-function applyFilters() {
-  allFeatures.forEach(f => {
-    const sourceId = f.properties._id.split('-').slice(0,2).join('-');
-    const visible = (() => {
-      if (selectedBlok && !f.properties._id.includes(selectedBlok)) return false;
-      if (activeTextFilter) {
-        return (f.properties.description || '').toLowerCase().includes(activeTextFilter);
-      }
-      return true;
-    })();
-    map.setLayoutProperty(`${sourceId}-fill`, 'visibility', visible ? 'visible' : 'none');
-    map.setLayoutProperty(`${sourceId}-line`, 'visibility', visible ? 'visible' : 'none');
-  });
-}
-
-// Blok button
-blokBtn.addEventListener('click', () => {
-  if (selectedBlok) {
-    selectedBlok = null;
-    blokBtn.innerHTML = 'Blok?';
-    applyFilters();
-    return;
-  }
-
-  // Open dropdown
-  const dropdown = document.createElement('div');
-  dropdown.style.position = 'absolute';
-  dropdown.style.top = '100%';
-  dropdown.style.right = '0';
-  dropdown.style.background = 'white';
-  dropdown.style.color = 'black';
-  dropdown.style.borderRadius = '6px';
-  dropdown.style.fontFamily = 'Helvetica, sans-serif';
-  dropdown.style.fontSize = '13px';
-  dropdown.style.padding = '5px';
-  dropdown.style.zIndex = 1003;
-  dropdown.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
-  dropdown.style.maxHeight = '150px';
-  dropdown.style.overflowY = 'auto';
-
-  // List available bloks
-  const bloks = [...new Set(allFeatures
-    .filter(f => f.properties._id.includes('blok-'))
-    .map(f => f.properties._id.split('-')[1])
-  )];
-
-  bloks.forEach(b => {
-    const div = document.createElement('div');
-    div.textContent = b.replace('.json', '').toUpperCase();
-    div.style.padding = '5px 10px';
-    div.style.cursor = 'pointer';
-    div.addEventListener('click', () => {
-      selectedBlok = b;
-      blokBtn.innerHTML = b.replace('.json', '').toUpperCase();
-      applyFilters();
-      dropdown.remove();
+    const matched = allFeatures.filter(filters[id]);
+    matched.forEach(f => {
+      const div = document.createElement('div');
+      div.textContent = f.properties.name;
+      div.addEventListener('click', () => {
+        input.value = '';
+        container.classList.remove('active');
+        list.innerHTML = '';
+        highlightFeature(f);
+      });
+      list.appendChild(div);
     });
-    div.addEventListener('mouseover', () => div.style.background = '#eee');
-    div.addEventListener('mouseout', () => div.style.background = 'white');
-    dropdown.appendChild(div);
   });
-
-  blokBtn.appendChild(dropdown);
-
-  // Close dropdown if click outside
-  setTimeout(() => {
-    document.addEventListener('click', function clickOutside(e) {
-      if (!blokBtn.contains(e.target)) {
-        dropdown.remove();
-        document.removeEventListener('click', clickOutside);
-      }
-    });
-  }, 10);
 });
 
-// Text filters
-bajakBtn.addEventListener('click', () => {
-  if (activeTextFilter === 'bajak') {
-    resetTextFilter();
-  } else {
-    activeTextFilter = 'bajak';
-    bajakBtn.style.color = 'lime';
-    calitBtn.style.color = 'white';
-    racunBtn.style.color = 'white';
-    applyFilters();
-  }
-});
-
-calitBtn.addEventListener('click', () => {
-  if (activeTextFilter === 'calit') {
-    resetTextFilter();
-  } else {
-    activeTextFilter = 'calit';
-    calitBtn.style.color = 'lime';
-    bajakBtn.style.color = 'white';
-    racunBtn.style.color = 'white';
-    applyFilters();
-  }
-});
-
-racunBtn.addEventListener('click', () => {
-  if (activeTextFilter === 'racun') {
-    resetTextFilter();
-  } else {
-    activeTextFilter = 'racun';
-    racunBtn.style.color = 'lime';
-    bajakBtn.style.color = 'white';
-    calitBtn.style.color = 'white';
-    applyFilters();
-  }
-});
+setIconColor();
 </script>
 
 
