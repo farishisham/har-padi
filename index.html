@@ -392,7 +392,16 @@ async function loadGroup(group, files) {
   }
 }
 
-
+function clearAllFilters() {
+  Object.entries(groups).forEach(([group, files]) => {
+    (Array.isArray(files) ? files : [files]).forEach(filename => {
+      const id = `${group}-${filename}`;
+      if (map.getLayer(`${id}-fill`)) {
+        map.setFilter(`${id}-fill`, null);
+      }
+    });
+  });
+}
 
 function highlightFeature(f) {
   Object.entries(groups).forEach(([group, files]) => {
@@ -519,27 +528,68 @@ filterContainer.appendChild(racunBtn);
 // New added part: set filter logic
 let activeFilter = null;
 
-[bajakBtn, calitBtn, racunBtn].forEach(btn => {
-  btn.addEventListener('click', () => {
-    const type = btn.textContent.toLowerCase();
+bajakBtn.addEventListener('click', () => {
+  if (activeWordFilter === 'bajak') {
+    activeWordFilter = null;
+    clearAllFilters();
+    bajakBtn.style.color = 'white';
+  } else {
+    applyWordFilter('bajak');
+    bajakBtn.style.color = 'limegreen';
+    calitBtn.style.color = 'white';
+    racunBtn.style.color = 'white';
+  }
+});
 
-    if (activeFilter === type) {
-      // Turn off
-      activeFilter = null;
-    } else {
-      // Turn on new filter
-      activeFilter = type;
+calitBtn.addEventListener('click', () => {
+  if (activeWordFilter === 'calit') {
+    activeWordFilter = null;
+    clearAllFilters();
+    calitBtn.style.color = 'white';
+  } else {
+    applyWordFilter('calit');
+    calitBtn.style.color = 'limegreen';
+    bajakBtn.style.color = 'white';
+    racunBtn.style.color = 'white';
+  }
+});
+
+racunBtn.addEventListener('click', () => {
+  if (activeWordFilter === 'racun') {
+    activeWordFilter = null;
+    clearAllFilters();
+    racunBtn.style.color = 'white';
+  } else {
+    applyWordFilter('racun');
+    racunBtn.style.color = 'limegreen';
+    bajakBtn.style.color = 'white';
+    calitBtn.style.color = 'white';
+  }
+});
+
+function applyWordFilter(word) {
+  resetAllFilterButtons();
+  clearAllHighlights();
+
+  activeWordFilter = word;
+
+  allFeatures.forEach(f => {
+    const descObj = f.properties.description;
+    let descText = '';
+
+    if (descObj && typeof descObj === 'object' && descObj.value) {
+      descText = descObj.value.toLowerCase();
+    } else if (typeof descObj === 'string') {
+      descText = descObj.toLowerCase();
     }
 
-    // Update button color
-    [bajakBtn, calitBtn, racunBtn].forEach(b => {
-      b.style.color = (b.textContent.toLowerCase() === activeFilter) ? 'limegreen' : 'white';
-    });
-
-    // Apply the actual polygon filter
-    updateVisibility();
+    if (descText.includes(word.toLowerCase())) {
+      map.setFilter(`${f.properties._id.split('-')[0]}-${f.properties._id.split('-')[1]}-fill`, ['==', '_id', f.properties._id]);
+    } else {
+      map.setFilter(`${f.properties._id.split('-')[0]}-${f.properties._id.split('-')[1]}-fill`, ['==', '_id', '']);
+    }
   });
-});
+}
 
 // helper function to update visibility
 function updateVisibility() {
