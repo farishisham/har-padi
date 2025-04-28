@@ -328,9 +328,20 @@ async function loadGroup(group, files) {
     const data = await response.json();
     const sourceId = `${group}-${filename}`;
 
-    data.features.forEach(f => {
+    data.features.forEach((f, i) => {
   f.properties._id = `${group}-${filename}-${i}`;
   
+  if (f.properties.description && typeof f.properties.description === 'object') {
+    const val = f.properties.description.value || '';
+    f.properties.description_clean = val
+      .replace(/<[^>]*>/g, '') // remove HTML tags
+      .toLowerCase()
+      .trim();
+  } else if (typeof f.properties.description === 'string') {
+    f.properties.description_clean = f.properties.description.toLowerCase().trim();
+  } else {
+    f.properties.description_clean = '';
+  }
 });
 
     map.addSource(sourceId, { type: 'geojson', data });
