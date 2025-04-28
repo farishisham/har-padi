@@ -570,13 +570,18 @@ function applyWordFilter(word) {
   activeWordFilter = word;
 
   allFeatures.forEach(f => {
-    if (f.properties.description?.toLowerCase().includes(word.toLowerCase())) {
+    let desc = "";
+    if (typeof f.properties.description === 'object' && f.properties.description.value) {
+      desc = f.properties.description.value.toLowerCase();
+    } else if (typeof f.properties.description === 'string') {
+      desc = f.properties.description.toLowerCase();
+    }
+
+    if (desc.includes(word)) {
       highlightFeature(f);
     }
   });
 }
-
-
 
 bajakBtn.addEventListener('click', () => {
   if (bajakBtn.style.color === 'limegreen') {
