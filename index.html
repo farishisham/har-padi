@@ -633,7 +633,25 @@ function updateVisibility() {
   });
 }
 
+function toggleFilter(type) {
+  if (activeFilter === type) {
+    activeFilter = null;
+    setButtonColor();
+    resetPolygonFilter();
+    return;
+  }
 
+  activeFilter = type;
+  setButtonColor();
+  allFeatures.forEach(f => {
+    const desc = f.properties.description ? f.properties.description.toLowerCase() : '';
+    const show = (type === 'bajak' && desc.includes('bajak')) ||
+                 (type === 'calit' && desc.includes('calit')) ||
+                 (type === 'racun' && desc.includes('racun'));
+    f.properties._visible = show;
+  });
+  updateVisiblePolygons();
+}
 
 bajakBtn.addEventListener('click', () => {
   if (bajakBtn.style.color === 'limegreen') {
