@@ -547,35 +547,6 @@ let currentFilter = null;
   });
 });
 
-// --- Blok Filter (Dropdown) ---
-//const blokDropdown = document.createElement('select');
-//blokDropdown.style.position = 'absolute';
-//blokDropdown.style.top = '150px';
-//blokDropdown.style.right = '70px';
-//blokDropdown.style.width = '120px';
-//blokDropdown.style.borderRadius = '5px';
-//blokDropdown.style.border = '1px solid #ccc';
-//blokDropdown.style.padding = '5px';
-//blokDropdown.style.fontFamily = 'Helvetica, sans-serif';
-//blokDropdown.style.fontSize = '12px';
-//blokDropdown.style.display = 'none';
-//blokDropdown.style.zIndex = 1005;
-//document.body.appendChild(blokDropdown);
-
-//function updateBlokDropdown() {
-//  blokDropdown.innerHTML = '';
-//  const uniqueBlokNames = new Set();
-//  allFeatures.forEach(f => {
-//   if (f.properties.group === 'blok') uniqueBlokNames.add(f.properties.name);
-//  });
-//  Array.from(uniqueBlokNames).sort().forEach(name => {
-//    const opt = document.createElement('option');
-//   opt.value = name;
-//    opt.textContent = name;
-//    blokDropdown.appendChild(opt);
-// });
-//}
-
 // --- Filter Logic ---
 function clearAllHighlights() {
   Object.entries(groups).forEach(([g, files]) => {
@@ -662,26 +633,7 @@ function updateVisibility() {
   });
 }
 
-// --- Button Event Handlers ---
-//blokBtn.addEventListener('click', () => {
-//  if (blokDropdown.style.display === 'none') {
-//    updateBlokDropdown();
-//    blokDropdown.style.display = 'block';
-//  } else {
-//    blokDropdown.style.display = 'none';
-//    clearAllHighlights();
-//  }
-//});
 
-//blokDropdown.addEventListener('change', () => {
-//  const selected = blokDropdown.value;
-//  clearAllHighlights();
-// allFeatures.forEach(f => {
-//    if (f.properties.name === selected) {
-//      highlightFeature(f);
-//    }
-//  });
-//});
 
 bajakBtn.addEventListener('click', () => {
   if (bajakBtn.style.color === 'limegreen') {
@@ -716,6 +668,8 @@ racunBtn.addEventListener('click', () => {
   }
 });
 setIconColor();
+
+
 </script>
 </body>
 </html>
