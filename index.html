@@ -305,8 +305,46 @@ const groups = {
 };
 
 let allFeatures = [];
-//let activeBlokFilter = null;
+
 let activeWordFilter = null;
+
+let activeFilter = null;
+
+[bajakBtn, calitBtn, racunBtn].forEach(btn => {
+  btn.addEventListener('click', () => {
+    const type = btn.textContent.toLowerCase(); // bajak, calit, racun
+
+    if (activeFilter === type) {
+      // If already active, deactivate
+      activeFilter = null;
+    } else {
+      // Otherwise activate this filter
+      activeFilter = type;
+    }
+
+    // Update button colors
+    [bajakBtn, calitBtn, racunBtn].forEach(b => {
+      b.style.color = (b.textContent.toLowerCase() === activeFilter) ? 'limegreen' : 'white';
+    });
+
+    // Clear highlights first
+    clearAllHighlights();
+
+    if (activeFilter) {
+      allFeatures.forEach(f => {
+        let desc = "";
+        if (typeof f.properties.description === 'object' && f.properties.description.value) {
+          desc = f.properties.description.value.toLowerCase();
+        } else if (typeof f.properties.description === 'string') {
+          desc = f.properties.description.toLowerCase();
+        }
+        if (desc.includes(activeFilter)) {
+          highlightFeature(f);
+        }
+      });
+    }
+  });
+});
 
 map.on('load', async ()=> {
   map.dragPan.enable();
