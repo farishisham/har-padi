@@ -331,17 +331,6 @@ async function loadGroup(group, files) {
     data.features.forEach(f => {
   f.properties._id = `${group}-${filename}-${i}`;
   
-  if (f.properties.description && typeof f.properties.description === 'object') {
-    const val = f.properties.description.value || '';
-    f.properties.description_clean = val
-      .replace(/<[^>]*>/g, '') // remove HTML tags
-      .toLowerCase()
-      .trim();
-  } else if (typeof f.properties.description === 'string') {
-    f.properties.description_clean = f.properties.description.toLowerCase().trim();
-  } else {
-    f.properties.description_clean = '';
-  }
 });
 
     map.addSource(sourceId, { type: 'geojson', data });
@@ -547,14 +536,26 @@ function updateVisibility() {
     (Array.isArray(files) ? files : [files]).forEach(filename => {
       const id = `${group}-${filename}-fill`;
       if (map.getLayer(id)) {
-        map.setFilter(id, currentFilter ? 
-          [
-            "match",
-            ["get", "description_clean"],
-            [currentFilter], true,
-            false
-          ] 
-          : null);
+        if (activeFilter) {
+          map.setFilter(id, [
+            "all",
+            ["has", "description"],
+            ["match",
+              ["downcase",
+                ["case",
+                  ["==", ["typeof", ["get", "description"]], "object"],
+                  ["get", "value", ["get", "description"]],
+                  ["get", "description"]
+                ]
+              ],
+              [activeFilter],
+              true,
+              false
+            ]
+          ]);
+        } else {
+          map.setFilter(id, null);
+        }
       }
     });
   });
