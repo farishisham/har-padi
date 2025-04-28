@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="utf-8" />
   <title>Lot Kerja Har Padi Enterprise</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
   <style>
     html, body { margin:0; padding:0; height:100%; background:black; }
@@ -81,29 +82,6 @@
     .search-container.active .close-btn { display:flex; }
     .close-btn { display:none; }
 
-    #filterButtons {
-      position:absolute;
-      top:95px; right:15px;
-      display:flex; flex-direction:column;
-      gap:8px;
-      z-index:1003;
-    }
-    .filter-btn {
-      width:44px; height:44px;
-      background:#333; color:white;
-      border:none; border-radius:50%;
-      font-family:Helvetica,sans-serif;
-      font-size:11px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      transition:0.3s;
-    }
-    .filter-btn.active {
-      color:#00cc66;
-    }
-
     #suggestions {
       position: absolute;
       top: 48px;
@@ -171,16 +149,8 @@
   </button>
 </div>
 
-<div id="filterButtons">
-  <button class="filter-btn" id="filterBlok">Blok?</button>
-  <button class="filter-btn" id="filterBajak">Bajak</button>
-  <button class="filter-btn" id="filterCalit">Calit</button>
-  <button class="filter-btn" id="filterRacun">Racun</button>
-</div>
-
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
-
 <script>
 const map = new maplibregl.Map({
   container: 'map',
@@ -189,7 +159,9 @@ const map = new maplibregl.Map({
     sources: {
       'esri-satellite': {
         type: 'raster',
-        tiles: ['https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+        tiles: [
+          'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+        ],
         tileSize: 256
       }
     },
@@ -205,19 +177,16 @@ const map = new maplibregl.Map({
   maxZoom: 17.4
 });
 
+// Limit map bounds
 map.setMaxBounds([[102.66830, 2.21776], [102.69816, 2.25551]]);
-
 const boundsPolygon = turf.bboxPolygon([102.66830, 2.21776, 102.69816, 2.25551]);
 
+// GPS and Marker
 let gpsMode = 1, watchId = null, marker = null;
 const iconImg = document.getElementById('gpsIconImg');
 const gpsMsg = document.getElementById('gpsMessage');
 
-function showGPSMessage() {
-  gpsMsg.style.display = 'block';
-  setTimeout(() => gpsMsg.style.display = 'none', 3000);
-}
-
+// FUNCTIONS
 function setIconColor() {
   iconImg.style.filter =
     gpsMode === 1 ? 'invert(100%)' :
@@ -225,51 +194,59 @@ function setIconColor() {
                     'invert(45%) sepia(100%) saturate(3000%) hue-rotate(5deg)';
 }
 
+function showGPSMessage() {
+  gpsMsg.style.display = 'block';
+  setTimeout(() => gpsMsg.style.display = 'none', 3000);
+}
+
 function createMarker(lng, lat) {
   const el = document.createElement('div');
   el.className = 'gps-marker';
-  const tri = document.createElement('div');
-  tri.className = 'triangle';
-  const cir = document.createElement('div');
-  cir.className = 'circle';
-  el.appendChild(tri);
-  el.appendChild(cir);
+  el.innerHTML = '<div class="triangle"></div><div class="circle"></div>';
   marker = new maplibregl.Marker(el).setLngLat([lng, lat]).addTo(map);
 }
 
 function updateMarker(lng, lat) {
-  marker ? marker.setLngLat([lng, lat]) : createMarker(lng, lat);
+  if (marker) {
+    marker.setLngLat([lng, lat]);
+  } else {
+    createMarker(lng, lat);
+  }
   if (gpsMode === 3) map.setCenter([lng, lat]);
+}
+
+function rotateMap(event) {
+  if (gpsMode !== 3) return;
+  const heading = event.webkitCompassHeading ?? (360 - event.alpha);
+  if (heading !== null && !isNaN(heading)) {
+    map.rotateTo(heading, { duration: 100 });
+  }
 }
 
 function handleOrientation() {
   if (DeviceOrientationEvent.requestPermission) {
-    DeviceOrientationEvent.requestPermission().then(r => {
-      if (r === 'granted') window.addEventListener('deviceorientation', rotateMap, true);
+    DeviceOrientationEvent.requestPermission().then(granted => {
+      if (granted === 'granted') window.addEventListener('deviceorientation', rotateMap, true);
     });
   } else {
     window.addEventListener('deviceorientation', rotateMap, true);
   }
 }
 
-function rotateMap(e) {
-  if (gpsMode !== 3) return;
-  const hd = e.webkitCompassHeading ?? (360 - e.alpha);
-  if (hd && !isNaN(hd)) map.rotateTo(hd, { duration: 100 });
-}
-
+// GPS Button Click
 document.getElementById('gpsButton').addEventListener('click', () => {
   gpsMode = (gpsMode % 3) + 1;
   setIconColor();
   if (watchId) navigator.geolocation.clearWatch(watchId);
   watchId = null;
   window.removeEventListener('deviceorientation', rotateMap);
+
   if (gpsMode === 1) return;
 
   watchId = navigator.geolocation.watchPosition(pos => {
     const [lng, lat] = [pos.coords.longitude, pos.coords.latitude];
-    const pt = turf.point([lng, lat]);
-    if (!turf.booleanPointInPolygon(pt, boundsPolygon)) {
+    const point = turf.point([lng, lat]);
+    if (!turf.booleanPointInPolygon(point, boundsPolygon)) {
       gpsMode = 1;
       setIconColor();
       showGPSMessage();
@@ -284,6 +261,7 @@ document.getElementById('gpsButton').addEventListener('click', () => {
   if (gpsMode === 3) handleOrientation();
 });
 
+// Cancel GPS mode when user interacts
 map.on('dragstart', () => {
   if (gpsMode !== 1) {
     gpsMode = 1;
@@ -293,26 +271,40 @@ map.on('dragstart', () => {
     window.removeEventListener('deviceorientation', rotateMap);
   }
 });
+map.on('touchstart', () => {
+  if (gpsMode !== 1) {
+    gpsMode = 1;
+    setIconColor();
+    if (watchId) navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+    window.removeEventListener('deviceorientation', rotateMap);
+  }
+});
 
-// --- Load polygon sources ---
+// --- POLYGONS ---
+
 const groups = {
   sawahring: 'sawahring.json',
-  blok: ['blok1.json', 'blok5.json']
+  blok: [
+    'blok1.json', 'blok2.json', 'blok3.json', 'blok4.json',
+    'blok5.json', 'blok7.json', 'blok8.json', 'blok9.json', 'blok10.json',
+    'blok11.json', 'blok12.json', 'blok13.json', 'blok14.json', 'blok15.json',
+    'blok16.json', 'blok17.json', 'blok18.json', 'blok19.json'
+  ]
 };
 
 let allFeatures = [];
+let activeBlokFilter = null;
+let activeWordFilter = null;
 
 map.on('load', () => {
-  map.dragPan.enable();
-  map.scrollZoom.enable();
-  map.touchZoomRotate.enable();
-
   Object.entries(groups).forEach(([group, files]) => {
-    (Array.isArray(files) ? files : [files]).forEach(filename => {
-      fetch(filename).then(r => r.json()).then(data => {
-        data.features.forEach((f, i) => f.properties._id = `${group}-${filename}-${i}`);
+    (Array.isArray(files) ? files : [files]).forEach(file => {
+      fetch(file).then(r => r.json()).then(data => {
+        data.features.forEach((f, i) => f.properties._id = `${group}-${file}-${i}`);
         allFeatures.push(...data.features);
-        const sourceId = `${group}-${filename}`;
+
+        const sourceId = `${group}-${file}`;
         map.addSource(sourceId, { type: 'geojson', data });
 
         const baseOpacity = group === 'sawahring' ? 0.4 : 0;
@@ -331,19 +323,24 @@ map.on('load', () => {
             ]
           }
         });
+
         map.addLayer({
-          id: `${sourceId}-line`, type: 'line', source: sourceId,
+          id: `${sourceId}-line`,
+          type: 'line',
+          source: sourceId,
           paint: { 'line-color': '#004d26', 'line-width': 2 }
         });
+
         map.addLayer({
-          id: `${sourceId}-highlight`, type: 'line', source: sourceId,
+          id: `${sourceId}-highlight`,
+          type: 'line',
+          source: sourceId,
           paint: { 'line-color': '#ffcc00', 'line-width': 4 },
           filter: ['==', '_id', '']
         });
 
         map.on('click', `${sourceId}-fill`, e => {
-          const f = e.features[0];
-          highlightFeature(f);
+          highlightFeature(e.features[0]);
         });
       });
     });
@@ -352,23 +349,27 @@ map.on('load', () => {
 
 function highlightFeature(f) {
   Object.entries(groups).forEach(([group, files]) => {
-    (Array.isArray(files) ? files : [files]).forEach(filename => {
-      const id = `${group}-${filename}`;
+    (Array.isArray(files) ? files : [files]).forEach(file => {
+      const id = `${group}-${file}`;
       const filter = f.properties._id.startsWith(id) ? ['==', '_id', f.properties._id] : ['==', '_id', ''];
       map.setFilter(`${id}-highlight`, filter);
     });
   });
   document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
-  gpsMode = 1; setIconColor();
+  gpsMode = 1;
+  setIconColor();
+  
   const center = turf.center(f).geometry.coordinates;
-  map.fitBounds(turf.bbox(f), { padding: 100, maxZoom: 17.4 });
+  map.fitBounds(turf.bbox(f), { padding: 100, maxZoom: 17.4, bearing: map.getBearing() });
+
   new maplibregl.Popup({ closeButton: false })
     .setLngLat(center)
-    .setHTML(`<strong>${f.properties.name}</strong>`)
+    .setHTML(`<strong>${f.properties.name}</strong><br>${(turf.area(f)/4046.86).toFixed(2)} ekar`)
     .addTo(map)
     .getElement().classList.add('popup-no-x');
 }
 
+// Clear highlight when clicking empty area
 map.on('click', e => {
   const allLayers = [];
   Object.entries(groups).forEach(([g, files]) => {
@@ -379,22 +380,22 @@ map.on('click', e => {
   const f = map.queryRenderedFeatures(e.point, { layers: allLayers })[0];
   if (!f) {
     Object.entries(groups).forEach(([g, files]) => {
-      (Array.isArray(files) ? files : [files]).forEach(f => {
-        map.setFilter(`${g}-${f}-highlight`, ['==', '_id', '']);
+      (Array.isArray(files) ? files : [files]).forEach(file => {
+        map.setFilter(`${g}-${file}-highlight`, ['==', '_id', '']);
       });
     });
     document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
   }
 });
 
-// --- SEARCH feature ---
+// --- SEARCH ---
 const input = document.getElementById('searchInput');
 const container = document.getElementById('searchContainer');
-const list = document.getElementById('suggestions');
+const suggestions = document.getElementById('suggestions');
 
 input.addEventListener('input', () => {
   const q = input.value.trim().toLowerCase();
-  list.innerHTML = '';
+  suggestions.innerHTML = '';
   if (!q) return;
   const matches = allFeatures.filter(f => f.properties.name?.toLowerCase().includes(q));
   matches.forEach(f => {
@@ -403,10 +404,10 @@ input.addEventListener('input', () => {
     div.addEventListener('click', () => {
       input.value = '';
       container.classList.remove('active');
-      list.innerHTML = '';
+      suggestions.innerHTML = '';
       highlightFeature(f);
     });
-    list.appendChild(div);
+    suggestions.appendChild(div);
   });
 });
 
@@ -414,46 +415,174 @@ document.getElementById('searchBtn').addEventListener('click', () => {
   container.classList.add('active');
   input.focus();
 });
+
 document.getElementById('closeBtn').addEventListener('click', () => {
   container.classList.remove('active');
   input.value = '';
-  list.innerHTML = '';
+  suggestions.innerHTML = '';
 });
 
-// --- FILTER buttons ---
-const filters = {
-  filterBlok: f => f.properties.group === 'blok',
-  filterBajak: f => f.properties.description?.toLowerCase().includes('bajak'),
-  filterCalit: f => f.properties.description?.toLowerCase().includes('calit'),
-  filterRacun: f => f.properties.description?.toLowerCase().includes('racun')
-};
+// Close search when tapping outside
+map.getCanvas().addEventListener('click', () => {
+  container.classList.remove('active');
+  input.value = '';
+  suggestions.innerHTML = '';
+});
 
-Object.keys(filters).forEach(id => {
-  document.getElementById(id).addEventListener('click', () => {
-    Object.keys(filters).forEach(k => document.getElementById(k).classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+// --- FILTER BUTTONS ---
+// Setup filter buttons
+const filterContainer = document.createElement('div');
+filterContainer.style.position = 'absolute';
+filterContainer.style.top = '100px';
+filterContainer.style.right = '15px';
+filterContainer.style.display = 'flex';
+filterContainer.style.flexDirection = 'column';
+filterContainer.style.gap = '8px';
+filterContainer.style.zIndex = 1004;
+document.body.appendChild(filterContainer);
 
-    const q = input.value.trim().toLowerCase();
-    list.innerHTML = '';
+function createFilterButton(label, id) {
+  const btn = document.createElement('button');
+  btn.textContent = label;
+  btn.id = id;
+  btn.style.width = '44px';
+  btn.style.height = '44px';
+  btn.style.borderRadius = '50%';
+  btn.style.border = 'none';
+  btn.style.background = '#333';
+  btn.style.color = 'white';
+  btn.style.fontSize = '11px';
+  btn.style.cursor = 'pointer';
+  btn.style.display = 'flex';
+  btn.style.alignItems = 'center';
+  btn.style.justifyContent = 'center';
+  btn.style.userSelect = 'none';
+  return btn;
+}
 
-    const matched = allFeatures.filter(filters[id]);
-    matched.forEach(f => {
-      const div = document.createElement('div');
-      div.textContent = f.properties.name;
-      div.addEventListener('click', () => {
-        input.value = '';
-        container.classList.remove('active');
-        list.innerHTML = '';
-        highlightFeature(f);
-      });
-      list.appendChild(div);
+const blokBtn = createFilterButton('Blok?', 'blokFilter');
+const bajakBtn = createFilterButton('Bajak', 'bajakFilter');
+const calitBtn = createFilterButton('Calit', 'calitFilter');
+const racunBtn = createFilterButton('Racun', 'racunFilter');
+
+filterContainer.appendChild(blokBtn);
+filterContainer.appendChild(bajakBtn);
+filterContainer.appendChild(calitBtn);
+filterContainer.appendChild(racunBtn);
+
+// --- Blok Filter (Dropdown) ---
+const blokDropdown = document.createElement('select');
+blokDropdown.style.position = 'absolute';
+blokDropdown.style.top = '150px';
+blokDropdown.style.right = '70px';
+blokDropdown.style.width = '120px';
+blokDropdown.style.borderRadius = '5px';
+blokDropdown.style.border = '1px solid #ccc';
+blokDropdown.style.padding = '5px';
+blokDropdown.style.fontFamily = 'Helvetica, sans-serif';
+blokDropdown.style.fontSize = '12px';
+blokDropdown.style.display = 'none';
+blokDropdown.style.zIndex = 1005;
+document.body.appendChild(blokDropdown);
+
+function updateBlokDropdown() {
+  blokDropdown.innerHTML = '';
+  const uniqueBlokNames = new Set();
+  allFeatures.forEach(f => {
+    if (f.properties.group === 'blok') uniqueBlokNames.add(f.properties.name);
+  });
+  Array.from(uniqueBlokNames).sort().forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    blokDropdown.appendChild(opt);
+  });
+}
+
+// --- Filter Logic ---
+function clearAllHighlights() {
+  Object.entries(groups).forEach(([g, files]) => {
+    (Array.isArray(files) ? files : [files]).forEach(file => {
+      map.setFilter(`${g}-${file}-highlight`, ['==', '_id', '']);
     });
+  });
+  document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
+}
+
+function resetAllFilterButtons() {
+  bajakBtn.style.color = 'white';
+  calitBtn.style.color = 'white';
+  racunBtn.style.color = 'white';
+}
+
+function applyWordFilter(word) {
+  resetAllFilterButtons();
+  clearAllHighlights();
+
+  activeWordFilter = word;
+
+  allFeatures.forEach(f => {
+    if (f.properties.description?.toLowerCase().includes(word.toLowerCase())) {
+      highlightFeature(f);
+    }
+  });
+}
+
+// --- Button Event Handlers ---
+blokBtn.addEventListener('click', () => {
+  if (blokDropdown.style.display === 'none') {
+    updateBlokDropdown();
+    blokDropdown.style.display = 'block';
+  } else {
+    blokDropdown.style.display = 'none';
+    clearAllHighlights();
+  }
+});
+
+blokDropdown.addEventListener('change', () => {
+  const selected = blokDropdown.value;
+  clearAllHighlights();
+  allFeatures.forEach(f => {
+    if (f.properties.name === selected) {
+      highlightFeature(f);
+    }
   });
 });
 
-setIconColor();
+bajakBtn.addEventListener('click', () => {
+  if (bajakBtn.style.color === 'limegreen') {
+    resetAllFilterButtons();
+    clearAllHighlights();
+    activeWordFilter = null;
+  } else {
+    applyWordFilter('bajak');
+    bajakBtn.style.color = 'limegreen';
+  }
+});
+
+calitBtn.addEventListener('click', () => {
+  if (calitBtn.style.color === 'limegreen') {
+    resetAllFilterButtons();
+    clearAllHighlights();
+    activeWordFilter = null;
+  } else {
+    applyWordFilter('calit');
+    calitBtn.style.color = 'limegreen';
+  }
+});
+
+racunBtn.addEventListener('click', () => {
+  if (racunBtn.style.color === 'limegreen') {
+    resetAllFilterButtons();
+    clearAllHighlights();
+    activeWordFilter = null;
+  } else {
+    applyWordFilter('racun');
+    racunBtn.style.color = 'limegreen';
+  }
+});
+
 </script>
-
-
 </body>
 </html>
+
