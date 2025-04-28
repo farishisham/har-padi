@@ -152,6 +152,10 @@
   </button>
 </div>
 
+<button id="filterBajak" class="filter-btn" onclick="applyFilter('bajak')">Bajak</button>
+<button id="filterCalit" class="filter-btn" onclick="applyFilter('calit')">Calit</button>
+<button id="filterRacun" class="filter-btn" onclick="applyFilter('racun')">Racun</button>
+
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 <script>
@@ -555,11 +559,25 @@ function applyWordFilter(word) {
 }
 
 function applyFilter(type) {
+  const buttons = {
+    bajak: document.getElementById('filterBajak'),
+    calit: document.getElementById('filterCalit'),
+    racun: document.getElementById('filterRacun')
+  };
+
   if (currentFilter === type) {
+    // Deactivate
     currentFilter = null;
+    Object.values(buttons).forEach(btn => btn.style.color = 'white');
   } else {
+    // Activate new
     currentFilter = type;
+    Object.entries(buttons).forEach(([key, btn]) => {
+      btn.style.color = (key === type) ? 'limegreen' : 'white';
+    });
   }
+
+  // Apply filter
   Object.entries(groups).forEach(([group, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(filename => {
       const sourceId = `${group}-${filename}`;
