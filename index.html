@@ -578,38 +578,7 @@ function applyWordFilter(word) {
   });
 }
 
-bajakBtn.addEventListener('click', () => {
-  if (bajakBtn.style.color === 'limegreen') {
-    resetAllFilterButtons();
-    clearAllHighlights();
-    activeWordFilter = null;
-  } else {
-    applyWordFilter('bajak');
-    bajakBtn.style.color = 'limegreen';
-  }
-});
 
-calitBtn.addEventListener('click', () => {
-  if (calitBtn.style.color === 'limegreen') {
-    resetAllFilterButtons();
-    clearAllHighlights();
-    activeWordFilter = null;
-  } else {
-    applyWordFilter('calit');
-    calitBtn.style.color = 'limegreen';
-  }
-});
-
-racunBtn.addEventListener('click', () => {
-  if (racunBtn.style.color === 'limegreen') {
-    resetAllFilterButtons();
-    clearAllHighlights();
-    activeWordFilter = null;
-  } else {
-    applyWordFilter('racun');
-    racunBtn.style.color = 'limegreen';
-  }
-});
 setIconColor();
 
 
