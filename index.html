@@ -312,10 +312,10 @@ map.on('load', () => {
       // Then load all blok files after sawahring is ready
       return Promise.all([
         fetch('blok1.json').then(r => r.json()),
-        //fetch('blok2.json').then(r => r.json()),
+        fetch('blok5.json').then(r => r.json()),
+		//fetch('blok2.json').then(r => r.json()),
         //fetch('blok3.json').then(r => r.json()),
         //fetch('blok4.json').then(r => r.json()),
-        fetch('blok5.json').then(r => r.json()),
         //fetch('blok7.json').then(r => r.json()),
         //fetch('blok8.json').then(r => r.json()),
         //fetch('blok9.json').then(r => r.json()),
