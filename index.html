@@ -294,7 +294,7 @@ const groups = {
 };
 
 let allFeatures = [];
-let activeBlokFilter = null;
+//let activeBlokFilter = null;
 let activeWordFilter = null;
 
 map.on('load', async ()=> {
@@ -483,44 +483,44 @@ function createFilterButton(label, id) {
   return btn;
 }
 
-const blokBtn = createFilterButton('Blok?', 'blokFilter');
+//const blokBtn = createFilterButton('Blok?', 'blokFilter');
 const bajakBtn = createFilterButton('Bajak', 'bajakFilter');
 const calitBtn = createFilterButton('Calit', 'calitFilter');
 const racunBtn = createFilterButton('Racun', 'racunFilter');
 
-filterContainer.appendChild(blokBtn);
+//filterContainer.appendChild(blokBtn);
 filterContainer.appendChild(bajakBtn);
 filterContainer.appendChild(calitBtn);
 filterContainer.appendChild(racunBtn);
 
 // --- Blok Filter (Dropdown) ---
-const blokDropdown = document.createElement('select');
-blokDropdown.style.position = 'absolute';
-blokDropdown.style.top = '150px';
-blokDropdown.style.right = '70px';
-blokDropdown.style.width = '120px';
-blokDropdown.style.borderRadius = '5px';
-blokDropdown.style.border = '1px solid #ccc';
-blokDropdown.style.padding = '5px';
-blokDropdown.style.fontFamily = 'Helvetica, sans-serif';
-blokDropdown.style.fontSize = '12px';
-blokDropdown.style.display = 'none';
-blokDropdown.style.zIndex = 1005;
-document.body.appendChild(blokDropdown);
+//const blokDropdown = document.createElement('select');
+//blokDropdown.style.position = 'absolute';
+//blokDropdown.style.top = '150px';
+//blokDropdown.style.right = '70px';
+//blokDropdown.style.width = '120px';
+//blokDropdown.style.borderRadius = '5px';
+//blokDropdown.style.border = '1px solid #ccc';
+//blokDropdown.style.padding = '5px';
+//blokDropdown.style.fontFamily = 'Helvetica, sans-serif';
+//blokDropdown.style.fontSize = '12px';
+//blokDropdown.style.display = 'none';
+//blokDropdown.style.zIndex = 1005;
+//document.body.appendChild(blokDropdown);
 
-function updateBlokDropdown() {
-  blokDropdown.innerHTML = '';
-  const uniqueBlokNames = new Set();
-  allFeatures.forEach(f => {
-    if (f.properties.group === 'blok') uniqueBlokNames.add(f.properties.name);
-  });
-  Array.from(uniqueBlokNames).sort().forEach(name => {
-    const opt = document.createElement('option');
-    opt.value = name;
-    opt.textContent = name;
-    blokDropdown.appendChild(opt);
-  });
-}
+//function updateBlokDropdown() {
+//  blokDropdown.innerHTML = '';
+//  const uniqueBlokNames = new Set();
+//  allFeatures.forEach(f => {
+//   if (f.properties.group === 'blok') uniqueBlokNames.add(f.properties.name);
+//  });
+//  Array.from(uniqueBlokNames).sort().forEach(name => {
+//    const opt = document.createElement('option');
+//   opt.value = name;
+//    opt.textContent = name;
+//    blokDropdown.appendChild(opt);
+// });
+//}
 
 // --- Filter Logic ---
 function clearAllHighlights() {
@@ -551,26 +551,69 @@ function applyWordFilter(word) {
   });
 }
 
-// --- Button Event Handlers ---
-blokBtn.addEventListener('click', () => {
-  if (blokDropdown.style.display === 'none') {
-    updateBlokDropdown();
-    blokDropdown.style.display = 'block';
+function applyFilter(type) {
+  if (currentFilter === type) {
+    currentFilter = null;
   } else {
-    blokDropdown.style.display = 'none';
-    clearAllHighlights();
+    currentFilter = type;
   }
-});
-
-blokDropdown.addEventListener('change', () => {
-  const selected = blokDropdown.value;
-  clearAllHighlights();
-  allFeatures.forEach(f => {
-    if (f.properties.name === selected) {
-      highlightFeature(f);
-    }
+  Object.entries(groups).forEach(([group, files]) => {
+    (Array.isArray(files) ? files : [files]).forEach(filename => {
+      const sourceId = `${group}-${filename}`;
+      const source = map.getSource(sourceId);
+      if (source && source._data) {
+        const features = source._data.features.map(f => {
+          const desc = (f.properties.description || "").toLowerCase();
+          let visible = true;
+          if (currentFilter === 'bajak') visible = desc.includes('bajak');
+          else if (currentFilter === 'calit') visible = desc.includes('calit');
+          else if (currentFilter === 'racun') visible = desc.includes('racun');
+          return { ...f, properties: { ...f.properties, _visible: visible } };
+        });
+        source.setData({ type: 'FeatureCollection', features });
+      }
+    });
   });
-});
+  updateVisibility();
+}
+
+function updateVisibility() {
+  Object.entries(groups).forEach(([group, files]) => {
+    (Array.isArray(files) ? files : [files]).forEach(filename => {
+      const sourceId = `${group}-${filename}`;
+      const fillLayerId = `${sourceId}-fill`;
+      if (map.getLayer(fillLayerId)) {
+        map.setPaintProperty(fillLayerId, 'fill-opacity', [
+          'case',
+          ['==', ['get', '_visible'], true],
+          ['interpolate', ['linear'], ['zoom'], 13, 0.4, 16, 0],
+          0
+        ]);
+      }
+    });
+  });
+}
+
+// --- Button Event Handlers ---
+//blokBtn.addEventListener('click', () => {
+//  if (blokDropdown.style.display === 'none') {
+//    updateBlokDropdown();
+//    blokDropdown.style.display = 'block';
+//  } else {
+//    blokDropdown.style.display = 'none';
+//    clearAllHighlights();
+//  }
+//});
+
+//blokDropdown.addEventListener('change', () => {
+//  const selected = blokDropdown.value;
+//  clearAllHighlights();
+// allFeatures.forEach(f => {
+//    if (f.properties.name === selected) {
+//      highlightFeature(f);
+//    }
+//  });
+//});
 
 bajakBtn.addEventListener('click', () => {
   if (bajakBtn.style.color === 'limegreen') {
