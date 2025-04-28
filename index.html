@@ -523,35 +523,7 @@ let activeFilter = null;
       b.style.color = (b.textContent.toLowerCase() === activeFilter) ? 'limegreen' : 'white';
     });
 
-    // Now filter polygons
-    Object.entries(groups).forEach(([group, files]) => {
-      (Array.isArray(files) ? files : [files]).forEach(filename => {
-        const id = `${group}-${filename}`;
-        const source = map.getSource(id);
-        if (!source) return;
-
-        const features = source._data.features.map(f => {
-          let desc = "";
-          if (typeof f.properties.description === 'object' && f.properties.description.value) {
-            desc = f.properties.description.value.toLowerCase();
-          } else if (typeof f.properties.description === 'string') {
-            desc = f.properties.description.toLowerCase();
-          }
-
-          const visible = activeFilter
-            ? desc.includes(activeFilter)
-            : true; // if no filter active, show all
-
-          return {
-            ...f,
-            properties: { ...f.properties, _visible: visible }
-          };
-        });
-
-        source.setData({ type: 'FeatureCollection', features });
-      });
-    });
-
+    // Apply the actual polygon filter
     updateVisibility();
   });
 });
@@ -562,12 +534,26 @@ function updateVisibility() {
     (Array.isArray(files) ? files : [files]).forEach(filename => {
       const id = `${group}-${filename}-fill`;
       if (map.getLayer(id)) {
-        map.setPaintProperty(id, 'fill-opacity', [
-          'case',
-          ['==', ['get', '_visible'], true],
-          ['interpolate', ['linear'], ['zoom'], 13, 0.4, 16, 0],
-          0
-        ]);
+        if (activeFilter) {
+          map.setFilter(id, [
+            "all",
+            ["has", "description"],
+            ["match",
+              ["downcase",
+                ["case",
+                  ["==", ["typeof", ["get", "description"]], "object"],
+                  ["get", "value", ["get", "description"]],
+                  ["get", "description"]
+                ]
+              ],
+              [activeFilter],
+              true,
+              false
+            ]
+          ]);
+        } else {
+          map.setFilter(id, null); // Show all if no active filter
+        }
       }
     });
   });
