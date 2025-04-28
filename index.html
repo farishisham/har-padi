@@ -490,15 +490,55 @@ function createFilterButton(label, id) {
   return btn;
 }
 
-//const blokBtn = createFilterButton('Blok?', 'blokFilter');
 const bajakBtn = createFilterButton('Bajak', 'bajakFilter');
 const calitBtn = createFilterButton('Calit', 'calitFilter');
 const racunBtn = createFilterButton('Racun', 'racunFilter');
 
-//filterContainer.appendChild(blokBtn);
 filterContainer.appendChild(bajakBtn);
 filterContainer.appendChild(calitBtn);
 filterContainer.appendChild(racunBtn);
+
+// New added part: set filter logic
+let currentFilter = null; // Track active filter
+
+[bajakBtn, calitBtn, racunBtn].forEach(btn => {
+  btn.addEventListener('click', () => {
+    const type = btn.textContent.toLowerCase(); // 'bajak', 'calit', 'racun'
+
+    if (currentFilter === type) {
+      // Deactivate
+      currentFilter = null;
+      bajakBtn.style.color = 'white';
+      calitBtn.style.color = 'white';
+      racunBtn.style.color = 'white';
+    } else {
+      // Activate new
+      currentFilter = type;
+      bajakBtn.style.color = type === 'bajak' ? 'limegreen' : 'white';
+      calitBtn.style.color = type === 'calit' ? 'limegreen' : 'white';
+      racunBtn.style.color = type === 'racun' ? 'limegreen' : 'white';
+    }
+
+    // Apply filter to all polygons
+    Object.entries(groups).forEach(([group, files]) => {
+      (Array.isArray(files) ? files : [files]).forEach(filename => {
+        const id = `${group}-${filename}`;
+
+        if (!map.getLayer(`${id}-fill`)) return;
+
+        if (currentFilter) {
+          map.setFilter(`${id}-fill`, [
+            "all",
+            ["has", "description"],
+            ["in", currentFilter, ["downcase", ["get", "description"]]]
+          ]);
+        } else {
+          map.setFilter(`${id}-fill`, null); // no filter
+        }
+      });
+    });
+  });
+});
 
 // --- Blok Filter (Dropdown) ---
 //const blokDropdown = document.createElement('select');
