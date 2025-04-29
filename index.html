@@ -155,11 +155,11 @@
   </button>
 </div>
 
-
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
 <script>
+
 const map = new maplibregl.Map({
   container: 'map',
   style: {
@@ -188,6 +188,34 @@ const map = new maplibregl.Map({
 // Limit map bounds
 map.setMaxBounds([[102.66830, 2.21776], [102.69816, 2.25551]]);
 const boundsPolygon = turf.bboxPolygon([102.66830, 2.21776, 102.69816, 2.25551]);
+
+let checkMarkers = [];
+
+function clearCheckMarkers() {
+  checkMarkers.forEach(m => m.remove());
+  checkMarkers = [];
+}
+
+function showCheckmarks(keyword) {
+  clearCheckMarkers();
+  allFeatures.forEach(f => {
+    let html = f.properties?.description?.value || '';
+    const parser = new DOMParser();
+    const text = parser.parseFromString(html, 'text/html').body.textContent.toLowerCase();
+
+    if (text.includes(keyword.toLowerCase())) {
+      const center = turf.center(f).geometry.coordinates;
+      const el = document.createElement('div');
+      el.innerHTML = '✔️';
+      el.style.fontSize = '18px';
+      el.style.color = 'limegreen';
+      el.style.textShadow = '1px 1px 1px black';
+      el.style.transform = 'translate(-50%, -50%)';
+      const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
+      checkMarkers.push(marker);
+    }
+  });
+}
 
 // GPS and Marker
 let gpsMode = 1, watchId = null, marker = null;
@@ -524,72 +552,35 @@ filterContainer.appendChild(racunBtn);
 // New added part: set filter logic
 let activeFilter = null;
 
-let activeWordFilter = null;
-let checkMarkers = [];
-
-function clearCheckMarkers() {
-  checkMarkers.forEach(marker => marker.remove());
-  checkMarkers = [];
-}
-
-function showCheckmarksFor(word) {
-  clearCheckMarkers();
-  allFeatures.forEach(f => {
-    const desc = (f.properties.description?.value || '').toLowerCase();
-    if (desc.includes(word)) {
-      const center = turf.center(f).geometry.coordinates;
-      const el = document.createElement('div');
-      el.innerHTML = '✔️';
-      el.style.fontSize = '18px';
-      el.style.color = 'limegreen';
-      el.style.textShadow = '1px 1px 2px black';
-      el.style.transform = 'translate(-50%, -50%)';
-      el.style.position = 'relative';
-      const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
-      checkMarkers.push(marker);
-    }
-  });
-}
+//let activeWordFilter = null;
 
 bajakBtn.addEventListener('click', () => {
-  if (activeWordFilter === 'bajak') {
-    activeWordFilter = null;
-    clearCheckMarkers();
-    resetAllFilterButtons();
-  } else {
-    activeWordFilter = 'bajak';
-    showCheckmarksFor('bajak');
+  const active = bajakBtn.style.color === 'limegreen';
+  clearCheckMarkers();
+  resetAllFilterButtons();
+  if (!active) {
     bajakBtn.style.color = 'limegreen';
-    calitBtn.style.color = 'white';
-    racunBtn.style.color = 'white';
+    showCheckmarks('bajak');
   }
 });
 
 calitBtn.addEventListener('click', () => {
-  if (activeWordFilter === 'calit') {
-    activeWordFilter = null;
-    clearCheckMarkers();
-    resetAllFilterButtons();
-  } else {
-    activeWordFilter = 'calit';
-    showCheckmarksFor('calit');
+  const active = calitBtn.style.color === 'limegreen';
+  clearCheckMarkers();
+  resetAllFilterButtons();
+  if (!active) {
     calitBtn.style.color = 'limegreen';
-    bajakBtn.style.color = 'white';
-    racunBtn.style.color = 'white';
+    showCheckmarks('calit');
   }
 });
 
 racunBtn.addEventListener('click', () => {
-  if (activeWordFilter === 'racun') {
-    activeWordFilter = null;
-    clearCheckMarkers();
-    resetAllFilterButtons();
-  } else {
-    activeWordFilter = 'racun';
-    showCheckmarksFor('racun');
+  const active = racunBtn.style.color === 'limegreen';
+  clearCheckMarkers();
+  resetAllFilterButtons();
+  if (!active) {
     racunBtn.style.color = 'limegreen';
-    bajakBtn.style.color = 'white';
-    calitBtn.style.color = 'white';
+    showCheckmarks('racun');
   }
 });
 
