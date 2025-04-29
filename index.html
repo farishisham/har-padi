@@ -1,3 +1,5 @@
+The filter still not working. Please check my code
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -302,7 +304,7 @@ const groups = {
 
 let allFeatures = [];
 //let activeBlokFilter = null;
-//let activeWordFilter = null;
+let activeWordFilter = null;
 
 map.on('load', async ()=> {
   map.dragPan.enable();
@@ -491,62 +493,59 @@ function createFilterButton(label, id) {
   return btn;
 }
 
+const bajakBtn = createFilterButton('Bajak', 'bajakFilter');
+const calitBtn = createFilterButton('Calit', 'calitFilter');
+const racunBtn = createFilterButton('Racun', 'racunFilter');
 
 filterContainer.appendChild(bajakBtn);
 filterContainer.appendChild(calitBtn);
 filterContainer.appendChild(racunBtn);
 
 // New added part: set filter logic
-let activeFilter = null;
+let currentFilter = null;
 
 [bajakBtn, calitBtn, racunBtn].forEach(btn => {
   btn.addEventListener('click', () => {
-    const type = btn.textContent.toLowerCase();
+    const type = btn.textContent.toLowerCase(); // 'bajak', 'calit', 'racun'
 
-    if (activeFilter === type) {
-      activeFilter = null;
+    if (currentFilter === type) {
+      // Deactivate
+      currentFilter = null;
     } else {
-      activeFilter = type;
+      // Activate
+      currentFilter = type;
     }
 
-    [bajakBtn, calitBtn, racunBtn].forEach(b => {
-      b.style.color = (b.textContent.toLowerCase() === activeFilter) ? 'limegreen' : 'white';
-    });
+    // Update button colors
+    bajakBtn.style.color = currentFilter === 'bajak' ? 'limegreen' : 'white';
+    calitBtn.style.color = currentFilter === 'calit' ? 'limegreen' : 'white';
+    racunBtn.style.color = currentFilter === 'racun' ? 'limegreen' : 'white';
 
-    clearAllHighlights();
+    // Apply the actual filter
+    Object.entries(groups).forEach(([group, files]) => {
+      (Array.isArray(files) ? files : [files]).forEach(filename => {
+        const id = `${group}-${filename}`;
 
-    if (activeFilter) {
-      allFeatures.forEach(f => {
-        let desc = "";
-        if (typeof f.properties.description === 'object' && f.properties.description.value) {
-          desc = f.properties.description.value.toLowerCase();
-        } else if (typeof f.properties.description === 'string') {
-          desc = f.properties.description.toLowerCase();
-        }
-        if (desc.includes(activeFilter)) {
-          highlightFeature(f);
+        if (!map.getLayer(`${id}-fill`)) return;
+
+        if (currentFilter) {
+          map.setFilter(`${id}-fill`, [
+            "all",
+            ["has", "description"],
+            ["match", ["downcase", ["get", "description"]],
+              ["*"+currentFilter+"*"], true, // match inside
+              true
+            ]
+          ]);
+        } else {
+          map.setFilter(`${id}-fill`, null); // clear filter
         }
       });
-    }
+    });
   });
 });
 
 // --- Filter Logic ---
-function clearAllHighlights() {
-  Object.entries(groups).forEach(([g, files]) => {
-    (Array.isArray(files) ? files : [files]).forEach(file => {
-      map.setFilter(`${g}-${file}-highlight`, ['==', '_id', '']);
-    });
-  });
-  document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
-}
-
-function resetAllFilterButtons() {
-  bajakBtn.style.color = 'white';
-  calitBtn.style.color = 'white';
-  racunBtn.style.color = 'white';
-}
-
 function clearAllHighlights() {
   Object.entries(groups).forEach(([g, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(file => {
@@ -569,53 +568,121 @@ function applyWordFilter(word) {
   activeWordFilter = word;
 
   allFeatures.forEach(f => {
-    const desc = f.properties.description ? f.properties.description.toLowerCase() : '';
-    if (desc.includes(word)) {
+    if (f.properties.description?.toLowerCase().includes(word.toLowerCase())) {
       highlightFeature(f);
     }
   });
 }
 
+function applyFilter(type) {
+  const buttons = {
+    bajak: document.getElementById('filterBajak'),
+    calit: document.getElementById('filterCalit'),
+    racun: document.getElementById('filterRacun')
+  };
+
+  if (currentFilter === type) {
+    // Deactivate
+    currentFilter = null;
+    Object.values(buttons).forEach(btn => btn.style.color = 'white');
+  } else {
+    // Activate new
+    currentFilter = type;
+    Object.entries(buttons).forEach(([key, btn]) => {
+      btn.style.color = (key === type) ? 'limegreen' : 'white';
+    });
+  }
+
+  // Apply filter
+  Object.entries(groups).forEach(([group, files]) => {
+    (Array.isArray(files) ? files : [files]).forEach(filename => {
+      const sourceId = `${group}-${filename}`;
+      const source = map.getSource(sourceId);
+      if (source && source._data) {
+        const features = source._data.features.map(f => {
+          const desc = (f.properties.description || "").toLowerCase();
+          let visible = true;
+          if (currentFilter === 'bajak') visible = desc.includes('bajak');
+          else if (currentFilter === 'calit') visible = desc.includes('calit');
+          else if (currentFilter === 'racun') visible = desc.includes('racun');
+          return { ...f, properties: { ...f.properties, _visible: visible } };
+        });
+        source.setData({ type: 'FeatureCollection', features });
+      }
+    });
+  });
+  updateVisibility();
+}
+
+function updateVisibility() {
+  Object.entries(groups).forEach(([group, files]) => {
+    (Array.isArray(files) ? files : [files]).forEach(filename => {
+      const sourceId = `${group}-${filename}`;
+      const fillLayerId = `${sourceId}-fill`;
+      if (map.getLayer(fillLayerId)) {
+        map.setPaintProperty(fillLayerId, 'fill-opacity', [
+          'case',
+          ['==', ['get', '_visible'], true],
+          ['interpolate', ['linear'], ['zoom'], 13, 0.4, 16, 0],
+          0
+        ]);
+      }
+    });
+  });
+}
+
+function toggleFilter(type) {
+  if (activeFilter === type) {
+    activeFilter = null;
+    setButtonColor();
+    resetPolygonFilter();
+    return;
+  }
+
+  activeFilter = type;
+  setButtonColor();
+  allFeatures.forEach(f => {
+    const desc = f.properties.description ? f.properties.description.toLowerCase() : '';
+    const show = (type === 'bajak' && desc.includes('bajak')) ||
+                 (type === 'calit' && desc.includes('calit')) ||
+                 (type === 'racun' && desc.includes('racun'));
+    f.properties._visible = show;
+  });
+  updateVisiblePolygons();
+}
+
 bajakBtn.addEventListener('click', () => {
-  if (activeWordFilter === 'bajak') {
-    activeWordFilter = null;
+  if (bajakBtn.style.color === 'limegreen') {
     resetAllFilterButtons();
     clearAllHighlights();
+    activeWordFilter = null;
   } else {
     applyWordFilter('bajak');
     bajakBtn.style.color = 'limegreen';
-    calitBtn.style.color = 'white';
-    racunBtn.style.color = 'white';
   }
 });
 
 calitBtn.addEventListener('click', () => {
-  if (activeWordFilter === 'calit') {
-    activeWordFilter = null;
+  if (calitBtn.style.color === 'limegreen') {
     resetAllFilterButtons();
     clearAllHighlights();
+    activeWordFilter = null;
   } else {
     applyWordFilter('calit');
     calitBtn.style.color = 'limegreen';
-    bajakBtn.style.color = 'white';
-    racunBtn.style.color = 'white';
   }
 });
 
 racunBtn.addEventListener('click', () => {
-  if (activeWordFilter === 'racun') {
-    activeWordFilter = null;
+  if (racunBtn.style.color === 'limegreen') {
     resetAllFilterButtons();
     clearAllHighlights();
+    activeWordFilter = null;
   } else {
     applyWordFilter('racun');
     racunBtn.style.color = 'limegreen';
-    bajakBtn.style.color = 'white';
-    calitBtn.style.color = 'white';
   }
 });
-
-
 setIconColor();
 
 
