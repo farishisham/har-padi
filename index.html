@@ -155,11 +155,11 @@
   </button>
 </div>
 
+
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
 <script>
-
 const map = new maplibregl.Map({
   container: 'map',
   style: {
@@ -188,32 +188,6 @@ const map = new maplibregl.Map({
 // Limit map bounds
 map.setMaxBounds([[102.66830, 2.21776], [102.69816, 2.25551]]);
 const boundsPolygon = turf.bboxPolygon([102.66830, 2.21776, 102.69816, 2.25551]);
-
-let checkMarkers = [];
-
-function clearCheckMarkers() {
-  checkMarkers.forEach(m => m.remove());
-  checkMarkers = [];
-}
-
-function showCheckmarks(keyword) {
-  clearCheckMarkers();
-
-  allFeatures.forEach(f => {
-    const text = f.properties.description_clean || '';
-    if (text.includes(keyword.toLowerCase())) {
-      const center = turf.center(f).geometry.coordinates;
-      const el = document.createElement('div');
-      el.textContent = '✔';
-      el.style.fontSize = '18px';
-      el.style.color = 'limegreen';
-      el.style.textShadow = '1px 1px 2px black';
-      el.style.transform = 'translate(-50%, -50%)';
-      const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
-      checkMarkers.push(marker);
-    }
-  });
-}
 
 // GPS and Marker
 let gpsMode = 1, watchId = null, marker = null;
@@ -329,6 +303,7 @@ const groups = {
 
 let allFeatures = [];
 
+let activeWordFilter = null;
 
 map.on('load', async ()=> {
   map.dragPan.enable();
@@ -344,8 +319,6 @@ map.on('load', async ()=> {
   ]);
 });
 
-window.allPolygonsLoaded = true;
-
 async function loadGroup(group, files) {
   for (const filename of files) {
     const response = await fetch(filename);
@@ -354,15 +327,19 @@ async function loadGroup(group, files) {
 
     data.features.forEach((f, i) => {
   f.properties._id = `${group}-${filename}-${i}`;
-
-  // Add this:
-  const rawHTML = f.properties.description?.value || '';
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(rawHTML, 'text/html');
-  const plainText = doc.body.textContent?.toLowerCase() || '';
-  f.properties.description_clean = plainText;
+  
+  if (f.properties.description && typeof f.properties.description === 'object') {
+    const val = f.properties.description.value || '';
+    f.properties.description_clean = val
+      .replace(/<[^>]*>/g, '') // remove HTML tags
+      .toLowerCase()
+      .trim();
+  } else if (typeof f.properties.description === 'string') {
+    f.properties.description_clean = f.properties.description.toLowerCase().trim();
+  } else {
+    f.properties.description_clean = '';
+  }
 });
-
 
     map.addSource(sourceId, { type: 'geojson', data });
 
@@ -548,65 +525,66 @@ filterContainer.appendChild(racunBtn);
 // New added part: set filter logic
 let activeFilter = null;
 
-//let activeWordFilter = null;
-
 bajakBtn.addEventListener('click', () => {
-  const active = bajakBtn.style.color === 'limegreen';
-  clearCheckMarkers();
-  resetAllFilterButtons();
-  if (!active) {
+  if (activeWordFilter === 'bajak') {
+    activeWordFilter = null;
+    clearAllFilters();
+    bajakBtn.style.color = 'white';
+  } else {
+    applyWordFilter('bajak');
     bajakBtn.style.color = 'limegreen';
-    showCheckmarks('bajak');
+    calitBtn.style.color = 'white';
+    racunBtn.style.color = 'white';
   }
 });
 
 calitBtn.addEventListener('click', () => {
-  const active = calitBtn.style.color === 'limegreen';
-  clearCheckMarkers();
-  resetAllFilterButtons();
-  if (!active) {
+  if (activeWordFilter === 'calit') {
+    activeWordFilter = null;
+    clearAllFilters();
+    calitBtn.style.color = 'white';
+  } else {
+    applyWordFilter('calit');
     calitBtn.style.color = 'limegreen';
-    showCheckmarks('calit');
+    bajakBtn.style.color = 'white';
+    racunBtn.style.color = 'white';
   }
 });
 
 racunBtn.addEventListener('click', () => {
-  const active = racunBtn.style.color === 'limegreen';
-  clearCheckMarkers();
-  resetAllFilterButtons();
-  if (!active) {
+  if (activeWordFilter === 'racun') {
+    activeWordFilter = null;
+    clearAllFilters();
+    racunBtn.style.color = 'white';
+  } else {
+    applyWordFilter('racun');
     racunBtn.style.color = 'limegreen';
-    showCheckmarks('racun');
+    bajakBtn.style.color = 'white';
+    calitBtn.style.color = 'white';
   }
 });
 
 function applyWordFilter(word) {
+  resetAllFilterButtons();
+  clearAllHighlights();
+
   activeWordFilter = word;
 
-  const matchingIds = allFeatures
-    .filter(f => {
-      let desc = '';
-      if (f.properties.description && typeof f.properties.description === 'object' && f.properties.description.value) {
-        desc = f.properties.description.value.toLowerCase();
-      } else if (typeof f.properties.description === 'string') {
-        desc = f.properties.description.toLowerCase();
-      }
-      return desc.includes(word.toLowerCase());
-    })
-    .map(f => f.properties._id);
+  allFeatures.forEach(f => {
+    const descObj = f.properties.description;
+    let descText = '';
 
-  Object.entries(groups).forEach(([group, files]) => {
-    (Array.isArray(files) ? files : [files]).forEach(file => {
-      const id = `${group}-${file}`;
-      if (map.getLayer(`${id}-fill`)) {
-        const layerMatches = matchingIds.filter(mid => mid.startsWith(id));
-        if (layerMatches.length) {
-          map.setFilter(`${id}-fill`, ['in', '_id', ...layerMatches]);
-        } else {
-          map.setFilter(`${id}-fill`, ['==', '_id', '']);
-        }
-      }
-    });
+    if (descObj && typeof descObj === 'object' && descObj.value) {
+      descText = descObj.value.toLowerCase();
+    } else if (typeof descObj === 'string') {
+      descText = descObj.toLowerCase();
+    }
+
+    if (descText.includes(word.toLowerCase())) {
+      map.setFilter(`${f.properties._id.split('-')[0]}-${f.properties._id.split('-')[1]}-fill`, ['==', '_id', f.properties._id]);
+    } else {
+      map.setFilter(`${f.properties._id.split('-')[0]}-${f.properties._id.split('-')[1]}-fill`, ['==', '_id', '']);
+    }
   });
 }
 
@@ -651,36 +629,35 @@ function clearAllHighlights() {
   document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
 }
 
-
 function resetAllFilterButtons() {
   bajakBtn.style.color = 'white';
   calitBtn.style.color = 'white';
   racunBtn.style.color = 'white';
 }
 
-
 function applyWordFilter(word) {
+  resetAllFilterButtons();
+  clearAllHighlights();
+
   activeWordFilter = word;
 
   allFeatures.forEach(f => {
-    let desc = '';
+    let desc = "";
     if (typeof f.properties.description === 'object' && f.properties.description.value) {
       desc = f.properties.description.value.toLowerCase();
     } else if (typeof f.properties.description === 'string') {
       desc = f.properties.description.toLowerCase();
     }
 
-    const visible = desc.includes(word);
-    const sourceId = `${f.properties._id.split('-')[0]}-${f.properties._id.split('-')[1]}`;
-    if (map.getLayer(`${sourceId}-fill`)) {
-      map.setFilter(`${sourceId}-fill`, visible
-        ? ['==', '_id', f.properties._id]
-        : ['==', '_id', '']);
+    if (desc.includes(word)) {
+      highlightFeature(f);
     }
   });
 }
 
+
 setIconColor();
+
 
 </script>
 </body>
