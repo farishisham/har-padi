@@ -560,39 +560,42 @@ function showCheckmarksForKeyword(keyword) {
 bajakBtn.addEventListener('click', () => {
   if (activeWordFilter === 'bajak') {
     activeWordFilter = null;
-    clearAllFilters();
     bajakBtn.style.color = 'white';
+    clearCheckMarkers();
   } else {
-    applyWordFilter('bajak');
+    activeWordFilter = 'bajak';
     bajakBtn.style.color = 'limegreen';
     calitBtn.style.color = 'white';
     racunBtn.style.color = 'white';
+    showCheckmarksForKeyword('bajak');
   }
 });
 
 calitBtn.addEventListener('click', () => {
   if (activeWordFilter === 'calit') {
     activeWordFilter = null;
-    clearAllFilters();
     calitBtn.style.color = 'white';
+    clearCheckMarkers();
   } else {
-    applyWordFilter('calit');
+    activeWordFilter = 'calit';
     calitBtn.style.color = 'limegreen';
     bajakBtn.style.color = 'white';
     racunBtn.style.color = 'white';
+    showCheckmarksForKeyword('calit');
   }
 });
 
 racunBtn.addEventListener('click', () => {
   if (activeWordFilter === 'racun') {
     activeWordFilter = null;
-    clearAllFilters();
     racunBtn.style.color = 'white';
+    clearCheckMarkers();
   } else {
-    applyWordFilter('racun');
+    activeWordFilter = 'racun';
     racunBtn.style.color = 'limegreen';
     bajakBtn.style.color = 'white';
     calitBtn.style.color = 'white';
+    showCheckmarksForKeyword('racun');
   }
 });
 
