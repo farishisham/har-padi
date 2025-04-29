@@ -636,21 +636,22 @@ function resetAllFilterButtons() {
 }
 
 function applyWordFilter(word) {
-  resetAllFilterButtons();
-  clearAllHighlights();
-
   activeWordFilter = word;
 
   allFeatures.forEach(f => {
-    let desc = "";
+    let desc = '';
     if (typeof f.properties.description === 'object' && f.properties.description.value) {
       desc = f.properties.description.value.toLowerCase();
     } else if (typeof f.properties.description === 'string') {
       desc = f.properties.description.toLowerCase();
     }
 
-    if (desc.includes(word)) {
-      highlightFeature(f);
+    const visible = desc.includes(word);
+    const sourceId = `${f.properties._id.split('-')[0]}-${f.properties._id.split('-')[1]}`;
+    if (map.getLayer(`${sourceId}-fill`)) {
+      map.setFilter(`${sourceId}-fill`, visible
+        ? ['==', '_id', f.properties._id]
+        : ['==', '_id', '']);
     }
   });
 }
