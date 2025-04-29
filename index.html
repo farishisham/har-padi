@@ -565,26 +565,32 @@ racunBtn.addEventListener('click', () => {
 });
 
 function applyWordFilter(word) {
-  resetAllFilterButtons();
-  clearAllHighlights();
-
   activeWordFilter = word;
 
-  allFeatures.forEach(f => {
-    const descObj = f.properties.description;
-    let descText = '';
+  Object.entries(groups).forEach(([group, files]) => {
+    (Array.isArray(files) ? files : [files]).forEach(file => {
+      const sourceId = `${group}-${file}`;
+      const matchingIds = allFeatures
+        .filter(f => {
+          const descObj = f.properties.description;
+          let descText = '';
+          if (descObj && typeof descObj === 'object' && descObj.value) {
+            descText = descObj.value.toLowerCase();
+          } else if (typeof descObj === 'string') {
+            descText = descObj.toLowerCase();
+          }
+          return f.properties._id.startsWith(sourceId) && descText.includes(word.toLowerCase());
+        })
+        .map(f => f.properties._id);
 
-    if (descObj && typeof descObj === 'object' && descObj.value) {
-      descText = descObj.value.toLowerCase();
-    } else if (typeof descObj === 'string') {
-      descText = descObj.toLowerCase();
-    }
-
-    if (descText.includes(word.toLowerCase())) {
-      map.setFilter(`${f.properties._id.split('-')[0]}-${f.properties._id.split('-')[1]}-fill`, ['==', '_id', f.properties._id]);
-    } else {
-      map.setFilter(`${f.properties._id.split('-')[0]}-${f.properties._id.split('-')[1]}-fill`, ['==', '_id', '']);
-    }
+      if (map.getLayer(`${sourceId}-fill`)) {
+        if (matchingIds.length) {
+          map.setFilter(`${sourceId}-fill`, ['in', '_id', ...matchingIds]);
+        } else {
+          map.setFilter(`${sourceId}-fill`, ['==', '_id', '']); // Hide all if none matches
+        }
+      }
+    });
   });
 }
 
