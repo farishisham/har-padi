@@ -155,10 +155,6 @@
   </button>
 </div>
 
-//<button id="filterBajak" class="filter-btn" onclick="applyFilter('bajak')">Bajak</button>
-//<button id="filterCalit" class="filter-btn" onclick="applyFilter('calit')">Calit</button>
-//<button id="filterRacun" class="filter-btn" onclick="applyFilter('racun')">Racun</button>
-
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
@@ -563,6 +559,21 @@ function resetAllFilterButtons() {
   racunBtn.style.color = 'white';
 }
 
+function clearAllHighlights() {
+  Object.entries(groups).forEach(([g, files]) => {
+    (Array.isArray(files) ? files : [files]).forEach(file => {
+      map.setFilter(`${g}-${file}-highlight`, ['==', '_id', '']);
+    });
+  });
+  document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
+}
+
+function resetAllFilterButtons() {
+  bajakBtn.style.color = 'white';
+  calitBtn.style.color = 'white';
+  racunBtn.style.color = 'white';
+}
+
 function applyWordFilter(word) {
   resetAllFilterButtons();
   clearAllHighlights();
@@ -570,121 +581,53 @@ function applyWordFilter(word) {
   activeWordFilter = word;
 
   allFeatures.forEach(f => {
-    if (f.properties.description?.toLowerCase().includes(word.toLowerCase())) {
+    const desc = f.properties.description ? f.properties.description.toLowerCase() : '';
+    if (desc.includes(word)) {
       highlightFeature(f);
     }
   });
 }
 
-function applyFilter(type) {
-  const buttons = {
-    bajak: document.getElementById('filterBajak'),
-    calit: document.getElementById('filterCalit'),
-    racun: document.getElementById('filterRacun')
-  };
-
-  if (currentFilter === type) {
-    // Deactivate
-    currentFilter = null;
-    Object.values(buttons).forEach(btn => btn.style.color = 'white');
-  } else {
-    // Activate new
-    currentFilter = type;
-    Object.entries(buttons).forEach(([key, btn]) => {
-      btn.style.color = (key === type) ? 'limegreen' : 'white';
-    });
-  }
-
-  // Apply filter
-  Object.entries(groups).forEach(([group, files]) => {
-    (Array.isArray(files) ? files : [files]).forEach(filename => {
-      const sourceId = `${group}-${filename}`;
-      const source = map.getSource(sourceId);
-      if (source && source._data) {
-        const features = source._data.features.map(f => {
-          const desc = (f.properties.description || "").toLowerCase();
-          let visible = true;
-          if (currentFilter === 'bajak') visible = desc.includes('bajak');
-          else if (currentFilter === 'calit') visible = desc.includes('calit');
-          else if (currentFilter === 'racun') visible = desc.includes('racun');
-          return { ...f, properties: { ...f.properties, _visible: visible } };
-        });
-        source.setData({ type: 'FeatureCollection', features });
-      }
-    });
-  });
-  updateVisibility();
-}
-
-function updateVisibility() {
-  Object.entries(groups).forEach(([group, files]) => {
-    (Array.isArray(files) ? files : [files]).forEach(filename => {
-      const sourceId = `${group}-${filename}`;
-      const fillLayerId = `${sourceId}-fill`;
-      if (map.getLayer(fillLayerId)) {
-        map.setPaintProperty(fillLayerId, 'fill-opacity', [
-          'case',
-          ['==', ['get', '_visible'], true],
-          ['interpolate', ['linear'], ['zoom'], 13, 0.4, 16, 0],
-          0
-        ]);
-      }
-    });
-  });
-}
-
-function toggleFilter(type) {
-  if (activeFilter === type) {
-    activeFilter = null;
-    setButtonColor();
-    resetPolygonFilter();
-    return;
-  }
-
-  activeFilter = type;
-  setButtonColor();
-  allFeatures.forEach(f => {
-    const desc = f.properties.description ? f.properties.description.toLowerCase() : '';
-    const show = (type === 'bajak' && desc.includes('bajak')) ||
-                 (type === 'calit' && desc.includes('calit')) ||
-                 (type === 'racun' && desc.includes('racun'));
-    f.properties._visible = show;
-  });
-  updateVisiblePolygons();
-}
-
 bajakBtn.addEventListener('click', () => {
-  if (bajakBtn.style.color === 'limegreen') {
+  if (activeWordFilter === 'bajak') {
+    activeWordFilter = null;
     resetAllFilterButtons();
     clearAllHighlights();
-    activeWordFilter = null;
   } else {
     applyWordFilter('bajak');
     bajakBtn.style.color = 'limegreen';
+    calitBtn.style.color = 'white';
+    racunBtn.style.color = 'white';
   }
 });
 
 calitBtn.addEventListener('click', () => {
-  if (calitBtn.style.color === 'limegreen') {
+  if (activeWordFilter === 'calit') {
+    activeWordFilter = null;
     resetAllFilterButtons();
     clearAllHighlights();
-    activeWordFilter = null;
   } else {
     applyWordFilter('calit');
     calitBtn.style.color = 'limegreen';
+    bajakBtn.style.color = 'white';
+    racunBtn.style.color = 'white';
   }
 });
 
 racunBtn.addEventListener('click', () => {
-  if (racunBtn.style.color === 'limegreen') {
+  if (activeWordFilter === 'racun') {
+    activeWordFilter = null;
     resetAllFilterButtons();
     clearAllHighlights();
-    activeWordFilter = null;
   } else {
     applyWordFilter('racun');
     racunBtn.style.color = 'limegreen';
+    bajakBtn.style.color = 'white';
+    calitBtn.style.color = 'white';
   }
 });
+
+
 setIconColor();
 
 
