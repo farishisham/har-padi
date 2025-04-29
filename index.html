@@ -198,18 +198,15 @@ function clearCheckMarkers() {
 
 function showCheckmarks(keyword) {
   clearCheckMarkers();
-  allFeatures.forEach(f => {
-    let rawHTML = f.properties?.description?.value || '';
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(rawHTML, 'text/html');
-    const text = doc.body.textContent.toLowerCase();
 
+  allFeatures.forEach(f => {
+    const text = f.properties.description_clean || '';
     if (text.includes(keyword.toLowerCase())) {
       const center = turf.center(f).geometry.coordinates;
       const el = document.createElement('div');
-      el.innerHTML = '✔';
-      el.style.color = 'limegreen';
+      el.textContent = '✔';
       el.style.fontSize = '18px';
+      el.style.color = 'limegreen';
       el.style.textShadow = '1px 1px 2px black';
       el.style.transform = 'translate(-50%, -50%)';
       const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
@@ -357,19 +354,15 @@ async function loadGroup(group, files) {
 
     data.features.forEach((f, i) => {
   f.properties._id = `${group}-${filename}-${i}`;
-  
-  if (f.properties.description && typeof f.properties.description === 'object') {
-    const val = f.properties.description.value || '';
-    f.properties.description_clean = val
-      .replace(/<[^>]*>/g, '') // remove HTML tags
-      .toLowerCase()
-      .trim();
-  } else if (typeof f.properties.description === 'string') {
-    f.properties.description_clean = f.properties.description.toLowerCase().trim();
-  } else {
-    f.properties.description_clean = '';
-  }
+
+  // Add this:
+  const rawHTML = f.properties.description?.value || '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(rawHTML, 'text/html');
+  const plainText = doc.body.textContent?.toLowerCase() || '';
+  f.properties.description_clean = plainText;
 });
+
 
     map.addSource(sourceId, { type: 'geojson', data });
 
