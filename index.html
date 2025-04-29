@@ -673,6 +673,31 @@ function resetAllFilterButtons() {
   racunBtn.style.color = 'white';
 }
 
+function showCheckmarksForKeyword(keyword) {
+  clearCheckMarkers();
+
+  allFeatures.forEach(f => {
+    let desc = "";
+    if (typeof f.properties.description === 'object' && f.properties.description.value) {
+      desc = f.properties.description.value.toLowerCase();
+    } else if (typeof f.properties.description === 'string') {
+      desc = f.properties.description.toLowerCase();
+    }
+
+    if (desc.includes(keyword.toLowerCase())) {
+      const el = document.createElement('div');
+      el.innerHTML = '✔';
+      el.style.color = 'limegreen';
+      el.style.fontSize = '18px';
+      el.style.textShadow = '1px 1px 2px black';
+
+      const center = turf.center(f).geometry.coordinates;
+      const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
+      checkMarkers.push(marker);
+    }
+  });
+}
+
 function applyWordFilter(word) {
   activeWordFilter = word;
 
