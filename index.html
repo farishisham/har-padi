@@ -567,27 +567,27 @@ racunBtn.addEventListener('click', () => {
 function applyWordFilter(word) {
   activeWordFilter = word;
 
+  const matchingIds = allFeatures
+    .filter(f => {
+      let desc = '';
+      if (f.properties.description && typeof f.properties.description === 'object' && f.properties.description.value) {
+        desc = f.properties.description.value.toLowerCase();
+      } else if (typeof f.properties.description === 'string') {
+        desc = f.properties.description.toLowerCase();
+      }
+      return desc.includes(word.toLowerCase());
+    })
+    .map(f => f.properties._id);
+
   Object.entries(groups).forEach(([group, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(file => {
-      const sourceId = `${group}-${file}`;
-      const matchingIds = allFeatures
-        .filter(f => {
-          const descObj = f.properties.description;
-          let descText = '';
-          if (descObj && typeof descObj === 'object' && descObj.value) {
-            descText = descObj.value.toLowerCase();
-          } else if (typeof descObj === 'string') {
-            descText = descObj.toLowerCase();
-          }
-          return f.properties._id.startsWith(sourceId) && descText.includes(word.toLowerCase());
-        })
-        .map(f => f.properties._id);
-
-      if (map.getLayer(`${sourceId}-fill`)) {
-        if (matchingIds.length) {
-          map.setFilter(`${sourceId}-fill`, ['in', '_id', ...matchingIds]);
+      const id = `${group}-${file}`;
+      if (map.getLayer(`${id}-fill`)) {
+        const layerMatches = matchingIds.filter(mid => mid.startsWith(id));
+        if (layerMatches.length) {
+          map.setFilter(`${id}-fill`, ['in', '_id', ...layerMatches]);
         } else {
-          map.setFilter(`${sourceId}-fill`, ['==', '_id', '']); // Hide all if none matches
+          map.setFilter(`${id}-fill`, ['==', '_id', '']);
         }
       }
     });
