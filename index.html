@@ -302,74 +302,7 @@ const groups = {
 };
 
 let allFeatures = [];
-let activeWordFilter = null;
-let checkMarkers = [];
 
-function clearCheckMarkers() {
-  checkMarkers.forEach(marker => marker.remove());
-  checkMarkers = [];
-}
-
-function showCheckmarksFor(word) {
-  clearCheckMarkers();
-  allFeatures.forEach(f => {
-    const desc = (f.properties.description?.value || '').toLowerCase();
-    if (desc.includes(word)) {
-      const center = turf.center(f).geometry.coordinates;
-      const el = document.createElement('div');
-      el.innerHTML = '✔️';
-      el.style.fontSize = '18px';
-      el.style.color = 'limegreen';
-      el.style.textShadow = '1px 1px 2px black';
-      el.style.transform = 'translate(-50%, -50%)';
-      el.style.position = 'relative';
-      const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
-      checkMarkers.push(marker);
-    }
-  });
-}
-
-bajakBtn.addEventListener('click', () => {
-  if (activeWordFilter === 'bajak') {
-    activeWordFilter = null;
-    clearCheckMarkers();
-    bajakBtn.style.color = 'white';
-  } else {
-    activeWordFilter = 'bajak';
-    showCheckmarksFor('bajak');
-    bajakBtn.style.color = 'limegreen';
-    calitBtn.style.color = 'white';
-    racunBtn.style.color = 'white';
-  }
-});
-
-calitBtn.addEventListener('click', () => {
-  if (activeWordFilter === 'calit') {
-    activeWordFilter = null;
-    clearCheckMarkers();
-    calitBtn.style.color = 'white';
-  } else {
-    activeWordFilter = 'calit';
-    showCheckmarksFor('calit');
-    calitBtn.style.color = 'limegreen';
-    bajakBtn.style.color = 'white';
-    racunBtn.style.color = 'white';
-  }
-});
-
-racunBtn.addEventListener('click', () => {
-  if (activeWordFilter === 'racun') {
-    activeWordFilter = null;
-    clearCheckMarkers();
-    racunBtn.style.color = 'white';
-  } else {
-    activeWordFilter = 'racun';
-    showCheckmarksFor('racun');
-    racunBtn.style.color = 'limegreen';
-    bajakBtn.style.color = 'white';
-    calitBtn.style.color = 'white';
-  }
-});
 
 map.on('load', async ()=> {
   map.dragPan.enable();
@@ -591,7 +524,74 @@ filterContainer.appendChild(racunBtn);
 // New added part: set filter logic
 let activeFilter = null;
 
+let activeWordFilter = null;
+let checkMarkers = [];
 
+function clearCheckMarkers() {
+  checkMarkers.forEach(marker => marker.remove());
+  checkMarkers = [];
+}
+
+function showCheckmarksFor(word) {
+  clearCheckMarkers();
+  allFeatures.forEach(f => {
+    const desc = (f.properties.description?.value || '').toLowerCase();
+    if (desc.includes(word)) {
+      const center = turf.center(f).geometry.coordinates;
+      const el = document.createElement('div');
+      el.innerHTML = '✔️';
+      el.style.fontSize = '18px';
+      el.style.color = 'limegreen';
+      el.style.textShadow = '1px 1px 2px black';
+      el.style.transform = 'translate(-50%, -50%)';
+      el.style.position = 'relative';
+      const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
+      checkMarkers.push(marker);
+    }
+  });
+}
+
+bajakBtn.addEventListener('click', () => {
+  if (activeWordFilter === 'bajak') {
+    activeWordFilter = null;
+    clearCheckMarkers();
+    bajakBtn.style.color = 'white';
+  } else {
+    activeWordFilter = 'bajak';
+    showCheckmarksFor('bajak');
+    bajakBtn.style.color = 'limegreen';
+    calitBtn.style.color = 'white';
+    racunBtn.style.color = 'white';
+  }
+});
+
+calitBtn.addEventListener('click', () => {
+  if (activeWordFilter === 'calit') {
+    activeWordFilter = null;
+    clearCheckMarkers();
+    calitBtn.style.color = 'white';
+  } else {
+    activeWordFilter = 'calit';
+    showCheckmarksFor('calit');
+    calitBtn.style.color = 'limegreen';
+    bajakBtn.style.color = 'white';
+    racunBtn.style.color = 'white';
+  }
+});
+
+racunBtn.addEventListener('click', () => {
+  if (activeWordFilter === 'racun') {
+    activeWordFilter = null;
+    clearCheckMarkers();
+    racunBtn.style.color = 'white';
+  } else {
+    activeWordFilter = 'racun';
+    showCheckmarksFor('racun');
+    racunBtn.style.color = 'limegreen';
+    bajakBtn.style.color = 'white';
+    calitBtn.style.color = 'white';
+  }
+});
 
 function applyWordFilter(word) {
   activeWordFilter = word;
