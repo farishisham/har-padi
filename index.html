@@ -555,60 +555,6 @@ let activeFilter = null;
   });
 });
 
-// Example of filtering polygons based on a condition
-function filterPolygons(geoJsonData, filterCondition) {
-    const parser = new DOMParser();
-    const filteredFeatures = geoJsonData.features.filter(feature => {
-        const desc = feature.properties.description?.toLowerCase();
-        return desc && desc.includes(filterCondition);
-    });
-
-    return {
-        type: 'FeatureCollection',
-        features: filteredFeatures
-    };
-}
-
-function addCheckmark(map, feature) {
-    const center = turf.center(feature).geometry.coordinates;
-
-    // Create a custom HTML element for the checkmark
-    const el = document.createElement('div');
-    el.style.width = '24px';
-    el.style.height = '24px';
-    el.style.background = 'limegreen';
-    el.style.color = 'white';
-    el.style.borderRadius = '50%';
-    el.style.display = 'flex';
-    el.style.justifyContent = 'center';
-    el.style.alignItems = 'center';
-    el.style.fontWeight = 'bold';
-    el.textContent = '✓';
-
-    // Add the marker to the map
-    new maplibregl.Marker(el)
-        .setLngLat(center)
-        .addTo(map);
-}
-
-// Example usage
-async function applyFilter(map, geoJsonData, filterCondition) {
-    // Filter the polygons
-    const filteredData = filterPolygons(geoJsonData, filterCondition);
-
-    // Clear existing markers (optional, if needed)
-    document.querySelectorAll('.maplibregl-marker').forEach(marker => marker.remove());
-
-    // Loop through filtered features and add checkmarks
-    filteredData.features.forEach(feature => {
-        addCheckmark(map, feature);
-    });
-}
-
-// Example filter condition: "bajak"
-applyFilter(map, geoJsonData, 'bajak');
-applyFilter(map, geoJsonData, 'calit');
-applyFilter(map, geoJsonData, 'racun');
 
 // helper function to update visibility
 function updateVisibility() {
