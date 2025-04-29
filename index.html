@@ -491,55 +491,43 @@ function createFilterButton(label, id) {
   return btn;
 }
 
-const bajakBtn = createFilterButton('Bajak', 'bajakFilter');
-const calitBtn = createFilterButton('Calit', 'calitFilter');
-const racunBtn = createFilterButton('Racun', 'racunFilter');
 
 filterContainer.appendChild(bajakBtn);
 filterContainer.appendChild(calitBtn);
 filterContainer.appendChild(racunBtn);
 
 // New added part: set filter logic
-let currentFilter = null;
+let activeFilter = null;
 
 [bajakBtn, calitBtn, racunBtn].forEach(btn => {
   btn.addEventListener('click', () => {
-    const type = btn.textContent.toLowerCase(); // 'bajak', 'calit', 'racun'
+    const type = btn.textContent.toLowerCase();
 
-    if (currentFilter === type) {
-      // Deactivate
-      currentFilter = null;
+    if (activeFilter === type) {
+      activeFilter = null;
     } else {
-      // Activate
-      currentFilter = type;
+      activeFilter = type;
     }
 
-    // Update button colors
-    bajakBtn.style.color = currentFilter === 'bajak' ? 'limegreen' : 'white';
-    calitBtn.style.color = currentFilter === 'calit' ? 'limegreen' : 'white';
-    racunBtn.style.color = currentFilter === 'racun' ? 'limegreen' : 'white';
+    [bajakBtn, calitBtn, racunBtn].forEach(b => {
+      b.style.color = (b.textContent.toLowerCase() === activeFilter) ? 'limegreen' : 'white';
+    });
 
-    // Apply the actual filter
-    Object.entries(groups).forEach(([group, files]) => {
-      (Array.isArray(files) ? files : [files]).forEach(filename => {
-        const id = `${group}-${filename}`;
+    clearAllHighlights();
 
-        if (!map.getLayer(`${id}-fill`)) return;
-
-        if (currentFilter) {
-          map.setFilter(`${id}-fill`, [
-            "all",
-            ["has", "description"],
-            ["match", ["downcase", ["get", "description"]],
-              ["*"+currentFilter+"*"], true, // match inside
-              true
-            ]
-          ]);
-        } else {
-          map.setFilter(`${id}-fill`, null); // clear filter
+    if (activeFilter) {
+      allFeatures.forEach(f => {
+        let desc = "";
+        if (typeof f.properties.description === 'object' && f.properties.description.value) {
+          desc = f.properties.description.value.toLowerCase();
+        } else if (typeof f.properties.description === 'string') {
+          desc = f.properties.description.toLowerCase();
+        }
+        if (desc.includes(activeFilter)) {
+          highlightFeature(f);
         }
       });
-    });
+    }
   });
 });
 
