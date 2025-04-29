@@ -555,7 +555,7 @@ bajakBtn.addEventListener('click', () => {
   if (activeWordFilter === 'bajak') {
     activeWordFilter = null;
     clearCheckMarkers();
-    bajakBtn.style.color = 'white';
+    resetAllFilterButtons();
   } else {
     activeWordFilter = 'bajak';
     showCheckmarksFor('bajak');
@@ -569,7 +569,7 @@ calitBtn.addEventListener('click', () => {
   if (activeWordFilter === 'calit') {
     activeWordFilter = null;
     clearCheckMarkers();
-    calitBtn.style.color = 'white';
+    resetAllFilterButtons();
   } else {
     activeWordFilter = 'calit';
     showCheckmarksFor('calit');
@@ -583,7 +583,7 @@ racunBtn.addEventListener('click', () => {
   if (activeWordFilter === 'racun') {
     activeWordFilter = null;
     clearCheckMarkers();
-    racunBtn.style.color = 'white';
+    resetAllFilterButtons();
   } else {
     activeWordFilter = 'racun';
     showCheckmarksFor('racun');
@@ -662,6 +662,34 @@ function clearAllHighlights() {
     });
   });
   document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
+}
+
+function clearCheckMarkers() {
+  checkMarkers.forEach(m => m.remove());
+  checkMarkers = [];
+}
+
+function showCheckmarksFor(keyword) {
+  clearCheckMarkers();
+
+  allFeatures.forEach(f => {
+    const rawHTML = f.properties?.description?.value || '';
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(rawHTML, 'text/html');
+    const text = doc.body.textContent.toLowerCase();
+
+    if (text.includes(keyword.toLowerCase())) {
+      const center = turf.center(f).geometry.coordinates;
+      const el = document.createElement('div');
+      el.innerText = '✔️';
+      el.style.fontSize = '18px';
+      el.style.color = 'limegreen';
+      el.style.textShadow = '1px 1px 2px black';
+      el.style.transform = 'translate(-50%, -50%)';
+      const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
+      checkMarkers.push(marker);
+    }
+  });
 }
 
 function resetAllFilterButtons() {
