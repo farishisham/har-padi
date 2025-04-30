@@ -510,18 +510,23 @@ function clearCheckMarkers() {
 }
 
 function showCheckmarks(keyword) {
+  clearCheckMarkers();
+
   allFeatures.forEach(f => {
-    let rawHTML = f.properties?.description?.value || '';
+    const rawHTML = f.properties?.description?.value || '';
     const parser = new DOMParser();
-    const text = parser.parseFromString(rawHTML, 'text/html').body.textContent.toLowerCase();
+    const doc = parser.parseFromString(rawHTML, 'text/html');
+    const text = doc.body.textContent.toLowerCase();
 
     if (text.includes(keyword.toLowerCase())) {
       const center = turf.center(f).geometry.coordinates;
+      
       const el = document.createElement('div');
-      el.innerHTML = '✔️';
-      el.style.fontSize = '18px';
-      el.style.color = 'white'; // You can change to 'limegreen' if preferred
-      el.style.textShadow = '1px 1px 1px black';
+      el.innerHTML = `
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="green" stroke="black" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 6L9 17L4 12" />
+        </svg>
+      `;
       el.style.transform = 'translate(-50%, -50%)';
       const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
       checkMarkers.push(marker);
