@@ -509,35 +509,22 @@ function clearCheckMarkers() {
   checkMarkers = [];
 }
 
-function showCheckmarksForKeyword(keyword) {
-  clearCheckMarkers();
-
+function showCheckmarks(keyword) {
   allFeatures.forEach(f => {
-    const desc = f.properties?.description;
-    
-    // Check if it's the expected object
-    if (desc && typeof desc === 'object' && desc.value) {
-      const html = desc.value;
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const text = doc.body.textContent?.toLowerCase() || '';
+    let rawHTML = f.properties?.description?.value || '';
+    const parser = new DOMParser();
+    const text = parser.parseFromString(rawHTML, 'text/html').body.textContent.toLowerCase();
 
-      console.log('Feature:', f.properties.name);
-      console.log('Parsed:', text);
-
-      if (text.includes(keyword.toLowerCase())) {
-        const center = turf.center(f).geometry.coordinates;
-        const el = document.createElement('div');
-        el.innerText = '✔';
-        el.style.fontSize = '18px';
-        el.style.color = 'white';
-        el.style.textShadow = '1px 1px 2px black';
-        el.style.transform = 'translate(-50%, -50%)';
-        const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
-        checkMarkers.push(marker);
-      }
-    } else {
-      console.warn('Missing or invalid description:', f.properties.name, desc);
+    if (text.includes(keyword.toLowerCase())) {
+      const center = turf.center(f).geometry.coordinates;
+      const el = document.createElement('div');
+      el.innerHTML = '✔️';
+      el.style.fontSize = '18px';
+      el.style.color = 'white'; // You can change to 'limegreen' if preferred
+      el.style.textShadow = '1px 1px 1px black';
+      el.style.transform = 'translate(-50%, -50%)';
+      const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
+      checkMarkers.push(marker);
     }
   });
 }
@@ -587,32 +574,32 @@ function updateVisibility() {
 
 // New added part: set filter logic
 bajakBtn.addEventListener('click', () => {
-  const active = bajakBtn.style.color === 'limegreen';
+  const alreadyActive = bajakBtn.style.color === 'limegreen';
   clearCheckMarkers();
   resetAllFilterButtons();
-  if (!active) {
+  if (!alreadyActive) {
     bajakBtn.style.color = 'limegreen';
-    showCheckmarksForKeyword('bajak');
+    showCheckmarks('bajak');
   }
 });
 
 calitBtn.addEventListener('click', () => {
-  const active = calitBtn.style.color === 'limegreen';
+  const alreadyActive = calitBtn.style.color === 'limegreen';
   clearCheckMarkers();
   resetAllFilterButtons();
-  if (!active) {
+  if (!alreadyActive) {
     calitBtn.style.color = 'limegreen';
-    showCheckmarksForKeyword('calit');
+    showCheckmarks('calit');
   }
 });
 
 racunBtn.addEventListener('click', () => {
-  const active = racunBtn.style.color === 'limegreen';
+  const alreadyActive = racunBtn.style.color === 'limegreen';
   clearCheckMarkers();
   resetAllFilterButtons();
-  if (!active) {
+  if (!alreadyActive) {
     racunBtn.style.color = 'limegreen';
-    showCheckmarksForKeyword('racun');
+    showCheckmarks('racun');
   }
 });
 
