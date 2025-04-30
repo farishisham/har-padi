@@ -14,15 +14,15 @@
     #header, #footer {
       position:fixed; width:100%; background:transparent;
       color:white; font-family:Helvetica,sans-serif;
-      text-align:center; z-index:1000; text-shadow: 1px 1px 0 black;
+      text-align:center; z-index:1000; text-shadow: 1px 1px 0 black;touch-action: none;
     }
-    #header { top:0; padding:5px 0; }
+    #header { top:0; padding:5px 0; touch-action: none;}
     #header h1 { margin:0; font-size:0.9rem; }
     #footer {
       bottom:0; font-size:0.6rem;
       left:3%;
       padding:5px 10px; text-align:left;
-      background:transparent;
+      background:transparent;touch-action: none;
     }
 
     #gpsButton {
@@ -30,12 +30,12 @@
       width:44px; height:44px; background:#333;
       border:none; border-radius:50%;
       display:flex; align-items:center; justify-content:center;
-      cursor:pointer; z-index:1001;
+      cursor:pointer; z-index:1001;touch-action: none;
     }
     #gpsIconImg { width:20px; height:20px; }
 
     .gps-marker {
-      position:relative; width:30px; height:30px;
+      position:relative; width:30px; height:30px;touch-action: none;
     }
     .gps-marker .circle {
       width:13px; height:13px; background:#007BFF;
@@ -57,10 +57,10 @@
 
     .search-container {
       position:absolute; top:44px; right:15px;
-      height:48px; z-index:1003;
+      height:48px; z-index:1003;touch-action: none;
     }
     .search-btn, .close-btn {
-      position:absolute; right:0; z-index:1002;
+      position:absolute; right:0; z-index:1002;touch-action: none;
       width:44px;height:44px;padding:0;
       border:none;border-radius:50%;
       background:#333;display:flex;
@@ -77,10 +77,10 @@
       transform: translateY(-50%) translateX(2px);  /* Adjust input to center it vertically */ padding-left:10px;
       padding-right:50px; border-radius:30px;
       border:1px solid #ccc; background:white;
-      outline:none; transition:all .3s ease;
+      outline:none; transition:all .3s ease;touch-action: none;
     }
     .search-container.active .search-input {
-      width:200px; opacity:1;
+      width:200px; opacity:1;touch-action: none;
     }
     .search-container.active .search-btn { display:none; }
     .search-container.active .close-btn { display:flex; }
@@ -98,7 +98,7 @@
       font-family: Helvetica, sans-serif;
       font-size: 13px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-      z-index: 1002;
+      z-index: 1002;touch-action: none;
     }
     
     #suggestions div {
@@ -122,7 +122,7 @@
       font-family: Helvetica, sans-serif;
       font-size: 13px;
       z-index: 9999;
-      display: none;
+      display: none;touch-action: none;
     }
     
     button:focus { outline: none; }
