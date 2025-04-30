@@ -583,37 +583,29 @@ function updateVisibility() {
   });
 }
 
+
+
 // New added part: set filter logic
 bajakBtn.addEventListener('click', () => {
-  const active = bajakBtn.style.color === 'limegreen';
   clearCheckMarkers();
   resetAllFilterButtons();
-  if (!active) {
-    bajakBtn.style.color = 'limegreen';
-    showCheckmarksForKeyword('bajak');
-  }
+  bajakBtn.style.color = 'limegreen';
+  showCheckmarks('bajak');
 });
 
 calitBtn.addEventListener('click', () => {
-  const active = calitBtn.style.color === 'limegreen';
   clearCheckMarkers();
   resetAllFilterButtons();
-  if (!active) {
-    calitBtn.style.color = 'limegreen';
-    showCheckmarksForKeyword('calit');
-  }
+  calitBtn.style.color = 'limegreen';
+  showCheckmarks('calit');
 });
 
 racunBtn.addEventListener('click', () => {
-  const active = racunBtn.style.color === 'limegreen';
   clearCheckMarkers();
   resetAllFilterButtons();
-  if (!active) {
-    racunBtn.style.color = 'limegreen';
-    showCheckmarksForKeyword('racun');
-  }
+  racunBtn.style.color = 'limegreen';
+  showCheckmarks('racun');
 });
-
 
 
 function resetAllFilterButtons() {
