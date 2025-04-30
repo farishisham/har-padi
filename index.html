@@ -132,7 +132,7 @@
 <body>
 
 <div id="header">
-  <h1>LOT KERJA HAR PADI ENTERPRISE v2</h1>
+  <h1>LOT KERJA HAR PADI ENTERPRISE</h1>
 </div>
 
 <div id="map"></div>
@@ -545,16 +545,18 @@ function showCheckmarksForKeyword(keyword) {
 let activeKeyword = null;
 
 function handleFilterButtonClick(keyword, button) {
-  const wasActive = activeKeyword === keyword;
+  const isSame = activeKeyword === keyword;
 
-  // Reset
-  activeKeyword = wasActive ? null : keyword;
+  activeKeyword = isSame ? null : keyword;
+
+  // Update button styles
+  [bajakBtn, calitBtn, racunBtn].forEach(btn => {
+    btn.style.color = (btn === button && !isSame) ? 'limegreen' : 'white';
+  });
+
   clearCheckMarkers();
-  resetAllFilterButtons();
 
-  // If activating, apply style + show checkmarks
-  if (!wasActive) {
-    button.style.color = 'limegreen';
+  if (!isSame) {
     showCheckmarks(keyword);
   }
 }
