@@ -503,27 +503,34 @@ filterContainer.appendChild(calitBtn);
 filterContainer.appendChild(racunBtn);
 
 function showCheckmarksForKeyword(keyword) {
-  clearCheckMarkers(); // remove old markers
+  clearCheckMarkers();
 
   allFeatures.forEach(f => {
     const html = f.properties?.description?.value || '';
     const parser = new DOMParser();
-    const text = parser.parseFromString(html, 'text/html').body.textContent.toLowerCase();
+    const doc = parser.parseFromString(html, 'text/html');
+    const text = doc.body.textContent?.toLowerCase() || '';
+
+    // Debug output
+    console.log('Parsed text:', text);
 
     if (text.includes(keyword.toLowerCase())) {
       const center = turf.center(f).geometry.coordinates;
       const el = document.createElement('div');
-      el.innerHTML = '✔';
-      el.style.color = 'limegreen';
+      el.innerText = '✔';
       el.style.fontSize = '18px';
+      el.style.color = 'limegreen';
       el.style.textShadow = '1px 1px 2px black';
       el.style.transform = 'translate(-50%, -50%)';
-
       const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
       checkMarkers.push(marker);
     }
   });
 }
+
+[bajakBtn, calitBtn, racunBtn].forEach(b => {
+      b.style.color = (b.textContent.toLowerCase() === activeFilter) ? 'limegreen' : 'white';
+    });
 
 // New added part: set filter logic
 bajakBtn.addEventListener('click', () => {
