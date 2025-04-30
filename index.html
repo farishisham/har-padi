@@ -567,11 +567,6 @@ racunBtn.addEventListener('click', () => {
   handleFilterClick('racun', racunBtn);
 });
 
-// Hook each button
-bajakBtn.addEventListener('click', () => handleFilterButtonClick('bajak', bajakBtn));
-calitBtn.addEventListener('click', () => handleFilterButtonClick('calit', calitBtn));
-racunBtn.addEventListener('click', () => handleFilterButtonClick('racun', racunBtn));
-
 // helper function to update visibility
 function updateVisibility() {
   Object.entries(groups).forEach(([group, files]) => {
