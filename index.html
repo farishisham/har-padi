@@ -533,14 +533,6 @@ function showCheckmarks(keyword) {
     }
   });
 }
-        </svg>
-      `;
-      el.style.transform = 'translate(-50%, -50%)';
-      const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
-      checkMarkers.push(marker);
-    }
-  });
-}
 
 let activeKeyword = null;
 
