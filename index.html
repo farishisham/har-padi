@@ -132,7 +132,7 @@
 <body>
 
 <div id="header">
-  <h1>LOT KERJA HAR PADI ENTERPRISE v6</h1>
+  <h1>LOT KERJA HAR PADI ENTERPRISE</h1>
 </div>
 
 <div id="map"></div>
@@ -501,6 +501,13 @@ const racunBtn = createFilterButton('Racun', 'racunFilter');
 filterContainer.appendChild(bajakBtn);
 filterContainer.appendChild(calitBtn);
 filterContainer.appendChild(racunBtn);
+
+let checkMarkers = [];
+
+function clearCheckMarkers() {
+  checkMarkers.forEach(m => m.remove());
+  checkMarkers = [];
+}
 
 function showCheckmarksForKeyword(keyword) {
   clearCheckMarkers();
