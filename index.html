@@ -531,22 +531,33 @@ function showCheckmarks(keyword) {
 
 let activeKeyword = null;
 
-function handleFilterButtonClick(keyword, button) {
+function handleFilterClick(keyword, button) {
   const isSame = activeKeyword === keyword;
 
-  activeKeyword = isSame ? null : keyword;
-
-  // Update button styles
-  [bajakBtn, calitBtn, racunBtn].forEach(btn => {
-    btn.style.color = (btn === button && !isSame) ? 'limegreen' : 'white';
-  });
-
+  // Always clear previous checkmarks and button highlights
   clearCheckMarkers();
+  resetAllFilterButtons();
 
   if (!isSame) {
+    activeKeyword = keyword;
+    button.style.color = 'limegreen';
     showCheckmarks(keyword);
+  } else {
+    activeKeyword = null; // Turn off if clicking same button
   }
 }
+
+bajakBtn.addEventListener('click', () => {
+  handleFilterClick('bajak', bajakBtn);
+});
+
+calitBtn.addEventListener('click', () => {
+  handleFilterClick('calit', calitBtn);
+});
+
+racunBtn.addEventListener('click', () => {
+  handleFilterClick('racun', racunBtn);
+});
 
 // Hook each button
 bajakBtn.addEventListener('click', () => handleFilterButtonClick('bajak', bajakBtn));
