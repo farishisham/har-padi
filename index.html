@@ -132,7 +132,7 @@
 <body>
 
 <div id="header">
-  <h1>LOT KERJA HAR PADI ENTERPRISE</h1>
+  <h1>LOT KERJA HAR PADI ENTERPRISE v6</h1>
 </div>
 
 <div id="map"></div>
@@ -502,75 +502,64 @@ filterContainer.appendChild(bajakBtn);
 filterContainer.appendChild(calitBtn);
 filterContainer.appendChild(racunBtn);
 
-// New added part: set filter logic
-let activeFilter = null;
+function showCheckmarksForKeyword(keyword) {
+  clearCheckMarkers(); // remove old markers
 
-[bajakBtn, calitBtn, racunBtn].forEach(btn => {
-  btn.addEventListener('click', () => {
-    const type = btn.textContent.toLowerCase();
+  allFeatures.forEach(f => {
+    const html = f.properties?.description?.value || '';
+    const parser = new DOMParser();
+    const text = parser.parseFromString(html, 'text/html').body.textContent.toLowerCase();
 
-    if (activeFilter === type) {
-      // Turn off
-      activeFilter = null;
-    } else {
-      // Turn on new filter
-      activeFilter = type;
+    if (text.includes(keyword.toLowerCase())) {
+      const center = turf.center(f).geometry.coordinates;
+      const el = document.createElement('div');
+      el.innerHTML = '✔';
+      el.style.color = 'limegreen';
+      el.style.fontSize = '18px';
+      el.style.textShadow = '1px 1px 2px black';
+      el.style.transform = 'translate(-50%, -50%)';
+
+      const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
+      checkMarkers.push(marker);
     }
-
-    // Update button color
-    [bajakBtn, calitBtn, racunBtn].forEach(b => {
-      b.style.color = (b.textContent.toLowerCase() === activeFilter) ? 'limegreen' : 'white';
-    });
-
-    // Now filter polygons
-    Object.entries(groups).forEach(([group, files]) => {
-      (Array.isArray(files) ? files : [files]).forEach(filename => {
-        const id = `${group}-${filename}`;
-        const source = map.getSource(id);
-        if (!source) return;
-
-        const features = source._data.features.map(f => {
-          let desc = "";
-          if (typeof f.properties.description === 'object' && f.properties.description.value) {
-            desc = f.properties.description.value.toLowerCase();
-          } else if (typeof f.properties.description === 'string') {
-            desc = f.properties.description.toLowerCase();
-          }
-
-          const visible = activeFilter
-            ? desc.includes(activeFilter)
-            : true; // if no filter active, show all
-
-          return {
-            ...f,
-            properties: { ...f.properties, _visible: visible }
-          };
-        });
-
-        source.setData({ type: 'FeatureCollection', features });
-      });
-    });
-
-    updateVisibility();
   });
+}
+
+// New added part: set filter logic
+bajakBtn.addEventListener('click', () => {
+  const active = bajakBtn.style.color === 'limegreen';
+  clearCheckMarkers();
+  resetAllFilterButtons();
+  if (!active) {
+    bajakBtn.style.color = 'limegreen';
+    showCheckmarksForKeyword('bajak');
+  }
 });
 
+calitBtn.addEventListener('click', () => {
+  const active = calitBtn.style.color === 'limegreen';
+  clearCheckMarkers();
+  resetAllFilterButtons();
+  if (!active) {
+    calitBtn.style.color = 'limegreen';
+    showCheckmarksForKeyword('calit');
+  }
+});
 
-// helper function to update visibility
-function updateVisibility() {
-  Object.entries(groups).forEach(([group, files]) => {
-    (Array.isArray(files) ? files : [files]).forEach(filename => {
-      const id = `${group}-${filename}-fill`;
-      if (map.getLayer(id)) {
-        map.setPaintProperty(id, 'fill-opacity', [
-          'case',
-          ['==', ['get', '_visible'], true],
-          ['interpolate', ['linear'], ['zoom'], 13, 0.4, 16, 0],
-          0
-        ]);
-      }
-    });
-  });
+racunBtn.addEventListener('click', () => {
+  const active = racunBtn.style.color === 'limegreen';
+  clearCheckMarkers();
+  resetAllFilterButtons();
+  if (!active) {
+    racunBtn.style.color = 'limegreen';
+    showCheckmarksForKeyword('racun');
+  }
+});
+
+function resetAllFilterButtons() {
+  bajakBtn.style.color = 'white';
+  calitBtn.style.color = 'white';
+  racunBtn.style.color = 'white';
 }
 
 // --- Filter Logic ---
