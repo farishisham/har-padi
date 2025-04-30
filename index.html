@@ -545,22 +545,24 @@ function showCheckmarksForKeyword(keyword) {
 let activeKeyword = null;
 
 function handleFilterButtonClick(keyword, button) {
-  const isActive = activeKeyword === keyword;
-  activeKeyword = isActive ? null : keyword;
+  const wasActive = activeKeyword === keyword;
 
+  // Reset
+  activeKeyword = wasActive ? null : keyword;
   clearCheckMarkers();
   resetAllFilterButtons();
 
-  if (!isActive) {
+  // If activating, apply style + show checkmarks
+  if (!wasActive) {
     button.style.color = 'limegreen';
     showCheckmarks(keyword);
   }
 }
 
+// Hook each button
 bajakBtn.addEventListener('click', () => handleFilterButtonClick('bajak', bajakBtn));
 calitBtn.addEventListener('click', () => handleFilterButtonClick('calit', calitBtn));
 racunBtn.addEventListener('click', () => handleFilterButtonClick('racun', racunBtn));
-
 
 // helper function to update visibility
 function updateVisibility() {
