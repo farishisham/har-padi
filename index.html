@@ -574,24 +574,33 @@ function updateVisibility() {
 
 // New added part: set filter logic
 bajakBtn.addEventListener('click', () => {
+  const isActive = bajakBtn.style.color === 'limegreen';
   clearCheckMarkers();
   resetAllFilterButtons();
-  bajakBtn.style.color = 'limegreen';
-  showCheckmarks('bajak');
+  if (!isActive) {
+    bajakBtn.style.color = 'limegreen';
+    showCheckmarks('bajak');
+  }
 });
 
 calitBtn.addEventListener('click', () => {
+  const isActive = calitBtn.style.color === 'limegreen';
   clearCheckMarkers();
   resetAllFilterButtons();
-  calitBtn.style.color = 'limegreen';
-  showCheckmarks('calit');
+  if (!isActive) {
+    calitBtn.style.color = 'limegreen';
+    showCheckmarks('calit');
+  }
 });
 
 racunBtn.addEventListener('click', () => {
+  const isActive = racunBtn.style.color === 'limegreen';
   clearCheckMarkers();
   resetAllFilterButtons();
-  racunBtn.style.color = 'limegreen';
-  showCheckmarks('racun');
+  if (!isActive) {
+    racunBtn.style.color = 'limegreen';
+    showCheckmarks('racun');
+  }
 });
 
 function resetAllFilterButtons() {
