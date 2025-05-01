@@ -594,47 +594,23 @@ function updateVisibility() {
 // New added part: set filter logic
 let activeButton = null;
 
-bajakBtn.addEventListener('click', () => {
-  const isActive = activeButton === bajakBtn;
+function handleButtonClick(type, button) {
+  const isActive = activeButton === button;
   clearCheckMarkers();
   resetAllFilterButtons();
 
   if (!isActive) {
-    bajakBtn.style.color = 'limegreen';
-    showCheckmarks('bajak');
-    activeButton = bajakBtn;
-  } else {
-    activeButton = null; // turn off
-  }
-});
-
-calitBtn.addEventListener('click', () => {
-  const isActive = activeButton === calitBtn;
-  clearCheckMarkers();
-  resetAllFilterButtons();
-
-  if (!isActive) {
-    calitBtn.style.color = 'limegreen';
-    showCheckmarks('calit');
-    activeButton = calitBtn;
+    button.style.color = 'limegreen';
+    showCheckmarks(type);
+    activeButton = button;
   } else {
     activeButton = null;
   }
-});
+}
 
-racunBtn.addEventListener('click', () => {
-  const isActive = activeButton === racunBtn;
-  clearCheckMarkers();
-  resetAllFilterButtons();
-
-  if (!isActive) {
-    racunBtn.style.color = 'limegreen';
-    showCheckmarks('racun');
-    activeButton = racunBtn;
-  } else {
-    activeButton = null;
-  }
-});
+bajakBtn.addEventListener('click', () => handleButtonClick('bajak', bajakBtn));
+calitBtn.addEventListener('click', () => handleButtonClick('calit', calitBtn));
+racunBtn.addEventListener('click', () => handleButtonClick('racun', racunBtn));
 
 
 // --- Filter Logic ---
