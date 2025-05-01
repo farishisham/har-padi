@@ -636,11 +636,6 @@ racunBtn.addEventListener('click', () => {
   }
 });
 
-function resetAllFilterButtons() {
-  bajakBtn.style.color = 'white';
-  calitBtn.style.color = 'white';
-  racunBtn.style.color = 'white';
-}
 
 // --- Filter Logic ---
 function clearAllHighlights() {
@@ -711,22 +706,6 @@ function applyFilter(type) {
   updateVisibility();
 }
 
-function updateVisibility() {
-  Object.entries(groups).forEach(([group, files]) => {
-    (Array.isArray(files) ? files : [files]).forEach(filename => {
-      const sourceId = `${group}-${filename}`;
-      const fillLayerId = `${sourceId}-fill`;
-      if (map.getLayer(fillLayerId)) {
-        map.setPaintProperty(fillLayerId, 'fill-opacity', [
-          'case',
-          ['==', ['get', '_visible'], true],
-          ['interpolate', ['linear'], ['zoom'], 13, 0.4, 16, 0],
-          0
-        ]);
-      }
-    });
-  });
-}
 
 function toggleFilter(type) {
   if (activeFilter === type) {
