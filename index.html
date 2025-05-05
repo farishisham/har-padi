@@ -397,7 +397,7 @@ function highlightFeature(f) {
 
   new maplibregl.Popup({ closeButton: false })
     .setLngLat(center)
-    .setHTML(`<strong>${f.properties.name}</strong><br>${(turf.area(f)/4046.86).toFixed(2)} acre<br>${(turf.area(f)/4046.86*35).toFixed(2)} tray gulung`)
+    .setHTML(`<strong>${f.properties.name}</strong><br>${(turf.area(f)/4046.86).toFixed(2)} acre size<br>${(turf.area(f)/4046.86*35).toFixed(2)} tray gulung`)
     .addTo(map)
     .getElement().classList.add('popup-no-x');
 }
