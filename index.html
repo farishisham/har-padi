@@ -381,55 +381,23 @@ async function loadGroup(group, files) {
 }
 
 function highlightFeature(f) {
-  // Apply highlight filters
   Object.entries(groups).forEach(([group, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(file => {
       const id = `${group}-${file}`;
-      const filter = f.properties._id.startsWith(id)
-        ? ['==', '_id', f.properties._id]
-        : ['==', '_id', ''];
+      const filter = f.properties._id.startsWith(id) ? ['==', '_id', f.properties._id] : ['==', '_id', ''];
       map.setFilter(`${id}-highlight`, filter);
     });
   });
-
-  // Clear previous popups
   document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
   gpsMode = 1;
   setIconColor();
-
+  
   const center = turf.center(f).geometry.coordinates;
-  map.fitBounds(turf.bbox(f), {
-    padding: 100,
-    maxZoom: 17.4,
-    bearing: map.getBearing()
-  });
-
-  // Calculate values
-  const areaAcre = turf.area(f) / 4046.86;
-  const trayGulung = (areaAcre * 35).toFixed(0);
-  const benihType = parseBenihType(f.properties?.description?.value) || 'N/A';
-
-  // Determine group from _id
-  const isSawahRing = f.properties._id.startsWith('sawahring-');
-
-  // Conditional popup content
-  const htmlContent = isSawahRing
-    ? `
-      <strong>SAWAH RING</strong><br>
-      ${areaAcre.toFixed(2)} ekar<br>
-      Benih: ${benihType}<br>
-      ${trayGulung} tray gulung
-    `
-    : `
-      <strong>${f.properties.name}</strong><br>
-      ${areaAcre.toFixed(2)} ekar<br>
-      Benih: ${benihType}<br>
-      ${trayGulung} tray gulung
-    `;
+  map.fitBounds(turf.bbox(f), { padding: 100, maxZoom: 17.4, bearing: map.getBearing() });
 
   new maplibregl.Popup({ closeButton: false })
     .setLngLat(center)
-    .setHTML(htmlContent)
+    .setHTML(`<strong>${f.properties.name}</strong><br>${(turf.area(f)/4046.86).toFixed(2)} ekar`)
     .addTo(map)
     .getElement().classList.add('popup-no-x');
 }
