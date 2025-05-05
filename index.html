@@ -397,7 +397,17 @@ function highlightFeature(f) {
 
   new maplibregl.Popup({ closeButton: false })
     .setLngLat(center)
-    .setHTML(`<strong>${f.properties.name}</strong><br>${(turf.area(f)/4046.86).toFixed(2)} ekar`)
+    .setHTML(`
+<strong>
+${f.properties.name}
+</strong>
+<br>
+${(turf.area(f)/4046.86).toFixed(2)} ekar
+<br>
+Benih: benihType
+<br>
+${(turf.area(f)/4046.86).toFixed(2)*35} tray gulung
+`)
     .addTo(map)
     .getElement().classList.add('popup-no-x');
 }
@@ -532,6 +542,36 @@ function showCheckmarks(keyword) {
   </svg>
 `;
       el.style.transform = 'translate(-50%, -50%)';
+      const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
+      checkMarkers.push(marker);
+    }
+  });
+}
+
+function showCheckmarks(keyword) {
+  clearCheckMarkers();
+
+  allFeatures.forEach(f => {
+    const rawHTML = f.properties?.description?.value || '';
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(rawHTML, 'text/html');
+    const text = doc.body.textContent.toLowerCase();
+
+    if (text.includes(keyword.toLowerCase())) {
+      const center = turf.center(f).geometry.coordinates;
+      
+      // Parse the benih type after 'benih'
+      const benihType = parseBenihType(rawHTML);
+      console.log('Benih Type:', benihType);  // Log the parsed benih type
+
+      // Create a div with the benih type text
+      const el = document.createElement('div');
+      el.textContent = benihType || 'No Benih Type Found'; // Display the benih type or a fallback text if none is found
+      el.style.transform = 'translate(-50%, -50%)';
+      el.style.fontSize = '14px';  // Adjust the font size if needed
+      el.style.backgroundColor = 'white'; // You can add some background for visibility
+      el.style.padding = '2px 5px';  // Some padding for better text appearance
+
       const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
       checkMarkers.push(marker);
     }
