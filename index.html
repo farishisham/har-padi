@@ -384,20 +384,51 @@ function highlightFeature(f) {
   Object.entries(groups).forEach(([group, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(file => {
       const id = `${group}-${file}`;
-      const filter = f.properties._id.startsWith(id) ? ['==', '_id', f.properties._id] : ['==', '_id', ''];
+      const filter = f.properties._id.startsWith(id)
+        ? ['==', '_id', f.properties._id]
+        : ['==', '_id', ''];
       map.setFilter(`${id}-highlight`, filter);
     });
   });
+
   document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
   gpsMode = 1;
   setIconColor();
-  
+
   const center = turf.center(f).geometry.coordinates;
-  map.fitBounds(turf.bbox(f), { padding: 100, maxZoom: 17.4, bearing: map.getBearing() });
+  map.fitBounds(turf.bbox(f), {
+    padding: 100,
+    maxZoom: 17.4,
+    bearing: map.getBearing()
+  });
+
+  // Parse values
+  const areaAcre = turf.area(f) / 4046.86;
+  const trayGulung = (areaAcre * 35).toFixed(0);
+  const benihType = parseBenihType(f.properties?.description?.value) || 'N/A';
+
+  // Extract group from _id
+  const idPrefix = f.properties._id.split('-')[0];
+
+  // Conditional HTML content
+  let htmlContent;
+  if (idPrefix === 'sawahring') {
+    htmlContent = `
+      <strong>${f.properties.name}</strong><br>
+      ${areaAcre.toFixed(2)} ekar
+    `;
+  } else {
+    htmlContent = `
+      <strong>${f.properties.name}</strong><br>
+      ${areaAcre.toFixed(2)} ekar<br>
+      Benih: ${benihType}<br>
+      ${trayGulung} tray gulung
+    `;
+  }
 
   new maplibregl.Popup({ closeButton: false })
     .setLngLat(center)
-    .setHTML(`<strong>${f.properties.name}</strong><br>${(turf.area(f)/4046.86).toFixed(2)} ekar<br>Benih: benihType<br>${(turf.area(f)/4046.86*35).toFixed(0)} tray gulung`)
+    .setHTML(htmlContent)
     .addTo(map)
     .getElement().classList.add('popup-no-x');
 }
