@@ -384,7 +384,7 @@ function parseBenihType(f) {
   const rawHTML = f.properties?.description?.value || '';
   const parser = new DOMParser();
   const doc = parser.parseFromString(rawHTML, 'text/html');
-  const text = doc.body.textContent.toLowerCase();
+  const text = doc.body.textContent.toLowerCase().replace(/\s+/g, ' ').trim();
 
   const match = text.match(/benih\s+(\S+)/);
   return match ? match[1] : null;
