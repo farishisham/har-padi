@@ -380,6 +380,16 @@ async function loadGroup(group, files) {
   }
 }
 
+function parseBenihType(f) {
+  const rawHTML = f.properties?.description?.value || '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(rawHTML, 'text/html');
+  const text = doc.body.textContent.toLowerCase();
+
+  const match = text.match(/benih\s+(\S+)/);
+  return match ? match[1] : null;
+}
+
 function highlightFeature(f) {
   Object.entries(groups).forEach(([group, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(file => {
@@ -394,6 +404,7 @@ function highlightFeature(f) {
   
   const center = turf.center(f).geometry.coordinates;
   map.fitBounds(turf.bbox(f), { padding: 100, maxZoom: 17.4, bearing: map.getBearing() });
+  const benihType = parseBenihType(f);
 
   new maplibregl.Popup({ closeButton: false })
     .setLngLat(center)
@@ -404,7 +415,7 @@ ${f.properties.name}
 <br>
 ${(turf.area(f)/4046.86).toFixed(2)} ekar
 <br>
-Benih: benihType
+Benih: ${benihType}
 <br>
 ${(turf.area(f)/4046.86*35).toFixed(0)} tray gulung
 `)
