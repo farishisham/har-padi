@@ -382,13 +382,14 @@ async function loadGroup(group, files) {
 
 function parseBenihType(f) {
   const rawHTML = f.properties?.description?.value || '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(rawHTML, 'text/html');
+  const text = doc.body.textContent.toLowerCase();
+  
+  console.log('Description text:', text);
 
-  // Strip HTML tags manually
-  const text = rawHTML.replace(/<[^>]*>/g, ' ').toLowerCase().replace(/\s+/g, ' ').trim();
-
-  console.log("Parsed description text:", text); // Debug
-
-  const match = text.match(/benih\s+([a-z0-9]+)/);
+  // Look for "benih" followed by a word (e.g., "benih CL" -> match "CL")
+  const match = text.match(/benih\s+([^\s]+)/);
   return match ? match[1].toUpperCase() : null;
 }
 
