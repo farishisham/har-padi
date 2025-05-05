@@ -404,7 +404,7 @@ function highlightFeature(f) {
   
   const center = turf.center(f).geometry.coordinates;
   map.fitBounds(turf.bbox(f), { padding: 100, maxZoom: 17.4, bearing: map.getBearing() });
-  const benihType = parseBenihType(f);
+  const benih = parseBenihType(f);
 
   new maplibregl.Popup({ closeButton: false })
     .setLngLat(center)
@@ -415,7 +415,7 @@ ${f.properties.name}
 <br>
 ${(turf.area(f)/4046.86).toFixed(2)} ekar
 <br>
-Benih: ${benihType || 'Tiada'}
+Benih: ${benih || 'Tiada'}
 <br>
 ${(turf.area(f)/4046.86*35).toFixed(0)} tray gulung
 `)
