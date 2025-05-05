@@ -397,17 +397,7 @@ function highlightFeature(f) {
 
   new maplibregl.Popup({ closeButton: false })
     .setLngLat(center)
-    .setHTML(`
-<strong>
-${f.properties.name}
-</strong>
-<br>
-${(turf.area(f)/4046.86).toFixed(2)} ekar
-<br>
-Benih: benihType
-<br>
-${(turf.area(f)/4046.86).toFixed(2)*35} tray gulung
-`)
+    .setHTML(`<strong>${f.properties.name}</strong><br>${(turf.area(f)/4046.86).toFixed(2)} ekar<br>Benih: benihType<br>${(turf.area(f)/4046.86).toFixed(2)*35} tray gulung`)
     .addTo(map)
     .getElement().classList.add('popup-no-x');
 }
