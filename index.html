@@ -387,13 +387,14 @@ function parseBenihType(f) {
 }
 
 function highlightFeature(fPartial) {
-  // Get full feature from allFeatures using _id
+  // Find full feature by _id
   const f = allFeatures.find(feat => feat.properties._id === fPartial.properties._id);
   if (!f) {
     console.warn('Full feature not found!');
     return;
   }
 
+  // Apply highlight filter
   Object.entries(groups).forEach(([group, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(file => {
       const id = `${group}-${file}`;
@@ -404,6 +405,7 @@ function highlightFeature(fPartial) {
     });
   });
 
+  // Remove any existing popups
   document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
   gpsMode = 1;
   setIconColor();
@@ -415,9 +417,10 @@ function highlightFeature(fPartial) {
     bearing: map.getBearing()
   });
 
-  const benih = parseBenihType(f);
+  const area = (turf.area(f) / 4046.86).toFixed(2);
+  const isBlok = f.properties.name?.toLowerCase().includes('blok'); // Adjust logic if needed
 
-let popupHTML = `
+  let popupHTML = `
     <strong>${f.properties.name}</strong><br>
     ${area} ekar
   `;
@@ -425,13 +428,15 @@ let popupHTML = `
   if (isBlok) {
     const benih = parseBenihType(f);
     const tray = Math.round(area * 35);
-    popupHTML += `
-      <strong>${f.properties.name}</strong><br>
-      ${(turf.area(f) / 4046.86).toFixed(2)} ekar<br>
-      Benih: ${benih || 'Tiada'}<br>
-      ${(turf.area(f) / 4046.86 * 35).toFixed(0)} Tray gulung
-    `;
+    popupHTML += `<br>Benih: ${benih || 'Tiada'}<br>${tray} tray gulung`;
   }
+
+  new maplibregl.Popup({ closeButton: false })
+    .setLngLat(center)
+    .setHTML(popupHTML)
+    .addTo(map)
+    .getElement().classList.add('popup-no-x');
+}
 
 
 // Clear highlight when clicking empty area
