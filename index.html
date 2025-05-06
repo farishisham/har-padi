@@ -408,37 +408,6 @@ function highlightFeature(f) {
     });
   });
 
-  // Remove existing popups
-  document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
-
-  gpsMode = 1;
-  setIconColor();
-
-  const center = turf.center(f).geometry.coordinates;
-  const benih = parseBenihType(f);
-
-new maplibregl.Popup({ closeButton: false })
-  .setLngLat(center)
-  .setHTML(`
-    <strong>${f.properties.name}</strong><br>
-    ${(turf.area(f)/4046.86).toFixed(2)} ekar<br>
-    Benih: ${benih || 'Tiada'}<br>
-    ${(turf.area(f)/4046.86 * 35).toFixed(0)} tray gulung
-  `)
-  .addTo(map)
-  .getElement().classList.add('popup-no-x');
-
-function highlightFeature(f) {
-  Object.entries(groups).forEach(([group, files]) => {
-    (Array.isArray(files) ? files : [files]).forEach(file => {
-      const id = `${group}-${file}`;
-      const filter = f.properties._id.startsWith(id)
-        ? ['==', '_id', f.properties._id]
-        : ['==', '_id', ''];
-      map.setFilter(`${id}-highlight`, filter);
-    });
-  });
-
   document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
   gpsMode = 1;
   setIconColor();
@@ -456,11 +425,11 @@ function highlightFeature(f) {
 new maplibregl.Popup({ closeButton: false })
   .setLngLat(center)
   .setHTML(`
-<strong>${f.properties.name}</strong><br>
-${(turf.area(f) / 4046.86).toFixed(2)} ekar<br>
-Benih: ${benih || 'Tiada'}<br>
-${(turf.area(f) / 4046.86 * 35).toFixed(0)} tray gulung
-`)
+    <strong>${f.properties.name}</strong><br>
+    ${(turf.area(f)/4046.86).toFixed(2)} ekar<br>
+    Benih: ${benih || 'Tiada'}<br>
+    ${(turf.area(f)/4046.86 * 35).toFixed(0)} tray gulung
+  `)
   .addTo(map)
   .getElement().classList.add('popup-no-x');
 }
