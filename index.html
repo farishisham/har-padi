@@ -379,15 +379,14 @@ async function loadGroup(group, files) {
 
 function parseBenihType(f) {
   const rawHTML = f.properties?.description?.value || '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(rawHTML, 'text/html');
+  const text = doc.body.textContent?.toLowerCase().trim() || '';
 
-  // Strip HTML tags manually since it's mostly just <pre>
-  const plainText = rawHTML.replace(/<[^>]+>/g, ' ').toLowerCase().trim();
+  console.log('Parsed text:', text); // Should log: "calit benih cl"
 
-  console.log('Plain text:', plainText); // Debug: see what's being parsed
-
-  // Match "benih" followed by one or more non-newline characters
-  const match = plainText.match(/benih\s+([^\n]+)/i);
-  return match ? match[1].trim().toUpperCase() : null;
+  const match = text.match(/benih\s+([^\s]+)/); // captures word after 'benih'
+  return match ? match[1].toUpperCase() : null;
 }
 
 function highlightFeature(f) {
@@ -447,16 +446,16 @@ function highlightFeature(f) {
   const areaInEkar = (turf.area(f) / 4046.86);
   const benih = parseBenihType(f);
 
-  new maplibregl.Popup({ closeButton: false })
-    .setLngLat(center)
-    .setHTML(`
-      <strong>${f.properties.name}</strong><br>
-      ${areaInEkar.toFixed(2)} ekar<br>
-      Benih: ${benih || 'Tiada'}<br>
-      ${(areaInEkar * 35).toFixed(0)} Tray gulung
-    `)
-    .addTo(map)
-    .getElement().classList.add('popup-no-x');
+new maplibregl.Popup({ closeButton: false })
+  .setLngLat(center)
+  .setHTML(`
+<strong>${f.properties.name}</strong><br>
+${(turf.area(f) / 4046.86).toFixed(2)} ekar<br>
+Benih: ${benih || 'Tiada'}<br>
+${(turf.area(f) / 4046.86 * 35).toFixed(0)} tray gulung
+`)
+  .addTo(map)
+  .getElement().classList.add('popup-no-x');
 }
 
 // Clear highlight when clicking empty area
