@@ -375,13 +375,21 @@ async function loadGroup(group, files) {
 }
 
 function parseBenihType(f) {
-  const rawHTML = f.properties?.description?.value || '';
+  const rawHTML = f?.properties?.description?.value;
+
+  if (!rawHTML) {
+    console.log('No description value found');
+    return null;
+  }
+
+  // Parse the HTML and extract text content
   const parser = new DOMParser();
   const doc = parser.parseFromString(rawHTML, 'text/html');
-  const text = doc.body.textContent || '';
+  const text = doc.body.textContent?.toLowerCase().trim() || '';
 
-  console.log('Parsed description text:', text); // Debug line
+  console.log('Parsed description text:', text);
 
+  // Match "benih" followed by non-linebreak text
   const match = text.match(/benih\s+([^\n]+)/i);
   return match ? match[1].trim().toUpperCase() : null;
 }
@@ -419,11 +427,18 @@ function highlightFeature(f) {
     `;
   }
 
-  new maplibregl.Popup({ closeButton: false })
-    .setLngLat(center)
-    .setHTML(popupHTML)
-    .addTo(map)
-    .getElement().classList.add('popup-no-x');
+  const benih = parseBenihType(f);
+
+new maplibregl.Popup({ closeButton: false })
+  .setLngLat(center)
+  .setHTML(`
+    <strong>${f.properties.name}</strong><br>
+    ${(turf.area(f)/4046.86).toFixed(2)} ekar<br>
+    Benih: ${benih || 'Tiada'}<br>
+    ${(turf.area(f)/4046.86 * 35).toFixed(0)} tray gulung
+  `)
+  .addTo(map)
+  .getElement().classList.add('popup-no-x');
 }
 
 // Clear highlight when clicking empty area
