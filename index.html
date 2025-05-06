@@ -425,20 +425,6 @@ function highlightFeature(f) {
     .getElement().classList.add('popup-no-x');
 }
 
-  const benih = parseBenihType(f);
-
-new maplibregl.Popup({ closeButton: false })
-  .setLngLat(center)
-  .setHTML(`
-    <strong>${f.properties.name}</strong><br>
-    ${(turf.area(f)/4046.86).toFixed(2)} ekar<br>
-    Benih: ${benih || 'Tiada'}<br>
-    ${(turf.area(f)/4046.86 * 35).toFixed(0)} tray gulung
-  `)
-  .addTo(map)
-  .getElement().classList.add('popup-no-x');
-}
-
 // Clear highlight when clicking empty area
 map.on('click', e => {
   const allLayers = [];
