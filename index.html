@@ -383,7 +383,7 @@ function parseBenihType(f) {
   const doc = parser.parseFromString(rawHTML, 'text/html');
   const text = doc.body.textContent;
 
-  console.log('Description text:', text);
+  console.log('Description text:', text); // For debugging
 
   // Match "benih" followed by rest of line (e.g., "benih MR 297")
   const match = text.match(/benih\s+([^\n]+)/i);
@@ -394,31 +394,35 @@ function highlightFeature(f) {
   Object.entries(groups).forEach(([group, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(file => {
       const id = `${group}-${file}`;
-      const filter = f.properties._id.startsWith(id) ? ['==', '_id', f.properties._id] : ['==', '_id', ''];
+      const filter = f.properties._id.startsWith(id)
+        ? ['==', '_id', f.properties._id]
+        : ['==', '_id', ''];
       map.setFilter(`${id}-highlight`, filter);
     });
   });
+
   document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
   gpsMode = 1;
   setIconColor();
-  
+
   const center = turf.center(f).geometry.coordinates;
-  map.fitBounds(turf.bbox(f), { padding: 100, maxZoom: 17.4, bearing: map.getBearing() });
+  map.fitBounds(turf.bbox(f), {
+    padding: 100,
+    maxZoom: 17.4,
+    bearing: map.getBearing()
+  });
+
+  const areaInEkar = (turf.area(f) / 4046.86);
   const benih = parseBenihType(f);
 
   new maplibregl.Popup({ closeButton: false })
     .setLngLat(center)
     .setHTML(`
-<strong>
-${f.properties.name}
-</strong>
-<br>
-${(turf.area(f)/4046.86).toFixed(2)} ekar
-<br>
-Benih: ${benih || 'Tiada'}
-<br>
-${(turf.area(f)/4046.86*35).toFixed(0)} tray gulung
-`)
+      <strong>${f.properties.name}</strong><br>
+      ${areaInEkar.toFixed(2)} ekar<br>
+      Benih: ${benih || 'NA'}<br>
+      ${(areaInEkar * 35).toFixed(0)} tray gulung
+    `)
     .addTo(map)
     .getElement().classList.add('popup-no-x');
 }
