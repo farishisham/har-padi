@@ -378,11 +378,11 @@ async function loadGroup(group, files) {
 }
 
 function parseBenihType(f) {
-  const html = '<pre id="com.exlyo.mapmarker.description_p_tag">Calit bajak benih MR 297</pre>';
-const parser = new DOMParser();
-const doc = parser.parseFromString(html, 'text/html');
-const text = doc.body.textContent || doc.body.innerText || '';
-   // Use fallback if textContent is empty
+  const rawHTML = f.properties?.description?.value || '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(rawHTML, 'text/html');
+
+  // Use fallback if textContent is empty
   let text = doc.body.textContent || doc.body.innerText || '';
   text = text.toLowerCase().replace(/\s+/g, ' ').trim();
 
