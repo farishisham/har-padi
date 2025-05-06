@@ -392,6 +392,7 @@ function parseBenihType(f) {
 }
 
 function highlightFeature(f) {
+  console.log('Raw description value:', f.properties?.description?.value);
   Object.entries(groups).forEach(([group, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(file => {
       const id = `${group}-${file}`;
