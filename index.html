@@ -378,17 +378,30 @@ async function loadGroup(group, files) {
 }
 
 function parseBenihType(f) {
-  const rawHTML = f.properties?.description?.value || '';
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(rawHTML, 'text/html');
-  const text = doc.body.textContent;
+      const rawHTML = f.properties?.description?.value || '';
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(rawHTML, 'text/html');
+      const text = doc.body.textContent;
 
-  console.log('Description text:', text); // For debugging
+      console.log('Description text:', text);
 
-  // Match "benih" followed by rest of line (e.g., "benih MR 297")
-  const match = text.match(/benih\s+([^\n]+)/i);
-  return match ? match[1].trim().toUpperCase() : null;
-}
+      // Match "benih" followed by rest of line (e.g., "benih MR 297")
+      const match = text.match(/benih\s+([^\n]+)/i);
+      return match ? match[1].trim().toUpperCase() : null;
+    }
+
+    // Function to parse and display result instantly
+    function parseAndDisplay() {
+      const rawHTML = document.getElementById('descriptionInput').value;
+      const parsedResult = parseBenihType({ properties: { description: { value: rawHTML } } });
+
+      const outputElement = document.getElementById('output');
+      if (parsedResult) {
+        outputElement.innerHTML = `<p><strong>Parsed Benih Type:</strong> ${parsedResult}</p>`;
+      } else {
+        outputElement.innerHTML = `<p>No "benih" found in the description.</p>`;
+      }
+    }
 
 function highlightFeature(f) {
   Object.entries(groups).forEach(([group, files]) => {
@@ -420,7 +433,7 @@ function highlightFeature(f) {
     .setHTML(`
       <strong>${f.properties.name}</strong><br>
       ${areaInEkar.toFixed(2)} ekar<br>
-      Benih: ${benih || 'Tiada'}<br>
+      Benih: ${parsedResult || 'Tiada'}<br>
       ${(areaInEkar * 35).toFixed(0)} Tray gulung
     `)
     .addTo(map)
