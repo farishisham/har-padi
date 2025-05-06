@@ -422,13 +422,13 @@ function highlightFeature(fPartial) {
 
   let popupHTML = `
     <strong>${f.properties.name}</strong><br>
-    ${area} ekar
+    ${area} Ekar
   `;
 
   if (isBlok) {
     const benih = parseBenihType(f);
     const tray = Math.round(area * 35);
-    popupHTML += `<br>Benih: ${benih || 'Tiada'}<br>${tray} tray gulung`;
+    popupHTML += `<br>Benih: ${benih || 'Tiada'}<br>${tray} Tray gulung`;
   }
 
   new maplibregl.Popup({ closeButton: false })
