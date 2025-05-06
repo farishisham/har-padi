@@ -420,7 +420,7 @@ function highlightFeature(f) {
     .setHTML(`
       <strong>${f.properties.name}</strong><br>
       ${areaInEkar.toFixed(2)} ekar<br>
-      Benih: ${parsedResult || 'Tiada'}<br>
+      Benih: ${benih || 'Tiada'}<br>
       ${(areaInEkar * 35).toFixed(0)} Tray gulung
     `)
     .addTo(map)
