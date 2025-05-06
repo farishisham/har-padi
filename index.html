@@ -381,13 +381,13 @@ function parseBenihType(f) {
   const rawHTML = f.properties?.description?.value || '';
   const parser = new DOMParser();
   const doc = parser.parseFromString(rawHTML, 'text/html');
-  
-  // Use same logic as filter button — extract full visible text
-  const text = doc.body.textContent.toLowerCase().replace(/\s+/g, ' ').trim();
-  console.log('Parsed text:', text);
 
-  // Match word after "benih"
-  const match = text.match(/benih\s+([^\s]+)/);
+  // Extract visible text from all tags (like your working filter code)
+  const text = doc.body.textContent.toLowerCase().replace(/\s+/g, ' ').trim();
+  console.log('Parsed text:', text); // DEBUG: See what we're parsing
+
+  // Match the word after "benih" (e.g. "CL", "297")
+  const match = text.match(/benih\s+([^\s]+)/i);
   return match ? match[1].toUpperCase() : null;
 }
 
@@ -422,7 +422,7 @@ new maplibregl.Popup({ closeButton: false })
     <strong>${f.properties.name}</strong><br>
     ${(turf.area(f)/4046.86).toFixed(2)} ekar<br>
     Benih: ${benih || 'Tiada'}<br>
-    ${(turf.area(f)/4046.86 * 35).toFixed(0)} tray gulung
+    ${(turf.area(f)/4046.86 * 35).toFixed(0)} Tray gulung
   `)
   .addTo(map)
   .getElement().classList.add('popup-no-x');
