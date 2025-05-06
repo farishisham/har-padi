@@ -382,10 +382,7 @@ function parseBenihType(f) {
 const parser = new DOMParser();
 const doc = parser.parseFromString(html, 'text/html');
 const text = doc.body.textContent || doc.body.innerText || '';
-console.log('Extracted:', text); // Should print: Calit bajak benih MR 297
-console.log(text.match(/benih\s+([^\n]+)/i)[1]); // Should print: MR 297
-
-    // Use fallback if textContent is empty
+   // Use fallback if textContent is empty
   let text = doc.body.textContent || doc.body.innerText || '';
   text = text.toLowerCase().replace(/\s+/g, ' ').trim();
 
