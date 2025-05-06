@@ -378,23 +378,17 @@ async function loadGroup(group, files) {
 }
 
 function parseBenihType(f) {
-  // Extract the raw HTML from the feature
   const rawHTML = f.properties?.description?.value || '';
-  console.log('Raw HTML:', rawHTML); // Debug: check what we get
-
-  // Parse the HTML
   const parser = new DOMParser();
   const doc = parser.parseFromString(rawHTML, 'text/html');
+  
+  // Use same logic as filter button — extract full visible text
+  const text = doc.body.textContent.toLowerCase().replace(/\s+/g, ' ').trim();
+  console.log('Parsed text:', text);
 
-  // Try to extract text from <pre> tag specifically
-  const preTag = doc.querySelector('pre');
-  const text = preTag?.textContent?.toLowerCase().trim() || '';
-
-  console.log('Extracted <pre> text:', text); // Debug output
-
-  // Match the word after "benih"
+  // Match word after "benih"
   const match = text.match(/benih\s+([^\s]+)/);
-  return match ? match[1].toUpperCase() : null; // Return as uppercase (e.g. "CL", "297")
+  return match ? match[1].toUpperCase() : null;
 }
 
 function highlightFeature(f) {
