@@ -378,18 +378,17 @@ async function loadGroup(group, files) {
 }
 
 function parseBenihType(f) {
-      const rawHTML = f.properties?.description?.value || '';
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(rawHTML, 'text/html');
-      const text = doc.body.textContent;
-      
-      console.log('Description text:', text);
+  const rawHTML = f.properties?.description?.value || '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(rawHTML, 'text/html');
+  const text = doc.body.textContent;
 
-      // Match "benih" followed by rest of line (e.g., "benih MR 297")
-      const match = text.match(/benih\s+([^\n]+)/i);
-      return match ? match[1].trim().toUpperCase() : null;
-    }
+  console.log('Description text:', text); // For debugging
 
+  // Match "benih" followed by rest of line (e.g., "benih MR 297")
+  const match = text.match(/benih\s+([^\n]+)/i);
+  return match ? match[1].trim().toUpperCase() : null;
+}
 
 function highlightFeature(f) {
   Object.entries(groups).forEach(([group, files]) => {
@@ -414,7 +413,7 @@ function highlightFeature(f) {
   });
 
   const areaInEkar = (turf.area(f) / 4046.86);
-  const benih = parseBenihType({ properties: { description: { value: rawHTML } } });
+  const benih = parseBenihType(f);
 
   new maplibregl.Popup({ closeButton: false })
     .setLngLat(center)
@@ -422,7 +421,7 @@ function highlightFeature(f) {
       <strong>${f.properties.name}</strong><br>
       ${areaInEkar.toFixed(2)} ekar<br>
       Benih: ${benih || 'Tiada'}<br>
-      ${(areaInEkar * 35).toFixed(0)} Tray gulung
+      ${(areaInEkar * 35).toFixed(0)} tray gulung
     `)
     .addTo(map)
     .getElement().classList.add('popup-no-x');
