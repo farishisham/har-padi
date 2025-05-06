@@ -396,7 +396,7 @@ function parseBenihType(f) {
   const doc = parser.parseFromString(rawHTML, 'text/html');
   const text = doc.body.textContent?.toLowerCase().trim() || '';
 
-  console.log('Parsed description text:', text);
+  //console.log('Parsed description text:', text);
 
   // Match "benih" followed by non-linebreak text
   const match = text.match(/benih\s+([^\n]+)/i);
