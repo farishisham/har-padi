@@ -379,17 +379,47 @@ async function loadGroup(group, files) {
 
 function parseBenihType(f) {
   const rawHTML = f.properties?.description?.value || '';
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(rawHTML, 'text/html');
 
-  // Use fallback if textContent is empty
-  let text = doc.body.textContent || doc.body.innerText || '';
-  text = text.toLowerCase().replace(/\s+/g, ' ').trim();
+  // Strip HTML tags manually since it's mostly just <pre>
+  const plainText = rawHTML.replace(/<[^>]+>/g, ' ').toLowerCase().trim();
 
-  console.log('Parsed text:', text); // Debugging output
+  console.log('Plain text:', plainText); // Debug: see what's being parsed
 
-  const match = text.match(/benih\s+([^\n]+)/i);
+  // Match "benih" followed by one or more non-newline characters
+  const match = plainText.match(/benih\s+([^\n]+)/i);
   return match ? match[1].trim().toUpperCase() : null;
+}
+
+function highlightFeature(f) {
+  Object.entries(groups).forEach(([group, files]) => {
+    (Array.isArray(files) ? files : [files]).forEach(file => {
+      const id = `${group}-${file}`;
+      const filter = f.properties._id.startsWith(id)
+        ? ['==', '_id', f.properties._id]
+        : ['==', '_id', ''];
+      map.setFilter(`${id}-highlight`, filter);
+    });
+  });
+
+  // Remove existing popups
+  document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
+
+  gpsMode = 1;
+  setIconColor();
+
+  const center = turf.center(f).geometry.coordinates;
+  const benih = parseBenihType(f);
+
+  new maplibregl.Popup({ closeButton: false })
+    .setLngLat(center)
+    .setHTML(`
+<strong>${f.properties.name}</strong><br>
+${(turf.area(f) / 4046.86).toFixed(2)} ekar<br>
+Benih: ${benih || 'Tiada'}<br>
+${(turf.area(f) / 4046.86 * 35).toFixed(0)} tray gulung
+`)
+    .addTo(map)
+    .getElement().classList.add('popup-no-x');
 }
 
 function highlightFeature(f) {
