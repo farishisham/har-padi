@@ -384,13 +384,13 @@ function parseBenihType(f) {
   const rawHTML = f.properties?.description?.value || '';
   const parser = new DOMParser();
   const doc = parser.parseFromString(rawHTML, 'text/html');
-  const text = doc.body.textContent.toLowerCase();
-  
+  const text = doc.body.textContent;
+
   console.log('Description text:', text);
 
-  // Look for "benih" followed by a word (e.g., "benih CL" -> match "CL")
-  const match = text.match(/benih\s+([^\s]+)/);
-  return match ? match[1].toUpperCase() : null;
+  // Match "benih" followed by rest of line (e.g., "benih MR 297")
+  const match = text.match(/benih\s+([^\n]+)/i);
+  return match ? match[1].trim().toUpperCase() : null;
 }
 
 function highlightFeature(f) {
