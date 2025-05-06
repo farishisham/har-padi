@@ -381,22 +381,28 @@ function parseBenihType(f) {
   const rawHTML = f.properties?.description?.value || '';
   const parser = new DOMParser();
   const doc = parser.parseFromString(rawHTML, 'text/html');
+  const text = doc.body.textContent || '';
 
-  // Get full visible text, same as filter button
-  const text = doc.body.textContent.toLowerCase().replace(/\s+/g, ' ').trim();
-  console.log('Parsed text:', text);  // <-- This should show e.g. "calit benih cl"
+  console.log('Parsed description text:', text); // Debug line
 
-  // Now extract the word after 'benih'
-  const match = text.match(/benih\s+([^\s]+)/i);
-  return match ? match[1].toUpperCase() : null;
+  const match = text.match(/benih\s+([^\n]+)/i);
+  return match ? match[1].trim().toUpperCase() : null;
 }
 
-function highlightFeature(f) {
-  console.log('Raw description value:', f.properties?.description?.value);
+function highlightFeature(fPartial) {
+  // Get full feature from allFeatures using _id
+  const f = allFeatures.find(feat => feat.properties._id === fPartial.properties._id);
+  if (!f) {
+    console.warn('Full feature not found!');
+    return;
+  }
+
   Object.entries(groups).forEach(([group, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(file => {
       const id = `${group}-${file}`;
-      const filter = f.properties._id.startsWith(id) ? ['==', '_id', f.properties._id] : ['==', '_id', ''];
+      const filter = f.properties._id.startsWith(id)
+        ? ['==', '_id', f.properties._id]
+        : ['==', '_id', ''];
       map.setFilter(`${id}-highlight`, filter);
     });
   });
@@ -406,19 +412,20 @@ function highlightFeature(f) {
   setIconColor();
 
   const center = turf.center(f).geometry.coordinates;
+  map.fitBounds(turf.bbox(f), {
+    padding: 100,
+    maxZoom: 17.4,
+    bearing: map.getBearing()
+  });
 
-  // Parse the HTML description to get plain text
-  const rawHTML = f.properties?.description?.value || '';
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(rawHTML, 'text/html');
-  const cleanDescription = doc.body.textContent.trim(); // Plain text
+  const benih = parseBenihType(f);
 
   new maplibregl.Popup({ closeButton: false })
     .setLngLat(center)
     .setHTML(`
       <strong>${f.properties.name}</strong><br>
       ${(turf.area(f) / 4046.86).toFixed(2)} ekar<br>
-      ${cleanDescription ? 'Deskripsi: ' + cleanDescription : 'Tiada deskripsi'}<br>
+      Benih: ${benih || 'Tiada'}<br>
       ${(turf.area(f) / 4046.86 * 35).toFixed(0)} tray gulung
     `)
     .addTo(map)
