@@ -386,20 +386,11 @@ function parseBenihType(f) {
   return match ? match[1].trim().toUpperCase() : null;
 }
 
-function highlightFeature(fPartial) {
-  // Get full feature from allFeatures using _id
-  const f = allFeatures.find(feat => feat.properties._id === fPartial.properties._id);
-  if (!f) {
-    console.warn('Full feature not found!');
-    return;
-  }
-
+function highlightFeature(f) {
   Object.entries(groups).forEach(([group, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(file => {
       const id = `${group}-${file}`;
-      const filter = f.properties._id.startsWith(id)
-        ? ['==', '_id', f.properties._id]
-        : ['==', '_id', ''];
+      const filter = f.properties._id.startsWith(id) ? ['==', '_id', f.properties._id] : ['==', '_id', ''];
       map.setFilter(`${id}-highlight`, filter);
     });
   });
@@ -409,22 +400,28 @@ function highlightFeature(fPartial) {
   setIconColor();
 
   const center = turf.center(f).geometry.coordinates;
-  map.fitBounds(turf.bbox(f), {
-    padding: 100,
-    maxZoom: 17.4,
-    bearing: map.getBearing()
-  });
+  map.fitBounds(turf.bbox(f), { padding: 100, maxZoom: 17.4, bearing: map.getBearing() });
 
-  const benih = parseBenihType(f);
+  const area = (turf.area(f) / 4046.86).toFixed(2);
+  const isBlok = f.properties._id.includes('blok'); // Change this if you use a different way to detect blok
+
+  let popupHTML = `
+    <strong>${f.properties.name}</strong><br>
+    ${area} ekar
+  `;
+
+  if (isBlok) {
+    const benih = parseBenihType(f);
+    const tray = Math.round(area * 35);
+    popupHTML += `
+      <br>Benih: ${benih || 'Tiada'}
+      <br>${tray} tray gulung
+    `;
+  }
 
   new maplibregl.Popup({ closeButton: false })
     .setLngLat(center)
-    .setHTML(`
-      <strong>${f.properties.name}</strong><br>
-      ${(turf.area(f) / 4046.86).toFixed(2)} ekar<br>
-      Benih: ${benih || 'Tiada'}<br>
-      ${(turf.area(f) / 4046.86 * 35).toFixed(0)} Tray gulung
-    `)
+    .setHTML(popupHTML)
     .addTo(map)
     .getElement().classList.add('popup-no-x');
 }
