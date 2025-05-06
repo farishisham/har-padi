@@ -381,11 +381,13 @@ function parseBenihType(f) {
   const rawHTML = f.properties?.description?.value || '';
   const parser = new DOMParser();
   const doc = parser.parseFromString(rawHTML, 'text/html');
-  const text = doc.body.textContent;
 
-  console.log('Description text:', text); // For debugging
+  // Use fallback if textContent is empty
+  let text = doc.body.textContent || doc.body.innerText || '';
+  text = text.toLowerCase().replace(/\s+/g, ' ').trim();
 
-  // Match "benih" followed by rest of line (e.g., "benih MR 297")
+  console.log('Parsed text:', text); // Debugging output
+
   const match = text.match(/benih\s+([^\n]+)/i);
   return match ? match[1].trim().toUpperCase() : null;
 }
