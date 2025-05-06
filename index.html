@@ -417,17 +417,22 @@ function highlightFeature(fPartial) {
 
   const benih = parseBenihType(f);
 
-  new maplibregl.Popup({ closeButton: false })
-    .setLngLat(center)
-    .setHTML(`
+let popupHTML = `
+    <strong>${f.properties.name}</strong><br>
+    ${area} ekar
+  `;
+
+  if (isBlok) {
+    const benih = parseBenihType(f);
+    const tray = Math.round(area * 35);
+    popupHTML += `
       <strong>${f.properties.name}</strong><br>
       ${(turf.area(f) / 4046.86).toFixed(2)} ekar<br>
       Benih: ${benih || 'Tiada'}<br>
       ${(turf.area(f) / 4046.86 * 35).toFixed(0)} Tray gulung
-    `)
-    .addTo(map)
-    .getElement().classList.add('popup-no-x');
-}
+    `;
+  }
+
 
 // Clear highlight when clicking empty area
 map.on('click', e => {
