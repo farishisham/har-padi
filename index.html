@@ -418,7 +418,7 @@ function highlightFeature(fPartial) {
   });
 
   const area = (turf.area(f) / 4046.86).toFixed(2);
-  const isBlok = f.properties.name?.toLowerCase().includes('blok'); // Adjust logic if needed
+  const isBlok = !f.properties.name?.toLowerCase().includes('blok'); // Adjust logic if needed
 
   let popupHTML = `
     <strong>${f.properties.name}</strong><br>
