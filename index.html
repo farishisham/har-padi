@@ -375,52 +375,56 @@ async function loadGroup(group, files) {
 }
 
 function parseBenihType(f) {
-  const html = f?.properties?.description?.value || '';
-  if (!html) return null;
-
-  // Parse HTML from <pre> or any other tag
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-
-  // Grab content regardless of tag
-  const text = doc.body.innerText?.toLowerCase().trim() || '';
-  console.log('Parsed description text:', text);
-
-  // Match "benih" followed by anything except newline
-  const match = text.match(/benih\s+([^\n]+)/i);
-  return match ? match[1].trim().toUpperCase() : null;
-}
-
-  // Parse the HTML and extract text content
+  const rawHTML = f.properties?.description?.value || '';
   const parser = new DOMParser();
   const doc = parser.parseFromString(rawHTML, 'text/html');
-  const text = doc.body.textContent?.toLowerCase().trim() || '';
+  const text = doc.body.textContent || '';
 
-  //console.log('Parsed description text:', text);
+  console.log('Parsed description text:', text); // Debug line
 
-  // Match "benih" followed by non-linebreak text
   const match = text.match(/benih\s+([^\n]+)/i);
   return match ? match[1].trim().toUpperCase() : null;
 }
 
-function highlightFeature(f) {
-  // Check if it's a 'blok' type based on ID, name, or group logic
-  const isBlok = f.properties.name?.toLowerCase().includes('blok') || f.properties._id.startsWith('blok');
+function highlightFeature(fPartial) {
+  // Get full feature from allFeatures using _id
+  const f = allFeatures.find(feat => feat.properties._id === fPartial.properties._id);
+  if (!f) {
+    console.warn('Full feature not found!');
+    return;
+  }
+
+  Object.entries(groups).forEach(([group, files]) => {
+    (Array.isArray(files) ? files : [files]).forEach(file => {
+      const id = `${group}-${file}`;
+      const filter = f.properties._id.startsWith(id)
+        ? ['==', '_id', f.properties._id]
+        : ['==', '_id', ''];
+      map.setFilter(`${id}-highlight`, filter);
+    });
+  });
+
+  document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
+  gpsMode = 1;
+  setIconColor();
 
   const center = turf.center(f).geometry.coordinates;
-  const areaEkar = (turf.area(f) / 4046.86).toFixed(2);
+  map.fitBounds(turf.bbox(f), {
+    padding: 100,
+    maxZoom: 17.4,
+    bearing: map.getBearing()
+  });
 
-  let popupHTML = `<strong>${f.properties.name}</strong><br>${areaEkar} ekar`;
-
-  if (isBlok) {
-    const benih = parseBenihType(f);
-    const trayEstimate = Math.round(areaEkar * 35);
-    popupHTML += `<br>Benih: ${benih || 'Tiada'}<br>${trayEstimate} tray gulung`;
-  }
+  const benih = parseBenihType(f);
 
   new maplibregl.Popup({ closeButton: false })
     .setLngLat(center)
-    .setHTML(popupHTML)
+    .setHTML(`
+      <strong>${f.properties.name}</strong><br>
+      ${(turf.area(f) / 4046.86).toFixed(2)} ekar<br>
+      Benih: ${benih || 'Tiada'}<br>
+      ${(turf.area(f) / 4046.86 * 35).toFixed(0)} Tray gulung
+    `)
     .addTo(map)
     .getElement().classList.add('popup-no-x');
 }
