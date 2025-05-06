@@ -298,10 +298,7 @@ map.on('touchstart', () => {
 const groups = {
   sawahring: 'sawahring.json',
   blok: [
-    'blok1.json', 'blok2.json', 'blok3.json', 'blok4.json',
-    'blok5.json', 'blok7.json', 'blok8.json', 'blok9.json', 'blok10.json',
-    'blok11.json', 'blok12.json', 'blok13.json', 'blok14.json', 'blok15.json',
-    'blok16.json', 'blok17.json', 'blok18.json', 'blok19.json'
+    'blok1.json'
   ]
 };
 
@@ -426,7 +423,7 @@ function highlightFeature(fPartial) {
       <strong>${f.properties.name}</strong><br>
       ${(turf.area(f) / 4046.86).toFixed(2)} ekar<br>
       Benih: ${benih || 'Tiada'}<br>
-      ${(turf.area(f) / 4046.86 * 35).toFixed(0)} tray gulung
+      ${(turf.area(f) / 4046.86 * 35).toFixed(0)} Tray gulung
     `)
     .addTo(map)
     .getElement().classList.add('popup-no-x');
