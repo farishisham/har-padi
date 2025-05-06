@@ -378,19 +378,23 @@ async function loadGroup(group, files) {
 }
 
 function parseBenihType(f) {
+  // Extract the raw HTML from the feature
   const rawHTML = f.properties?.description?.value || '';
+  console.log('Raw HTML:', rawHTML); // Debug: check what we get
+
+  // Parse the HTML
   const parser = new DOMParser();
   const doc = parser.parseFromString(rawHTML, 'text/html');
 
-  // Get the text inside the <pre> tag directly
+  // Try to extract text from <pre> tag specifically
   const preTag = doc.querySelector('pre');
   const text = preTag?.textContent?.toLowerCase().trim() || '';
 
-  console.log('Parsed <pre> text:', text); // For debugging
+  console.log('Extracted <pre> text:', text); // Debug output
 
-  // Extract word after 'benih'
+  // Match the word after "benih"
   const match = text.match(/benih\s+([^\s]+)/);
-  return match ? match[1].toUpperCase() : null;
+  return match ? match[1].toUpperCase() : null; // Return as uppercase (e.g. "CL", "297")
 }
 
 function highlightFeature(f) {
@@ -413,17 +417,16 @@ function highlightFeature(f) {
   const center = turf.center(f).geometry.coordinates;
   const benih = parseBenihType(f);
 
-  new maplibregl.Popup({ closeButton: false })
-    .setLngLat(center)
-    .setHTML(`
-<strong>${f.properties.name}</strong><br>
-${(turf.area(f) / 4046.86).toFixed(2)} ekar<br>
-Benih: ${benih || 'Tiada'}<br>
-${(turf.area(f) / 4046.86 * 35).toFixed(0)} tray gulung
-`)
-    .addTo(map)
-    .getElement().classList.add('popup-no-x');
-}
+new maplibregl.Popup({ closeButton: false })
+  .setLngLat(center)
+  .setHTML(`
+    <strong>${f.properties.name}</strong><br>
+    ${(turf.area(f)/4046.86).toFixed(2)} ekar<br>
+    Benih: ${benih || 'Tiada'}<br>
+    ${(turf.area(f)/4046.86 * 35).toFixed(0)} tray gulung
+  `)
+  .addTo(map)
+  .getElement().classList.add('popup-no-x');
 
 function highlightFeature(f) {
   Object.entries(groups).forEach(([group, files]) => {
