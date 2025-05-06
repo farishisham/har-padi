@@ -382,11 +382,11 @@ function parseBenihType(f) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(rawHTML, 'text/html');
 
-  // Extract visible text from all tags (like your working filter code)
+  // Get full visible text, same as filter button
   const text = doc.body.textContent.toLowerCase().replace(/\s+/g, ' ').trim();
-  console.log('Parsed text:', text); // DEBUG: See what we're parsing
+  console.log('Parsed text:', text);  // <-- This should show e.g. "calit benih cl"
 
-  // Match the word after "benih" (e.g. "CL", "297")
+  // Now extract the word after 'benih'
   const match = text.match(/benih\s+([^\s]+)/i);
   return match ? match[1].toUpperCase() : null;
 }
@@ -414,7 +414,9 @@ function highlightFeature(f) {
   });
 
   const areaInEkar = (turf.area(f) / 4046.86);
-  const benih = parseBenihType(f);
+  
+  const center = turf.center(f).geometry.coordinates;
+const benih = parseBenihType(f);
 
 new maplibregl.Popup({ closeButton: false })
   .setLngLat(center)
@@ -422,7 +424,7 @@ new maplibregl.Popup({ closeButton: false })
     <strong>${f.properties.name}</strong><br>
     ${(turf.area(f)/4046.86).toFixed(2)} ekar<br>
     Benih: ${benih || 'Tiada'}<br>
-    ${(turf.area(f)/4046.86 * 35).toFixed(0)} Tray gulung
+    ${(turf.area(f)/4046.86 * 35).toFixed(0)} tray gulung
   `)
   .addTo(map)
   .getElement().classList.add('popup-no-x');
