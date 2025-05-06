@@ -375,12 +375,21 @@ async function loadGroup(group, files) {
 }
 
 function parseBenihType(f) {
-  const rawHTML = f?.properties?.description?.value;
+  const html = f?.properties?.description?.value || '';
+  if (!html) return null;
 
-  if (!rawHTML) {
-    console.log('No description value found');
-    return null;
-  }
+  // Parse HTML from <pre> or any other tag
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  // Grab content regardless of tag
+  const text = doc.body.innerText?.toLowerCase().trim() || '';
+  console.log('Parsed description text:', text);
+
+  // Match "benih" followed by anything except newline
+  const match = text.match(/benih\s+([^\n]+)/i);
+  return match ? match[1].trim().toUpperCase() : null;
+}
 
   // Parse the HTML and extract text content
   const parser = new DOMParser();
@@ -395,37 +404,26 @@ function parseBenihType(f) {
 }
 
 function highlightFeature(f) {
-  Object.entries(groups).forEach(([group, files]) => {
-    (Array.isArray(files) ? files : [files]).forEach(file => {
-      const id = `${group}-${file}`;
-      const filter = f.properties._id.startsWith(id) ? ['==', '_id', f.properties._id] : ['==', '_id', ''];
-      map.setFilter(`${id}-highlight`, filter);
-    });
-  });
-
-  document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
-  gpsMode = 1;
-  setIconColor();
+  // Check if it's a 'blok' type based on ID, name, or group logic
+  const isBlok = f.properties.name?.toLowerCase().includes('blok') || f.properties._id.startsWith('blok');
 
   const center = turf.center(f).geometry.coordinates;
-  map.fitBounds(turf.bbox(f), { padding: 100, maxZoom: 17.4, bearing: map.getBearing() });
+  const areaEkar = (turf.area(f) / 4046.86).toFixed(2);
 
-  const area = (turf.area(f) / 4046.86).toFixed(2);
-  const isBlok = f.properties._id.includes('blok'); // Change this if you use a different way to detect blok
-
-  let popupHTML = `
-    <strong>${f.properties.name}</strong><br>
-    ${area} ekar
-  `;
+  let popupHTML = `<strong>${f.properties.name}</strong><br>${areaEkar} ekar`;
 
   if (isBlok) {
     const benih = parseBenihType(f);
-    const tray = Math.round(area * 35);
-    popupHTML += `
-      <br>Benih: ${benih || 'Tiada'}
-      <br>${tray} tray gulung
-    `;
+    const trayEstimate = Math.round(areaEkar * 35);
+    popupHTML += `<br>Benih: ${benih || 'Tiada'}<br>${trayEstimate} tray gulung`;
   }
+
+  new maplibregl.Popup({ closeButton: false })
+    .setLngLat(center)
+    .setHTML(popupHTML)
+    .addTo(map)
+    .getElement().classList.add('popup-no-x');
+}
 
   const benih = parseBenihType(f);
 
