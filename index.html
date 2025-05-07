@@ -427,7 +427,7 @@ function highlightFeature(fPartial) {
   if (isBlok) {
     const benih = parseBenihType(f);
     const tray = Math.round(area * 35);
-    popupHTML += `<br>Benih: ${benih || 'Tiada'}<br>${tray} Tray gulung`;
+    popupHTML += `<br>Benih: ${benih || 'Tiada'}<br>${tray} Tray/Gulung<br>${tray*3} Gulung`;
   }
 
   new maplibregl.Popup({ closeButton: false })
