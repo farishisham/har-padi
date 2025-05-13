@@ -395,8 +395,8 @@ function parseBenihType(f) {
 
   //console.log('Parsed description text:', text); // Debug line
 
-  //const match = text.match(/benih\s+([^\n]+)/i);
-  const match = text.match(/benih\s+([a-z0-9]+)/i);
+  const match = text.match(/benih\s+([^\n]+)/i);
+  //const match = text.match(/benih\s+([a-z0-9]+)/i);
   return match ? match[1].trim().toUpperCase() : null;
   //return match ? match[1].trim().toUpperCase() : null;
 
