@@ -429,11 +429,12 @@ function highlightFeature(fPartial) {
   });
 
   const area = (turf.area(f) / 4046.86).toFixed(2);
+  const areahectare = (turf.area(f)*0.405 / 4046.86).toFixed(2);
   const isBlok = !f.properties.name?.toLowerCase().includes('blok'); // Adjust logic if needed
 
   let popupHTML = `
     <strong>${f.properties.name}</strong><br>
-    ${area} ekar atau ${area*0.405}.toFixed(2) hektar
+    ${area} ekar atau ${areahectare} hektar
   `;
 
   if (isBlok) {
