@@ -384,7 +384,7 @@ function parseTaburInfo(f) {
   const match = text.match(/tabur\s+\d+\s+beg/i);
   return match
   ? match[0].charAt(0).toUpperCase() + match[0].slice(1)
-  : null;
+  : 'Calit';
 }
 
 function parseBenihType(f) {
