@@ -384,7 +384,7 @@ function parseTaburInfo(f) {
   const match = text.match(/tabur\s+\d+\s+beg/i);
   return match
   ? match[0].charAt(0).toUpperCase() + match[0].slice(1)
-  : 'Calit';
+  : null;
 }
 
 function parseBenihType(f) {
@@ -443,7 +443,13 @@ function highlightFeature(fPartial) {
     const benih = parseBenihType(f);
     const tabur = parseTaburInfo(f);
     const tray = Math.round(area * 35);
-    popupHTML += `<br>Benih: ${benih || 'Tiada'}<br>${tabur}<br>${tray} Tray atau ${tray*3} Gulung`;
+    popupHTML += `<br>Benih: ${benih || 'Tiada'}`;
+    
+    if (tabur) popupHTML += `<br>${tabur}`;
+    //if (benih) popupHTML += `<br>Benih: ${benih}`
+    if (textIncludesCalit(f)) popupHTML += `<br>${tray} tray atau ${tray*3} gulung`;
+
+
   }
 
   new maplibregl.Popup({ closeButton: false })
