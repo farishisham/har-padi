@@ -433,7 +433,7 @@ function highlightFeature(fPartial) {
 
   let popupHTML = `
     <strong>${f.properties.name}</strong><br>
-    ${area} ekar atau ${area*0.405} hektar
+    ${area} ekar atau ${area*0.405}.toFixed(2) hektar
   `;
 
   if (isBlok) {
