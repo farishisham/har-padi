@@ -374,6 +374,17 @@ async function loadGroup(group, files) {
   }
 }
 
+function parseTaburInfo(f) {
+  const rawHTML = f.properties?.description?.value || '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(rawHTML, 'text/html');
+  const text = doc.body.textContent.toLowerCase();
+
+  // Match "tabur" followed by number + "beg", e.g., "tabur 2 beg"
+  const match = text.match(/tabur\s+\d+\s+beg/i);
+  return match ? match[0] : null;
+}
+
 function parseBenihType(f) {
   const rawHTML = f.properties?.description?.value || '';
   const parser = new DOMParser();
@@ -427,8 +438,9 @@ function highlightFeature(fPartial) {
 
   if (isBlok) {
     const benih = parseBenihType(f);
+    const tabur = parseTaburInfo(f);
     const tray = Math.round(area * 35);
-    popupHTML += `<br>Benih: ${benih || 'Tiada'}<br>${tray} Tray<br>${tray*3} Gulung`;
+    popupHTML += `<br>Benih: ${benih || 'Tiada'}<br>${tabur}<br>${tray} Tray<br>${tray*3} Gulung`;
   }
 
   new maplibregl.Popup({ closeButton: false })
