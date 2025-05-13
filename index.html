@@ -393,10 +393,13 @@ function parseBenihType(f) {
   const doc = parser.parseFromString(rawHTML, 'text/html');
   const text = doc.body.textContent || '';
 
-  console.log('Parsed description text:', text); // Debug line
+  //console.log('Parsed description text:', text); // Debug line
 
-  const match = text.match(/benih\s+([^\n]+)/i);
+  //const match = text.match(/benih\s+([^\n]+)/i);
+  const match = text.match(/benih\s+(\S+)/i);
   return match ? match[1].trim().toUpperCase() : null;
+  //return match ? match[1].trim().toUpperCase() : null;
+
 }
 
 function highlightFeature(fPartial) {
