@@ -396,7 +396,7 @@ function parseBenihType(f) {
   //console.log('Parsed description text:', text); // Debug line
 
   //const match = text.match(/benih\s+([^\n]+)/i);
-  const match = text.match(/benih\s+(\S+)/i);
+  const match = text.match(/benih\s+([a-z0-9]+)/i);
   return match ? match[1].trim().toUpperCase() : null;
   //return match ? match[1].trim().toUpperCase() : null;
 
@@ -451,8 +451,6 @@ function highlightFeature(fPartial) {
     if (tabur) popupHTML += `<br>${tabur}`;
     //if (benih) popupHTML += `<br>Benih: ${benih}`
     if (f.properties.description?.value?.toLowerCase().includes('calit')) popupHTML += `<br>${tray} tray atau ${tray*3} gulung`;
-
-
   }
 
   new maplibregl.Popup({ closeButton: false })
