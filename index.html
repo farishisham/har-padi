@@ -382,7 +382,7 @@ function parseTaburInfo(f) {
 
   // Match "tabur" followed by number + "beg", e.g., "tabur 2 beg"
   const match = text.match(/tabur\s+\d+\s+beg/i);
-  return match ? match[0] : Calit;
+  return match ? match[0] : null;
 }
 
 function parseBenihType(f) {
