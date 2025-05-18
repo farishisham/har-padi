@@ -384,8 +384,9 @@ function parseTarikhTanam(f) {
   if (!match) return null;
 
   const [day, month, year] = match[1].split('/').map(Number);
-  // Convert to JS Date: month is 0-based
-  return new Date(year, month - 1, day);
+  const formattedDay = day.toString().padStart(2, '0');
+  const formattedMonth = month.toString().padStart(2, '0');
+  return `${formattedDay}/${formattedMonth}/${year}`;
 }
 
 function parseTaburInfo(f) {
@@ -465,7 +466,7 @@ function highlightFeature(fPartial) {
     
     if (tabur) popupHTML += `<br>${tabur}`;
     //if (benih) popupHTML += `<br>Benih: ${benih}`
-    if (f.properties.description?.value?.toLowerCase().includes('calit')) popupHTML += `<br>${tray} tray atau ${tray*3} gulung<br>Tarikh tanam: ${tarikhtanam}`;
+    if (f.properties.description?.value?.toLowerCase().includes('calit')) popupHTML += `<br>${tray} tray atau ${tray*3} gulung<br>Tarikh Tanam: ${tarikhtanam}`;
   }
 
   new maplibregl.Popup({ closeButton: false })
