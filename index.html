@@ -569,10 +569,83 @@ function createFilterButton(label, id) {
 const bajakBtn = createFilterButton('Bajak', 'bajakFilter');
 const calitBtn = createFilterButton('Calit', 'calitFilter');
 const racunBtn = createFilterButton('Racun', 'racunFilter');
+const tuaiBtn = createFilterButton('Tuai', 'tuaiFilter');
+const ripenessDays = {
+  'cl': 100,
+  '269': 120,
+  'hybrid': 110
+};
 
+filterContainer.appendChild(tuaiBtn);
 filterContainer.appendChild(bajakBtn);
 filterContainer.appendChild(calitBtn);
 filterContainer.appendChild(racunBtn);
+
+const tuaiBtn = document.createElement('button');
+tuaiBtn.textContent = 'Tuai';
+tuaiBtn.id = 'tuaiBtn';
+tuaiBtn.style.position = 'fixed';
+tuaiBtn.style.bottom = '15px';
+tuaiBtn.style.left = '15px';
+tuaiBtn.style.width = '60px';
+tuaiBtn.style.height = '44px';
+tuaiBtn.style.borderRadius = '8px';
+tuaiBtn.style.border = 'none';
+tuaiBtn.style.background = '#333';
+tuaiBtn.style.color = 'white';
+tuaiBtn.style.fontSize = '13px';
+tuaiBtn.style.cursor = 'pointer';
+tuaiBtn.style.zIndex = '1002';
+tuaiBtn.style.touchAction = 'none';
+document.body.appendChild(tuaiBtn);
+
+function getRipenessLevel(tarikhTanam, benihType) {
+  if (!tarikhTanam || !benihType) return null;
+  
+  const ripeDays = ripenessDays[benihType.toLowerCase()];
+  if (!ripeDays) return null;
+
+  const [d, m, y] = tarikhTanam.split('/').map(Number);
+  const plantDate = new Date(y, m - 1, d);
+  const now = new Date();
+  const diffDays = Math.floor((now - plantDate) / (1000 * 60 * 60 * 24));
+
+  return Math.max(0, Math.min(1, diffDays / ripeDays)); // clamp between 0–1
+}
+
+let tuaiMode = false;
+
+tuaiBtn.addEventListener('click', () => {
+  tuaiMode = !tuaiMode;
+  tuaiBtn.style.color = tuaiMode ? 'limegreen' : 'white';
+
+  allFeatures.forEach(f => {
+    const tarikh = parseTarikhTanam(f);
+    const benih = parseBenihType(f);
+    const level = getRipenessLevel(tarikh, benih);
+
+    const fill = level === null
+      ? '#888' // fallback color
+      : `hsl(${(1 - level) * 120}, 100%, 50%)`; // green → red gradient
+
+    f.properties.fill = fill;
+  });
+
+  // Refresh source data
+  Object.entries(groups).forEach(([group, files]) => {
+    (Array.isArray(files) ? files : [files]).forEach(filename => {
+      const id = `${group}-${filename}`;
+      const source = map.getSource(id);
+      if (!source) return;
+
+      const groupFeatures = allFeatures.filter(f =>
+        f.properties._id.startsWith(`${group}-${filename}`)
+      );
+
+      source.setData({ type: 'FeatureCollection', features: groupFeatures });
+    });
+  });
+});
 
 let checkMarkers = [];
 
