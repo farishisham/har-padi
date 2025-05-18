@@ -454,6 +454,20 @@ function parseBenihType(f) {
   return match ? match[1].trim().toUpperCase() : null;
 }
 
+function getDaysSinceTanam(tarikhStr) {
+  if (!tarikhStr) return null;
+
+  // Expecting format "dd/mm/yyyy"
+  const [day, month, year] = tarikhStr.split('/').map(Number);
+  const tanamDate = new Date(year, month - 1, day);
+  const today = new Date();
+
+  const diffTime = today - tanamDate; // in milliseconds
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  return diffDays;
+}
+
 function formatUsiaBenih(tarikhStr) {
   const days = getDaysSinceTanam(tarikhStr);
   return days !== null ? `Usia benih: ${days} hari` : '';
