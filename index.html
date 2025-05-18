@@ -376,9 +376,22 @@ async function loadGroup(group, files) {
     });
 
     map.on('click', `${sourceId}-fill`, e => {
-      const f = e.features[0];
-      highlightFeature(f);
-    });
+  const zoom = map.getZoom();
+
+  // Only allow clicks on 'blok' at zoom ≥ 15
+  if (group === 'blok' && zoom >= 15) {
+    const f = e.features[0];
+    highlightFeature(f);
+  }
+
+  // Only allow clicks on 'sawahring' at zoom < 15
+  if (group === 'sawahring' && zoom < 15) {
+    const f = e.features[0];
+    highlightFeature(f);
+  }
+
+  // Otherwise, ignore the click
+});
   }
 }
 
