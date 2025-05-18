@@ -381,7 +381,7 @@ function parseTarikhTanam(f) {
   const text = doc.body.textContent.toLowerCase().replace(/\s+/g, ' ').trim();
 
   const match = text.match(/tarikh tanam\s+(\d{1,2}\/\d{1,2}\/\d{4})/);
-  if (!match) return null;
+  if (!match) return 'Tiada';
 
   const [day, month, year] = match[1].split('/').map(Number);
   const formattedDay = day.toString().padStart(2, '0');
