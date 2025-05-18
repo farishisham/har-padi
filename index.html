@@ -674,7 +674,103 @@ function getRipenessColor(percent) {
   return 'rgb(160,100,0)'; // Fallback for fully overripe
 }
 
+function updateTuaiColor() {
+  Object.entries(groups).forEach(([group, files]) => {
+    (Array.isArray(files) ? files : [files]).forEach(filename => {
+      const layerId = `${group}-${filename}-fill`;
+      if (map.getLayer(layerId)) {
+        map.setPaintProperty(layerId, 'fill-color',
+          tuaiActive
+            ? [
+                'interpolate',
+                ['linear'],
+                ['get', 'ripeness'],
+                0, '#3AFF3A',    // green
+                0.5, '#FFFF00',  // yellow
+                1, '#FFD700',    // gold
+                1.1, '#FFA500'   // darker gold for overripe
+              ]
+            : ['get', 'fill'] // original color
+        );
+      }
+    });
+  });
+}
+
 let tuaiActive = false;
+
+function toggleTuai() {
+  tuaiActive = !tuaiActive;
+
+  // Update button style
+  tuaiBtn.style.color = tuaiActive ? 'limegreen' : 'white';
+
+  Object.entries(groups).forEach(([group, files]) => {
+    (Array.isArray(files) ? files : [files]).forEach(filename => {
+      const sourceId = `${group}-${filename}`;
+      const source = map.getSource(sourceId);
+      if (!source || !source._data) return;
+
+      const features = source._data.features.map(f => {
+        if (!tuaiActive) {
+          return { ...f, properties: { ...f.properties, ripeness: null } };
+        }
+
+        const rawHTML = f.properties?.description?.value || '';
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(rawHTML, 'text/html');
+        const text = doc.body.textContent.toLowerCase();
+
+        const matchBenih = text.match(/benih\s+([^\n]+?)(?=\s+tarikh|$)/i);
+        const benih = matchBenih ? matchBenih[1].trim().toUpperCase() : null;
+
+        const matchDate = text.match(/tarikh tanam\s+(\d{1,2}\/\d{1,2}\/\d{4})/);
+        const dateStr = matchDate ? matchDate[1] : null;
+        if (!benih || !dateStr) return { ...f, properties: { ...f.properties, ripeness: null } };
+
+        const parts = dateStr.split('/');
+        const tanamDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        const today = new Date();
+        const age = Math.floor((today - tanamDate) / (1000 * 60 * 60 * 24));
+
+        const ripeDaysMap = { 'CL': 100, '269': 120, '467': 80 };
+        const ripeDays = ripeDaysMap[benih] || 110;
+        const maxDays = ripeDays + 10;
+
+        const pct = Math.max(0, Math.min(1, age / maxDays));
+        return {
+          ...f,
+          properties: { ...f.properties, ripeness: pct }
+        };
+      });
+
+      // Update source
+      source.setData({ type: 'FeatureCollection', features });
+
+      // 🌟 Set fill-opacity (FIXED when tuaiActive)
+      const fillId = `${sourceId}-fill`;
+      if (map.getLayer(fillId)) {
+        if (tuaiActive) {
+          map.setPaintProperty(fillId, 'fill-opacity', 0.8); // Constant opacity
+        } else {
+          // Restore original zoom-based opacity
+          const baseOpacity = group === 'sawahring' ? 0.4 : 0;
+          map.setPaintProperty(fillId, 'fill-opacity', [
+            'interpolate', ['linear'], ['zoom'],
+            13, baseOpacity,
+            14, baseOpacity,
+            15, baseOpacity === 0.4 ? 0.2 : 0.2,
+            16, baseOpacity === 0.4 ? 0 : 0.4
+          ]);
+        }
+      }
+    });
+  });
+
+  updateTuaiColor();
+}
+
+
 
 tuaiBtn.addEventListener('click', () => {
   tuaiActive = !tuaiActive;
