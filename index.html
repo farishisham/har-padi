@@ -677,21 +677,34 @@ function getRipenessColor(percent) {
 function updateTuaiColor() {
   Object.entries(groups).forEach(([group, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(filename => {
-      const layerId = `${group}-${filename}-fill`;
-      if (map.getLayer(layerId)) {
-        map.setPaintProperty(layerId, 'fill-color',
-          tuaiActive
-            ? [
-                'interpolate',
-                ['linear'],
-                ['get', 'ripeness'],
-                0, '#3AFF3A',    // green
-                0.5, '#FFFF00',  // yellow
-                1, '#FFD700',    // gold
-                1.1, '#FFA500'   // darker gold for overripe
-              ]
-            : ['get', 'fill'] // original color
-        );
+      const sourceId = `${group}-${filename}`;
+      const fillLayerId = `${sourceId}-fill`;
+
+      if (!map.getLayer(fillLayerId)) return;
+
+      if (tuaiActive) {
+        map.setPaintProperty(fillLayerId, 'fill-color', [
+          'interpolate',
+          ['linear'],
+          ['get', 'ripeness'],
+          0, '#3AFF3A',     // green
+          0.5, '#FFFF00',   // yellow
+          1, '#FFD700',     // gold
+          1.1, '#FFA500'    // overripe
+        ]);
+        map.setPaintProperty(fillLayerId, 'fill-opacity', 0.6); // ← Fixed opacity
+      } else {
+        map.setPaintProperty(fillLayerId, 'fill-color', ['get', 'fill']);
+
+        // Restore original zoom-based opacity
+        const baseOpacity = sourceId.includes('sawahring') ? 0.4 : 0;
+        map.setPaintProperty(fillLayerId, 'fill-opacity', [
+          'interpolate', ['linear'], ['zoom'],
+          13, baseOpacity,
+          14, baseOpacity,
+          15, baseOpacity === 0.4 ? 0.2 : 0.2,
+          16, baseOpacity === 0.4 ? 0 : 0.4
+        ]);
       }
     });
   });
