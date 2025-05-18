@@ -716,36 +716,6 @@ function getRipenessColor(days, ripeDays) {
   return '#802600';                                   // overripe
 }
 
-function getRipenessColor(percent) {
-  // Clamp to 1.25
-  percent = Math.max(0, Math.min(1.25, percent));
-
-  const stops = [
-    { pct: 0.0, color: [0, 128, 0] },      // Green
-    { pct: 0.5, color: [255, 255, 0] },    // Yellow
-    { pct: 0.75, color: [255, 215, 0] },   // Gold
-    { pct: 1.0, color: [128, 38, 0] },    // Fully Ripe
-    { pct: 1.25, color: [128, 38, 0] }    // Overripe
-  ];
-
-  for (let i = 1; i < stops.length; i++) {
-    if (percent <= stops[i].pct) {
-      const prev = stops[i - 1];
-      const next = stops[i];
-      const range = next.pct - prev.pct;
-      const frac = (percent - prev.pct) / range;
-
-      const r = Math.round(prev.color[0] + frac * (next.color[0] - prev.color[0]));
-      const g = Math.round(prev.color[1] + frac * (next.color[1] - prev.color[1]));
-      const b = Math.round(prev.color[2] + frac * (next.color[2] - prev.color[2]));
-
-      return `rgb(${r}, ${g}, ${b})`;
-    }
-  }
-
-  return 'rgb(160,100,0)'; // Fallback for fully overripe
-}
-
 function updateTuaiOpacity(isActive) {
   Object.entries(groups).forEach(([group, files]) => {
     const isSawahRing = group === 'sawahring';
