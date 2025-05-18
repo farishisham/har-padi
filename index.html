@@ -406,15 +406,11 @@ function parseBenihType(f) {
   const rawHTML = f.properties?.description?.value || '';
   const parser = new DOMParser();
   const doc = parser.parseFromString(rawHTML, 'text/html');
-  const text = doc.body.textContent || '';
+  const text = doc.body.textContent.toLowerCase().replace(/\s+/g, ' ').trim();
 
-  //console.log('Parsed description text:', text); // Debug line
-
-  const match = text.match(/benih\s+([^\n]+)/i);
-  //const match = text.match(/benih\s+([a-z0-9]+)/i);
+  // Match the word after "benih", stopping before "tarikh" if present
+  const match = text.match(/benih\s+(.+?)(?=\s+tarikh|$)/i);
   return match ? match[1].trim().toUpperCase() : null;
-  //return match ? match[1].trim().toUpperCase() : null;
-
 }
 
 function highlightFeature(fPartial) {
