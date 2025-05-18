@@ -610,6 +610,26 @@ function extractDescriptionText(f) {
   return doc.body.textContent?.toLowerCase() || '';
 }
 
+function calculateRipenessPercent(plantingDate, ripeDay) {
+  const today = new Date();
+  const planted = new Date(plantingDate);
+  const daysSincePlanting = (today - planted) / (1000 * 60 * 60 * 24);
+
+  if (daysSincePlanting < 0) return 0; // Future planting
+
+  const ripeStart = ripeDay;
+  const ripeEnd = ripeDay + 10;
+
+  if (daysSincePlanting < ripeStart) {
+    return daysSincePlanting / ripeDay; // 0 to 1
+  } else if (daysSincePlanting <= ripeEnd) {
+    return 1; // Fully ripe for 10 days
+  } else {
+    const overripeDays = daysSincePlanting - ripeEnd;
+    return 1 + Math.min(overripeDays / 10, 0.25); // 1 to max 1.25
+  }
+}
+
 function getRipenessLevel(tarikhTanam, benihType) {
   if (!tarikhTanam || !benihType) return null;
   
@@ -625,8 +645,33 @@ function getRipenessLevel(tarikhTanam, benihType) {
 }
 
 function getRipenessColor(percent) {
-  const hue = Math.round(percent * 120); // 0 = red, 120 = green
-  return `hsl(${hue}, 100%, 40%)`;
+  // Clamp to 1.25
+  percent = Math.max(0, Math.min(1.25, percent));
+
+  const stops = [
+    { pct: 0.0, color: [0, 128, 0] },      // Green
+    { pct: 0.5, color: [255, 255, 0] },    // Yellow
+    { pct: 0.75, color: [255, 215, 0] },   // Gold
+    { pct: 1.0, color: [204, 153, 0] },    // Fully Ripe
+    { pct: 1.25, color: [160, 100, 0] }    // Overripe
+  ];
+
+  for (let i = 1; i < stops.length; i++) {
+    if (percent <= stops[i].pct) {
+      const prev = stops[i - 1];
+      const next = stops[i];
+      const range = next.pct - prev.pct;
+      const frac = (percent - prev.pct) / range;
+
+      const r = Math.round(prev.color[0] + frac * (next.color[0] - prev.color[0]));
+      const g = Math.round(prev.color[1] + frac * (next.color[1] - prev.color[1]));
+      const b = Math.round(prev.color[2] + frac * (next.color[2] - prev.color[2]));
+
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+  }
+
+  return 'rgb(160,100,0)'; // Fallback for fully overripe
 }
 
 let tuaiActive = false;
