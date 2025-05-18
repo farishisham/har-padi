@@ -651,7 +651,7 @@ tuaiBtn.style.cursor = 'pointer';
 tuaiBtn.style.zIndex = 1001;
 document.body.appendChild(tuaiBtn);
 
-const ripenessDays = {
+const benihRipenessDays = {
   'cl': 100,
   '269': 120,
   'hybrid': 110
@@ -898,7 +898,10 @@ const ripeDays = ripeDaysMap[benih] || 110; // Default to 110 if not found
       });
 
       // Update source
-      source.setData({ type: 'FeatureCollection', features: updatedFeatures });
+      source.setData({
+  type: 'FeatureCollection',
+  features
+});
     });
   });
 });
