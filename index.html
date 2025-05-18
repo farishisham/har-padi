@@ -704,7 +704,7 @@ function updateTuaiOpacity() {
       if (!map.getLayer(fillLayerId)) return;
 
       if (tuaiActive) {
-        map.setPaintProperty(fillId, 'fill-color', color);
+        //map.setPaintProperty(fillId, 'fill-color', color);
         map.setPaintProperty(fillId, 'fill-opacity', 0.6);
       } else {
         // Restore zoom-based opacity
