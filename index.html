@@ -695,7 +695,7 @@ function calculateRipenessPercent(plantingDate, ripeDay) {
 function getRipenessLevel(tarikhTanam, benihType) {
   if (!tarikhTanam || !benihType) return null;
   
-  const ripeDays = ripenessDays[benihType.toLowerCase()];
+  const ripeDays = benihRipenessDays[benihType.toLowerCase()];
   if (!ripeDays) return null;
 
   const [d, m, y] = tarikhTanam.split('/').map(Number);
@@ -720,6 +720,8 @@ function updateTuaiOpacity(isActive) {
   Object.entries(groups).forEach(([group, files]) => {
     const isSawahRing = group === 'sawahring';
     const fileList = Array.isArray(files) ? files : [files];
+    f.properties.fill = color;
+    f.properties._visible = true; // optional if you're using _visible logic
 
     fileList.forEach(filename => {
       const sourceId = `${group}-${filename}`;
@@ -900,7 +902,7 @@ const ripeDays = ripeDaysMap[benih] || 110; // Default to 110 if not found
       // Update source
       source.setData({
   type: 'FeatureCollection',
-  updatefeatures
+  features
 });
     });
   });
