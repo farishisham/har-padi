@@ -573,11 +573,12 @@ const racunBtn = createFilterButton('Racun', 'racunFilter');
 const tuaiBtn = document.createElement('button');
 tuaiBtn.textContent = 'Tuai';
 tuaiBtn.style.position = 'fixed';
-tuaiBtn.style.bottom = '15px';
+tuaiBtn.style.display = 'flex';
+tuaiBtn.style.bottom = '35px';
 tuaiBtn.style.left = '15px';
-tuaiBtn.style.width = '60px';
+tuaiBtn.style.width = '44px';
 tuaiBtn.style.height = '44px';
-tuaiBtn.style.borderRadius = '8px';
+tuaiBtn.style.borderRadius = '50%';
 tuaiBtn.style.border = 'none';
 tuaiBtn.style.background = '#333';
 tuaiBtn.style.color = 'white';
@@ -621,7 +622,12 @@ function getRipenessLevel(tarikhTanam, benihType) {
   return Math.max(0, Math.min(1, diffDays / ripeDays)); // clamp between 0–1
 }
 
-let tuaiMode = false;
+function getRipenessColor(percent) {
+  const hue = Math.round(percent * 120); // 0 = red, 120 = green
+  return `hsl(${hue}, 100%, 40%)`;
+}
+
+let tuaiActive = false;
 
 tuaiBtn.addEventListener('click', () => {
   tuaiActive = !tuaiActive;
