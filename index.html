@@ -705,7 +705,7 @@ function updateTuaiOpacity() {
 
       if (tuaiActive) {
         //map.setPaintProperty(fillId, 'fill-color', color);
-        map.setPaintProperty(fillId, 'fill-opacity', 0.6);
+        map.setPaintProperty(fillId, 'fill-opacity', ['literal', 0.6]);
       } else {
         // Restore zoom-based opacity
         const baseOpacity = sourceId.includes('sawahring') ? 0.4 : 0;
