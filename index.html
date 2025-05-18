@@ -704,8 +704,16 @@ tuaiBtn.addEventListener('click', () => {
         const tarikhMatch = descText.match(/tarikh\s+tanam\s+(\d{1,2}\/\d{1,2}\/\d{4})/i);
         const tarikhStr = tarikhMatch ? tarikhMatch[1] : null;
 
-        const ripeDays = benih === 'CL' ? 100 : benih === '269' ? 120 : 110;
+        const ripeDaysMap = {
+  'CL': 100,
+  '269': 120,
+  '467': 80,
+  'MR297': 105,
+  'HYBRID': 95
+  // Add more types as needed
+};
 
+const ripeDays = ripeDaysMap[benih] || 110; // Default to 110 if not found
         let color = '#888';
         if (tarikhStr) {
           const [d, m, y] = tarikhStr.split('/').map(Number);
