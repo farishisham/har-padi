@@ -769,90 +769,6 @@ function toggleTuai() {
   tuaiLegend.style.display = tuaiActive ? 'block' : 'none';
 
   Object.entries(groups).forEach(([group, files]) => {
-    const fileList = Array.isArray(files) ? files : [files];
-    fileList.forEach(filename => {
-      const sourceId = `${group}-${filename}`;
-      const source = map.getSource(sourceId);
-      if (!source || !source._data) return;
-
-      const features = source._data.features.map(f => {
-        if (!tuaiActive) {
-          // Reset to original
-          return {
-            ...f,
-            properties: {
-              ...f.properties,
-              fill: f.properties.originalFill || '#ffffff'
-            }
-          };
-        }
-
-        const desc = extractDescriptionText(f);
-        const benihMatch = desc.match(/benih\s+(.+?)(?=\s+tarikh|$)/i);
-        const benih = benihMatch ? benihMatch[1].trim().toUpperCase() : null;
-        const tarikhMatch = desc.match(/tarikh\s+tanam\s+(\d{1,2}\/\d{1,2}\/\d{4})/i);
-        const tarikhStr = tarikhMatch ? tarikhMatch[1] : null;
-
-        if (!benih || !tarikhStr) return f;
-
-        const [d, m, y] = tarikhStr.split('/').map(Number);
-        const tanamDate = new Date(y, m - 1, d);
-        const today = new Date();
-        const diffDays = Math.floor((today - tanamDate) / (1000 * 60 * 60 * 24));
-
-        const ripeDaysMap = {
-          'CL': 100,
-          '269': 120,
-          '467': 80,
-          'MR297': 105,
-          'HYBRID': 95
-        };
-        const ripeDays = ripeDaysMap[benih] || 110;
-
-        const color = getRipenessColor(diffDays, ripeDays);
-        return {
-          ...f,
-          properties: {
-            ...f.properties,
-            originalFill: f.properties.fill || '#ffffff',
-            fill: color
-          }
-        };
-      });
-
-      source.setData({
-        type: 'FeatureCollection',
-        features
-      });
-
-      const fillId = `${sourceId}-fill`;
-      if (map.getLayer(fillId)) {
-        map.setPaintProperty(fillId, 'fill-color', ['get', 'fill']);
-        map.setPaintProperty(fillId, 'fill-opacity', tuaiActive ? 0.6 : (
-          group === 'sawahring' ? 0.4 : 0
-        ));
-      }
-
-      const lineId = `${sourceId}-line`;
-      if (map.getLayer(lineId) && group === 'sawahring') {
-        map.setPaintProperty(lineId, 'line-opacity', tuaiActive ? 0.6 : 1);
-      }
-    });
-  });
-}
-
-//tuaiBtn.addEventListener('click', toggleTuai);
-
-const tuaiLegend = document.getElementById('tuaiLegend');
-
-tuaiBtn.addEventListener('click', () => {
-  tuaiActive = !tuaiActive;
-  tuaiBtn.style.color = tuaiActive ? 'limegreen' : 'white';
-  tuaiLegend.style.display = tuaiActive ? 'block' : 'none';
-  //applyTuaiColors(); // your existing function that sets color and ripeness
-  //updateTuaiOpacity(); // <-- call this to force opacity
-
-  Object.entries(groups).forEach(([group, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(filename => {
       const sourceId = `${group}-${filename}`;
       const source = map.getSource(sourceId);
@@ -877,23 +793,22 @@ tuaiBtn.addEventListener('click', () => {
         const tarikhStr = tarikhMatch ? tarikhMatch[1] : null;
 
         const ripeDaysMap = {
-  'CL': 100,
-  '269': 120,
-  '467': 80,
-  'MR297': 105,
-  'HYBRID': 95
-  // Add more types as needed
-};
+          'CL': 100,
+          '269': 120,
+          '467': 80,
+          'MR297': 105,
+          'HYBRID': 95
+        };
 
-const ripeDays = ripeDaysMap[benih] || 110; // Default to 110 if not found
+        const ripeDays = ripeDaysMap[benih] || 110;
         let color = '#888';
+
         if (tarikhStr) {
           const [d, m, y] = tarikhStr.split('/').map(Number);
           const tanamDate = new Date(y, m - 1, d);
           const now = new Date();
           const diffDays = Math.floor((now - tanamDate) / (1000 * 60 * 60 * 24));
-          const percentage = Math.min(Math.max(diffDays / ripeDays, 0), 1);
-          const color = getRipenessColor(days, ripeDays);
+          color = getRipenessColor(diffDays, ripeDays);
         }
 
         return {
@@ -906,14 +821,40 @@ const ripeDays = ripeDaysMap[benih] || 110; // Default to 110 if not found
         };
       });
 
-      // Update source
       source.setData({
-  type: 'FeatureCollection',
-  features
-});
+        type: 'FeatureCollection',
+        features: updatedFeatures
+      });
+
+      const fillId = `${sourceId}-fill`;
+      if (map.getLayer(fillId)) {
+        if (tuaiActive) {
+          map.setPaintProperty(fillId, 'fill-opacity', 0.8);
+        } else {
+          const baseOpacity = group === 'sawahring' ? 0.4 : 0;
+          map.setPaintProperty(fillId, 'fill-opacity', [
+            'interpolate', ['linear'], ['zoom'],
+            13, baseOpacity,
+            14, baseOpacity,
+            15, baseOpacity === 0.4 ? 0.2 : 0.2,
+            16, baseOpacity === 0.4 ? 0 : 0.4
+          ]);
+        }
+      }
+
+      const lineId = `${sourceId}-line`;
+      if (map.getLayer(lineId)) {
+        map.setPaintProperty(lineId, 'line-opacity', tuaiActive ? 0.8 : 1);
+      }
     });
   });
-});
+}
+
+//tuaiBtn.addEventListener('click', toggleTuai);
+
+const tuaiLegend = document.getElementById('tuaiLegend');
+
+tuaiBtn.addEventListener('click', toggleTuai);
 
 let checkMarkers = [];
 
