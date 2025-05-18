@@ -470,7 +470,7 @@ function getDaysSinceTanam(tarikhStr) {
 
 function formatUsiaBenih(tarikhStr) {
   const days = getDaysSinceTanam(tarikhStr);
-  return days !== null ? `Usia benih: ${days} hari` : '';
+  return days !== null ? `${days}` : '';
 }
 
 function highlightFeature(fPartial) {
