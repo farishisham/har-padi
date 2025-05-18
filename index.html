@@ -704,12 +704,12 @@ function updateTuaiOpacity() {
       if (!map.getLayer(fillLayerId)) return;
 
       if (tuaiActive) {
-        // Force fixed opacity when Tuai is active
-        map.setPaintProperty(fillLayerId, 'fill-opacity', 0.6);
+        map.setPaintProperty(fillId, 'fill-color', color);
+        map.setPaintProperty(fillId, 'fill-opacity', 0.6);
       } else {
         // Restore zoom-based opacity
         const baseOpacity = sourceId.includes('sawahring') ? 0.4 : 0;
-        map.setPaintProperty(fillLayerId, 'fill-opacity', [
+        map.setPaintProperty(fillId, 'fill-opacity', [
           'interpolate', ['linear'], ['zoom'],
           13, baseOpacity,
           14, baseOpacity,
