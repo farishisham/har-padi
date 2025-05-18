@@ -374,6 +374,20 @@ async function loadGroup(group, files) {
   }
 }
 
+function parseTarikhTanam(f) {
+  const rawHTML = f.properties?.description?.value || '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(rawHTML, 'text/html');
+  const text = doc.body.textContent.toLowerCase().replace(/\s+/g, ' ').trim();
+
+  const match = text.match(/tarikh tanam\s+(\d{1,2}\/\d{1,2}\/\d{4})/);
+  if (!match) return null;
+
+  const [day, month, year] = match[1].split('/').map(Number);
+  // Convert to JS Date: month is 0-based
+  return new Date(year, month - 1, day);
+}
+
 function parseTaburInfo(f) {
   const rawHTML = f.properties?.description?.value || '';
   const parser = new DOMParser();
@@ -446,11 +460,12 @@ function highlightFeature(fPartial) {
     const benih = parseBenihType(f);
     const tabur = parseTaburInfo(f);
     const tray = Math.round(area * 35);
+    const tarikhtanam = parseTarikhTanam(f)
     popupHTML += `<br>Benih: ${benih || 'Tiada'}`;
     
     if (tabur) popupHTML += `<br>${tabur}`;
     //if (benih) popupHTML += `<br>Benih: ${benih}`
-    if (f.properties.description?.value?.toLowerCase().includes('calit')) popupHTML += `<br>${tray} tray atau ${tray*3} gulung`;
+    if (f.properties.description?.value?.toLowerCase().includes('calit')) popupHTML += `<br>${tray} tray atau ${tray*3} gulung<br>Tarikh tanam: ${tarikhtanam}`;
   }
 
   new maplibregl.Popup({ closeButton: false })
