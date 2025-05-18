@@ -454,6 +454,11 @@ function parseBenihType(f) {
   return match ? match[1].trim().toUpperCase() : null;
 }
 
+function formatUsiaBenih(tarikhStr) {
+  const days = getDaysSinceTanam(tarikhStr);
+  return days !== null ? `Usia benih: ${days} hari` : '';
+}
+
 function highlightFeature(fPartial) {
   // Find full feature by _id
   const f = allFeatures.find(feat => feat.properties._id === fPartial.properties._id);
@@ -499,13 +504,13 @@ function highlightFeature(fPartial) {
     const tabur = parseTaburInfo(f);
     const tray = Math.round(area * 35);
     const tarikhTanam = parseTarikhTanam(f);
-    //const usiaText = formatUsiaBenih(tarikhTanam);
+    const usiaText = formatUsiaBenih(tarikhTanam);
 //console.log(days); // e.g. → 16 (if today is 18 May 2025)
     popupHTML += `<br>Benih: ${benih || 'Tiada'}`;
     
     if (tabur) popupHTML += `<br>${tabur}`;
     //if (benih) popupHTML += `<br>Benih: ${benih}`
-    if (f.properties.description?.value?.toLowerCase().includes('calit')) popupHTML += `<br>${tray} tray atau ${tray*3} gulung<br>Tarikh tanam: ${tarikhTanam}`;
+    if (f.properties.description?.value?.toLowerCase().includes('calit')) popupHTML += `<br>${tray} tray atau ${tray*3} gulung<br>Tarikh tanam: ${tarikhTanam}<br>Usia benih: ${usiaText} hari`;
   }
 
   new maplibregl.Popup({ closeButton: false })
