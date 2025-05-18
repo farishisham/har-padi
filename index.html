@@ -498,7 +498,7 @@ function highlightFeature(fPartial) {
     const benih = parseBenihType(f);
     const tabur = parseTaburInfo(f);
     const tray = Math.round(area * 35);
-    //const tarikhTanam = parseTarikhTanam(f);
+    const tarikhTanam = parseTarikhTanam(f);
     //const usiaText = formatUsiaBenih(tarikhTanam);
 //console.log(days); // e.g. → 16 (if today is 18 May 2025)
     popupHTML += `<br>Benih: ${benih || 'Tiada'}`;
