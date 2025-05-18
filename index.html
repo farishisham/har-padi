@@ -581,23 +581,7 @@ filterContainer.appendChild(bajakBtn);
 filterContainer.appendChild(calitBtn);
 filterContainer.appendChild(racunBtn);
 
-const tuaiBtn = document.createElement('button');
-tuaiBtn.textContent = 'Tuai';
-tuaiBtn.id = 'tuaiBtn';
-tuaiBtn.style.position = 'fixed';
-tuaiBtn.style.bottom = '15px';
-tuaiBtn.style.left = '15px';
-tuaiBtn.style.width = '60px';
-tuaiBtn.style.height = '44px';
-tuaiBtn.style.borderRadius = '8px';
-tuaiBtn.style.border = 'none';
-tuaiBtn.style.background = '#333';
-tuaiBtn.style.color = 'white';
-tuaiBtn.style.fontSize = '13px';
-tuaiBtn.style.cursor = 'pointer';
-tuaiBtn.style.zIndex = '1002';
-tuaiBtn.style.touchAction = 'none';
-document.body.appendChild(tuaiBtn);
+
 
 function getRipenessLevel(tarikhTanam, benihType) {
   if (!tarikhTanam || !benihType) return null;
