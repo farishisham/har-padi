@@ -715,9 +715,8 @@ function toggleTuai() {
 
   // Update button style
   tuaiBtn.style.color = tuaiActive ? 'limegreen' : 'white';
-  
-  //applyTuaiColors(); // your existing function that sets color and ripeness
-  //updateTuaiOpacity(); // <-- call this to force opacity
+  applyTuaiColors(); // your existing function that sets color and ripeness
+  updateTuaiOpacity(); // <-- call this to force opacity
 
   Object.entries(groups).forEach(([group, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(filename => {
@@ -784,13 +783,11 @@ function toggleTuai() {
   updateTuaiColor();
 }
 
-
-
 tuaiBtn.addEventListener('click', () => {
   tuaiActive = !tuaiActive;
   tuaiBtn.style.color = tuaiActive ? 'limegreen' : 'white';
-  applyTuaiColors(); // your existing function that sets color and ripeness
-  updateTuaiOpacity(); // <-- call this to force opacity
+  //applyTuaiColors(); // your existing function that sets color and ripeness
+  //updateTuaiOpacity(); // <-- call this to force opacity
 
   Object.entries(groups).forEach(([group, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(filename => {
