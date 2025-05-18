@@ -336,6 +336,12 @@ async function loadGroup(group, files) {
       source: sourceId,
       paint: {
         'fill-color': ['get', 'fill'],
+        'line-opacity': [
+          'interpolate', ['linear'], ['zoom'],
+          13, baseOpacity,
+          14, baseOpacity,
+          15, baseOpacity === 0.4 ? 0.2 : 0.2,
+          16, baseOpacity === 0.4 ? 0 : 0.4
         'fill-opacity': [
           'interpolate', ['linear'], ['zoom'],
           13, baseOpacity,
@@ -674,7 +680,7 @@ function getRipenessColor(percent) {
   return 'rgb(160,100,0)'; // Fallback for fully overripe
 }
 
-function updateTuaiColor() {
+function updateTuaiOpacity() {
   Object.entries(groups).forEach(([group, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(filename => {
       const sourceId = `${group}-${filename}`;
@@ -683,20 +689,10 @@ function updateTuaiColor() {
       if (!map.getLayer(fillLayerId)) return;
 
       if (tuaiActive) {
-        map.setPaintProperty(fillLayerId, 'fill-color', [
-          'interpolate',
-          ['linear'],
-          ['get', 'ripeness'],
-          0, '#3AFF3A',     // green
-          0.5, '#FFFF00',   // yellow
-          1, '#FFD700',     // gold
-          1.1, '#FFA500'    // overripe
-        ]);
-        map.setPaintProperty(fillLayerId, 'fill-opacity', 0.6); // ← Fixed opacity
+        // Force fixed opacity when Tuai is active
+        map.setPaintProperty(fillLayerId, 'fill-opacity', 0.6);
       } else {
-        map.setPaintProperty(fillLayerId, 'fill-color', ['get', 'fill']);
-
-        // Restore original zoom-based opacity
+        // Restore zoom-based opacity
         const baseOpacity = sourceId.includes('sawahring') ? 0.4 : 0;
         map.setPaintProperty(fillLayerId, 'fill-opacity', [
           'interpolate', ['linear'], ['zoom'],
@@ -788,6 +784,9 @@ function toggleTuai() {
 tuaiBtn.addEventListener('click', () => {
   tuaiActive = !tuaiActive;
   tuaiBtn.style.color = tuaiActive ? 'limegreen' : 'white';
+  
+  applyTuaiColors(); // your existing function that sets color and ripeness
+  updateTuaiOpacity(); // <-- call this to force opacity
 
   Object.entries(groups).forEach(([group, files]) => {
     (Array.isArray(files) ? files : [files]).forEach(filename => {
