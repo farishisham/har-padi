@@ -832,7 +832,8 @@ function toggleTuai() {
           map.setPaintProperty(fillId, 'fill-opacity', 0.8);
           map.setPaintProperty(fillId, 'fill-opacity-transition', { duration: 0 });
           //map.setPaintProperty(fillId, 'fill-opacity', 0.8);
-        } else {
+        } else 
+        {
           const baseOpacity = group === 'sawahring' ? 0.4 : 0;
           map.setPaintProperty(fillId, 'fill-opacity', [
             'interpolate', ['linear'], ['zoom'],
@@ -841,6 +842,17 @@ function toggleTuai() {
             15, baseOpacity === 0.4 ? 0.2 : 0.2,
             16, baseOpacity === 0.4 ? 0 : 0.4
           ]);
+          if (map.getLayer(lineId)) {
+  const baseOpacity = group === 'sawahring' ? 0.4 : 1;
+  map.setPaintProperty(lineId, 'line-opacity-transition', { duration: 0 }); // prevent animation
+  map.setPaintProperty(lineId, 'line-opacity', [
+    'interpolate', ['linear'], ['zoom'],
+    13, baseOpacity,
+    14, baseOpacity,
+    15, baseOpacity === 1 ? 1 : 1,
+    16, baseOpacity === 1 ? 0 : 1
+  ]);
+}
         }
       }
 
@@ -852,8 +864,8 @@ function toggleTuai() {
     'interpolate', ['linear'], ['zoom'],
     13, baseOpacity,
     14, baseOpacity,
-    15, baseOpacity === 1 ? 1 : 1,
-    16, baseOpacity === 1 ? 0 : 1
+    15, baseOpacity === 0 ? 0 : 0,
+    16, baseOpacity === 0 ? 1 : 0
   ]);
 }
     });
