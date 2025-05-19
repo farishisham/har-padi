@@ -708,10 +708,10 @@ function getRipenessLevel(tarikhTanam, benihType) {
 
 function getRipenessColor(days, ripeDays) {
   if (days < 0) return '#999999'; // future planting date
-  if (days < ripeDays * 0.25) return '#00ff00';       // green
-  if (days < ripeDays * 0.5) return '#00ff00';        // yellow-green
-  if (days < ripeDays * 0.75) return '#00ff00';       // yellow
-  if (days < ripeDays) return '#00ff00';              // gold (ripe)
+  if (days < ripeDays * 0.25) return '#00cc00';       // green
+  if (days < ripeDays * 0.5) return '#00cc00';        // yellow-green
+  if (days < ripeDays * 0.75) return '#00cc00';       // yellow
+  if (days < ripeDays) return '#00cc00';              // gold (ripe)
   if (days < ripeDays + 10) return '#ffd700';         // dark gold (still okay)
   return '#802600';                                   // overripe
 }
