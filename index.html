@@ -455,7 +455,7 @@ function parseBenihType(f) {
 }
 
 function getDaysSinceTanam(tarikhStr) {
-  if (!tarikhStr) return 'Tiada';
+  if (!tarikhStr) return null;
 
   // Expecting format "dd/mm/yyyy"
   const [day, month, year] = tarikhStr.split('/').map(Number);
@@ -470,7 +470,7 @@ function getDaysSinceTanam(tarikhStr) {
 
 function formatUsiaBenih(tarikhStr) {
   const days = getDaysSinceTanam(tarikhStr);
-  return days !== null ? `${days} hari` : 'Tiada';
+  return isNaN(days) || days === null ? 'Tiada' : `${days}`;
 }
 
 function highlightFeature(fPartial) {
