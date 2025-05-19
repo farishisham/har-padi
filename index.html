@@ -846,6 +846,8 @@ function toggleTuai() {
       if (map.getLayer(lineId)) {
         if (tuaiActive) {
           map.setPaintProperty(lineId, 'line-opacity', isSawahRing ? 0 : 1);
+          map.setPaintProperty(lineId, 'line-width', isSawahRing ? 0 : 1);
+        
         } else {
           const baseOpacity = isSawahRing ? 1 : 0;
           map.setPaintProperty(lineId, 'line-opacity',
