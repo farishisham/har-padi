@@ -765,14 +765,12 @@ let tuaiActive = false;
 
 function toggleTuai() {
   tuaiActive = !tuaiActive;
+
   tuaiBtn.style.color = tuaiActive ? 'limegreen' : 'white';
   tuaiLegend.style.display = tuaiActive ? 'block' : 'none';
 
   Object.entries(groups).forEach(([group, files]) => {
-    const fileList = Array.isArray(files) ? files : [files];
-    const isSawahRing = group === 'sawahring';
-
-    fileList.forEach(filename => {
+    (Array.isArray(files) ? files : [files]).forEach(filename => {
       const sourceId = `${group}-${filename}`;
       const source = map.getSource(sourceId);
       if (!source || !source._data) return;
@@ -802,16 +800,15 @@ function toggleTuai() {
           'MR297': 105,
           'HYBRID': 95
         };
-
         const ripeDays = ripeDaysMap[benih] || 110;
-        let color = '#888';
 
+        let color = '#888';
         if (tarikhStr) {
           const [d, m, y] = tarikhStr.split('/').map(Number);
           const tanamDate = new Date(y, m - 1, d);
           const now = new Date();
-          const days = Math.floor((now - tanamDate) / (1000 * 60 * 60 * 24));
-          color = getRipenessColor(days, ripeDays);
+          const diffDays = Math.floor((now - tanamDate) / (1000 * 60 * 60 * 24));
+          color = getRipenessColor(diffDays, ripeDays);
         }
 
         return {
@@ -824,17 +821,15 @@ function toggleTuai() {
         };
       });
 
-      // Set updated data back to source
+      // Update source with new fill colors
       source.setData({
         type: 'FeatureCollection',
         features: updatedFeatures
       });
 
-      // Force fill-opacity
       const fillId = `${sourceId}-fill`;
       if (map.getLayer(fillId)) {
         map.setPaintProperty(fillId, 'fill-opacity-transition', { duration: 0 });
-
         if (tuaiActive) {
           map.setPaintProperty(fillId, 'fill-opacity', 0.8);
         } else {
@@ -849,7 +844,7 @@ function toggleTuai() {
         }
       }
 
-      // Handle line opacity for both sawahring and blok
+      // ✅ Line opacity for all groups (not just sawahring)
       const lineId = `${sourceId}-line`;
       if (map.getLayer(lineId)) {
         map.setPaintProperty(lineId, 'line-opacity-transition', { duration: 0 });
@@ -857,13 +852,13 @@ function toggleTuai() {
         if (tuaiActive) {
           map.setPaintProperty(lineId, 'line-opacity', 0.8);
         } else {
-          const baseOpacity = group === 'sawahring' ? 0.4 : 1;
+          const baseLineOpacity = group === 'sawahring' ? 0.4 : 1;
           map.setPaintProperty(lineId, 'line-opacity', [
             'interpolate', ['linear'], ['zoom'],
-            13, baseOpacity,
-            14, baseOpacity,
-            15, baseOpacity === 1 ? 1 : 1,
-            16, baseOpacity === 1 ? 0 : 1
+            13, baseLineOpacity,
+            14, baseLineOpacity,
+            15, baseLineOpacity === 1 ? 1 : 1,
+            16, baseLineOpacity === 1 ? 0 : 1
           ]);
         }
       }
