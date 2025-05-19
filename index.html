@@ -848,18 +848,21 @@ function toggleTuai() {
       }
 
       if (map.getLayer(lineId)) {
-        map.setPaintProperty(lineId, 'line-opacity',
-          tuaiActive
-            ? (isSawahRing ? ['literal', 0.6] : ['literal', 1])
-            : [
-              'interpolate', ['linear'], ['zoom'],
-              13, 1,
-              14, 1,
-              15, 1,
-              16, isSawahRing ? 0 : 1
-            ]
-        );
-      }
+  if (tuaiActive) {
+    map.setPaintProperty(lineId, 'line-opacity',
+      isSawahRing ? ['literal', 0.6] : ['literal', 1]
+    );
+  } else {
+    const baseOpacity = isSawahRing ? 1 : 1;
+    map.setPaintProperty(lineId, 'line-opacity', [
+      'interpolate', ['linear'], ['zoom'],
+      13, baseOpacity,
+      14, baseOpacity,
+      15, baseOpacity,
+      16, isSawahRing ? 0 : baseOpacity
+    ]);
+  }
+}
     });
   });
 }
