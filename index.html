@@ -470,7 +470,7 @@ function getDaysSinceTanam(tarikhStr) {
 
 function formatUsiaBenih(tarikhStr) {
   const days = getDaysSinceTanam(tarikhStr);
-  return isNaN(days) || days === null ? 'Tiada' : `${days}`;
+  return isNaN(days) || days === null ? 'Tiada' : `${days} hari`;
 }
 
 function highlightFeature(fPartial) {
