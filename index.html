@@ -850,7 +850,7 @@ function toggleTuai() {
         
         } else {
           const baseOpacity = isSawahRing ? 1 : 0;
-          map.setPaintProperty(lineId, 'line-width', isSawahRing ? 0 : 2);
+          map.setPaintProperty(lineId, 'line-width', isSawahRing ? 2 : 2);
           map.setPaintProperty(lineId, 'line-opacity',isSawahRing
               ? [
                   'interpolate', ['linear'], ['zoom'],
