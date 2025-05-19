@@ -470,7 +470,7 @@ function getDaysSinceTanam(tarikhStr) {
 
 function formatUsiaBenih(tarikhStr) {
   const days = getDaysSinceTanam(tarikhStr);
-  return days !== null ? `${days}` : '';
+  return days !== Tiada ? `${days} hari` : '';
 }
 
 function highlightFeature(fPartial) {
@@ -524,7 +524,7 @@ function highlightFeature(fPartial) {
     
     if (tabur) popupHTML += `<br>${tabur}`;
     //if (benih) popupHTML += `<br>Benih: ${benih}`
-    if (f.properties.description?.value?.toLowerCase().includes('calit')) popupHTML += `<br>${tray} tray atau ${tray*3} gulung<br>Tarikh tanam: ${tarikhTanam}<br>Usia benih: ${usiaText} hari`;
+    if (f.properties.description?.value?.toLowerCase().includes('calit')) popupHTML += `<br>${tray} tray atau ${tray*3} gulung<br>Tarikh tanam: ${tarikhTanam}<br>Usia benih: ${usiaText}`;
   }
 
   new maplibregl.Popup({ closeButton: false })
