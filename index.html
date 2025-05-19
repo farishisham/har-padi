@@ -348,7 +348,7 @@ async function loadGroup(group, files) {
 
     map.addSource(sourceId, { type: 'geojson', data });
 
-    const baseOpacity = group === 'sawahring' ? 0.4 : 0;
+    const baseOpacity = group === 'sawahring' ? 1 : 0;
 
     map.addLayer({
       id: `${sourceId}-fill`,
