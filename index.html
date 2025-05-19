@@ -831,7 +831,7 @@ function toggleTuai() {
       if (map.getLayer(fillId)) {
         map.setPaintProperty(fillId, 'fill-opacity',
           tuaiActive
-            ? (isSawahRing ? 0 : 0.8)
+            ? (isSawahRing ? 0 : 0.4)
             : [
                 'interpolate', ['linear'], ['zoom'],
                 13, isSawahRing ? 0.4 : 0,
