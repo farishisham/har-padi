@@ -846,9 +846,16 @@ function toggleTuai() {
 
       const lineId = `${sourceId}-line`;
       if (map.getLayer(lineId)) {
-        map.setPaintProperty(lineId, 'line-opacity', tuaiActive ? 0.8 : 1);
-        map.setPaintProperty(lineId, 'line-opacity-transition', { duration: 0 });
-      }
+  const baseOpacity = group === 'sawahring' ? 0.4 : 1;
+  map.setPaintProperty(lineId, 'line-opacity-transition', { duration: 0 }); // prevent animation
+  map.setPaintProperty(lineId, 'line-opacity', [
+    'interpolate', ['linear'], ['zoom'],
+    13, baseOpacity,
+    14, baseOpacity,
+    15, baseOpacity === 1 ? 1 : 1,
+    16, baseOpacity === 1 ? 0 : 1
+  ]);
+}
     });
   });
 }
