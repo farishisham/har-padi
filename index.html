@@ -765,7 +765,6 @@ let tuaiActive = false;
 
 function toggleTuai() {
   tuaiActive = !tuaiActive;
-
   tuaiBtn.style.color = tuaiActive ? 'limegreen' : 'white';
   tuaiLegend.style.display = tuaiActive ? 'block' : 'none';
 
@@ -775,23 +774,22 @@ function toggleTuai() {
 
     fileList.forEach(filename => {
       const sourceId = `${group}-${filename}`;
+      const fillId = `${sourceId}-fill`;
+      const lineId = `${sourceId}-line`;
       const source = map.getSource(sourceId);
       if (!source || !source._data) return;
 
       const updatedFeatures = source._data.features.map(f => {
-        const originalFill = f.properties.originalFill || f.properties.fill || '#ffffff';
-
         if (!tuaiActive) {
           return {
             ...f,
             properties: {
               ...f.properties,
-              fill: originalFill
+              fill: f.properties.originalFill || '#ffffff'
             }
           };
         }
 
-        // TUAI ACTIVE
         const descText = extractDescriptionText(f);
         const benihMatch = descText.match(/benih\s+([^\s]+)/i);
         const benih = benihMatch ? benihMatch[1].toUpperCase() : null;
@@ -807,62 +805,68 @@ function toggleTuai() {
           'HYBRID': 95
         };
         const ripeDays = ripeDaysMap[benih] || 110;
-
         let color = '#888';
+
         if (tarikhStr) {
           const [d, m, y] = tarikhStr.split('/').map(Number);
           const tanamDate = new Date(y, m - 1, d);
           const now = new Date();
-          const diffDays = Math.floor((now - tanamDate) / (1000 * 60 * 60 * 24));
-          color = getRipenessColor(diffDays, ripeDays);
+          const days = Math.floor((now - tanamDate) / (1000 * 60 * 60 * 24));
+          color = getRipenessColor(days, ripeDays);
         }
 
         return {
           ...f,
           properties: {
             ...f.properties,
-            originalFill,
+            originalFill: f.properties.fill || '#ffffff',
             fill: color
           }
         };
       });
 
-      source.setData({
-        type: 'FeatureCollection',
-        features: updatedFeatures
-      });
+      source.setData({ type: 'FeatureCollection', features: updatedFeatures });
 
-      const fillId = `${sourceId}-fill`;
-      const lineId = `${sourceId}-line`;
-
+      // FILL OPACITY
       if (map.getLayer(fillId)) {
         map.setPaintProperty(fillId, 'fill-opacity',
-          tuaiActive ? ['literal', 0.6] : [
-            'interpolate', ['linear'], ['zoom'],
-            13, isSawahRing ? 0.4 : 0,
-            14, isSawahRing ? 0.4 : 0,
-            15, isSawahRing ? 0.2 : 0.2,
-            16, isSawahRing ? 0 : 0.4
-          ]
+          tuaiActive
+            ? (isSawahRing ? 0 : 0.8)
+            : [
+                'interpolate', ['linear'], ['zoom'],
+                13, isSawahRing ? 0.4 : 0,
+                14, isSawahRing ? 0.4 : 0,
+                15, isSawahRing ? 0.2 : 0.2,
+                16, isSawahRing ? 0 : 0.4
+              ]
         );
       }
 
+      // LINE OPACITY
       if (map.getLayer(lineId)) {
-  if (tuaiActive) {
-    map.setPaintProperty(lineId, 'line-opacity',
-      isSawahRing ? ['literal', 0.6] : ['literal', 1]
-    );
-  } else {
-    const baseOpacity = isSawahRing ? 1 : 1;
-    map.setPaintProperty(lineId, 'line-opacity', [
-      'interpolate', ['linear'], ['zoom'],
-      13, baseOpacity,
-      14, baseOpacity,
-      15, baseOpacity,
-      16, isSawahRing ? 0 : baseOpacity
-    ]);
-  }
-}
+        if (tuaiActive) {
+          map.setPaintProperty(lineId, 'line-opacity', isSawahRing ? 0 : 1);
+        } else {
+          const baseOpacity = isSawahRing ? 1 : 1;
+          map.setPaintProperty(lineId, 'line-opacity',
+            isSawahRing
+              ? [
+                  'interpolate', ['linear'], ['zoom'],
+                  13, 1,
+                  14, 1,
+                  15, 1,
+                  16, 0
+                ]
+              : [
+                  'interpolate', ['linear'], ['zoom'],
+                  13, baseOpacity,
+                  14, baseOpacity,
+                  15, baseOpacity === 1 ? 1 : 1,
+                  16, baseOpacity === 1 ? 0 : 1
+                ]
+          );
+        }
+      }
     });
   });
 }
