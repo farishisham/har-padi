@@ -770,22 +770,28 @@ function toggleTuai() {
   tuaiLegend.style.display = tuaiActive ? 'block' : 'none';
 
   Object.entries(groups).forEach(([group, files]) => {
-    (Array.isArray(files) ? files : [files]).forEach(filename => {
+    const isSawahRing = group === 'sawahring';
+    const fileList = Array.isArray(files) ? files : [files];
+
+    fileList.forEach(filename => {
       const sourceId = `${group}-${filename}`;
       const source = map.getSource(sourceId);
       if (!source || !source._data) return;
 
       const updatedFeatures = source._data.features.map(f => {
+        const originalFill = f.properties.originalFill || f.properties.fill || '#ffffff';
+
         if (!tuaiActive) {
           return {
             ...f,
             properties: {
               ...f.properties,
-              fill: f.properties.originalFill || '#ffffff'
+              fill: originalFill
             }
           };
         }
 
+        // TUAI ACTIVE
         const descText = extractDescriptionText(f);
         const benihMatch = descText.match(/benih\s+([^\s]+)/i);
         const benih = benihMatch ? benihMatch[1].toUpperCase() : null;
@@ -815,52 +821,44 @@ function toggleTuai() {
           ...f,
           properties: {
             ...f.properties,
-            originalFill: f.properties.fill || '#ffffff',
+            originalFill,
             fill: color
           }
         };
       });
 
-      // Update source with new fill colors
       source.setData({
         type: 'FeatureCollection',
         features: updatedFeatures
       });
 
       const fillId = `${sourceId}-fill`;
+      const lineId = `${sourceId}-line`;
+
       if (map.getLayer(fillId)) {
-        map.setPaintProperty(fillId, 'fill-opacity-transition', { duration: 0 });
-        if (tuaiActive) {
-          map.setPaintProperty(fillId, 'fill-opacity', 0.8);
-        } else {
-          const baseOpacity = group === 'sawahring' ? 0.4 : 0;
-          map.setPaintProperty(fillId, 'fill-opacity', [
+        map.setPaintProperty(fillId, 'fill-opacity',
+          tuaiActive ? ['literal', 0.6] : [
             'interpolate', ['linear'], ['zoom'],
-            13, baseOpacity,
-            14, baseOpacity,
-            15, baseOpacity === 0.4 ? 0.2 : 0.2,
-            16, baseOpacity === 0.4 ? 0 : 0.4
-          ]);
-        }
+            13, isSawahRing ? 0.4 : 0,
+            14, isSawahRing ? 0.4 : 0,
+            15, isSawahRing ? 0.2 : 0.2,
+            16, isSawahRing ? 0 : 0.4
+          ]
+        );
       }
 
-      // ✅ Line opacity for all groups (not just sawahring)
-      const lineId = `${sourceId}-line`;
       if (map.getLayer(lineId)) {
-        map.setPaintProperty(lineId, 'line-opacity-transition', { duration: 0 });
-
-        if (tuaiActive) {
-          map.setPaintProperty(lineId, 'line-opacity', 0.8);
-        } else {
-          const baseLineOpacity = group === 'sawahring' ? 0.4 : 1;
-          map.setPaintProperty(lineId, 'line-opacity', [
-            'interpolate', ['linear'], ['zoom'],
-            13, baseLineOpacity,
-            14, baseLineOpacity,
-            15, baseLineOpacity === 1 ? 1 : 1,
-            16, baseLineOpacity === 1 ? 0 : 1
-          ]);
-        }
+        map.setPaintProperty(lineId, 'line-opacity',
+          tuaiActive
+            ? (isSawahRing ? ['literal', 0.6] : ['literal', 1])
+            : [
+              'interpolate', ['linear'], ['zoom'],
+              13, 1,
+              14, 1,
+              15, 1,
+              16, isSawahRing ? 0 : 1
+            ]
+        );
       }
     });
   });
