@@ -455,7 +455,7 @@ function parseBenihType(f) {
 }
 
 function getDaysSinceTanam(tarikhStr) {
-  if (!tarikhStr) return null;
+  if (!tarikhStr) return 'Tiada';
 
   // Expecting format "dd/mm/yyyy"
   const [day, month, year] = tarikhStr.split('/').map(Number);
