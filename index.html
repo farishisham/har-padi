@@ -312,6 +312,7 @@ map.on('dragstart', () => {
     window.removeEventListener('deviceorientation', rotateMap);
   }
 });
+
 map.on('touchstart', () => {
   if (gpsMode !== 1) {
     gpsMode = 1;
@@ -320,6 +321,16 @@ map.on('touchstart', () => {
     watchId = null;
     window.removeEventListener('deviceorientation', rotateMap);
   }
+});
+
+map.on('zoom', () => {
+  const zoom = map.getZoom();
+  const opacity = zoom >= 14 ? 1 : 0;
+  blokNumberMarkers.forEach(marker => {
+    if (marker.getElement()) {
+      marker.getElement().style.opacity = opacity;
+    }
+  });
 });
 
 // --- POLYGONS ---
