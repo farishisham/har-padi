@@ -408,17 +408,6 @@ allFeatures.push(...data.features);
         'line-width': 2
       }
     });
-
-    map.addLayer({
-      id: `${sourceId}-highlight`,
-      type: 'line',
-      source: sourceId,
-      paint: {
-        'line-color': '#ffcc00',
-        'line-width': 4
-      },
-      filter: ['==', '_id', '']
-    });
     
     if (group === 'sawahring') {
   map.addLayer({
@@ -445,6 +434,17 @@ allFeatures.push(...data.features);
   });
 }
 
+    map.addLayer({
+      id: `${sourceId}-highlight`,
+      type: 'line',
+      source: sourceId,
+      paint: {
+        'line-color': '#ffcc00',
+        'line-width': 4
+      },
+      filter: ['==', '_id', '']
+    });
+    
     map.on('click', `${sourceId}-fill`, e => {
   const zoom = map.getZoom();
 
