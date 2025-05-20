@@ -478,8 +478,11 @@ function showBlokNumbers() {
 
     if (isSawahRing && blokNo) {
       //const center = turf.center(f).geometry.coordinates;
-      const center = turf.pointOnFeature(f).geometry.coordinates;
+      const point = turf.pointOnFeature(f).geometry.coordinates;
+      const offsetCenter = [point[0], point[1] + 0.0003];
+      const center = offsetCenter;
       const el = document.createElement('div');
+      //el.style.transform = 'translate(-50%, -40%)';
       el.textContent = blokNo;
       el.style.fontSize = '13px';
       el.style.color = 'white';
