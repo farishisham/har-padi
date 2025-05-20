@@ -360,10 +360,6 @@ async function loadGroup(group, files) {
     const blokNo = parseBlokNumber(name);
     if (blokNo) {
       f.properties.blok_no = blokNo;
-
-      // Calculate center point using Turf
-      const center = turf.center(f);
-      f.properties.center = center.geometry.coordinates; // [lng, lat]
     }
   }
 });
@@ -410,29 +406,30 @@ allFeatures.push(...data.features);
     });
     
     if (group === 'sawahring') {
-  map.addLayer({
-    id: `${sourceId}-labels`,
-    type: 'symbol',
-    source: sourceId,
-    layout: {
-      'text-field': ['get', 'blok_no'],
-      'text-size': 14,
-      'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-      'text-offset': [0, 0],
-      'text-anchor': 'center'
-    },
-    paint: {
-      'text-color': 'white',
-      'text-halo-color': 'black',
-      'text-halo-width': 1,
-      'text-opacity': [
-        'interpolate', ['linear'], ['zoom'],
-        13, 1,
-        15, 0
-      ]
-    }
-  });
-}
+    map.addLayer({
+      id: `${sourceId}-label`,
+      type: 'symbol',
+      source: sourceId,
+      layout: {
+        'text-field': ['get', 'blok_no'],
+        'text-font': ['Open Sans Bold'],
+        'text-size': 14,
+        'text-anchor': 'center'
+      },
+      paint: {
+        'text-color': 'white',
+        'text-halo-color': 'black',
+        'text-halo-width': 1.5,
+        'text-opacity': [
+          'interpolate', ['linear'], ['zoom'],
+          13, 1,
+          15, 0
+        ]
+      }
+    });
+  }
+
+ 
 
     map.addLayer({
       id: `${sourceId}-highlight`,
@@ -466,7 +463,7 @@ allFeatures.push(...data.features);
 }
 
 function parseBlokNumber(name) {
-  const match = name.toLowerCase().match(/blok\s*(\d+)/);
+  const match = name.toLowerCase().match(/blok\s+(\d+)/);
   return match ? match[1] : null;
 }
 
