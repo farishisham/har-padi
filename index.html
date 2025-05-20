@@ -323,15 +323,7 @@ map.on('touchstart', () => {
   }
 });
 
-map.on('zoom', () => {
-  const zoom = map.getZoom();
-  const opacity = zoom >= 14 ? 1 : 0;
-  blokNumberMarkers.forEach(marker => {
-    if (marker.getElement()) {
-      marker.getElement().style.opacity = opacity;
-    }
-  });
-});
+
 
 // --- POLYGONS ---
 
@@ -342,7 +334,7 @@ const groups = {
   ]
 };
 
-let sawahRingLabels = [];
+let blokNumberMarkers = [];
 
 let allFeatures = [];
 
@@ -355,7 +347,7 @@ map.on('load', async ()=> {
 
   await loadGroup('sawahring', ['sawahring.json']);  // Always load sawahring first
   await loadGroup('blok', ['blok1.json']);
-  showSawahRingLabels();
+  showBlokNumbers();
 
 });
 
@@ -475,32 +467,32 @@ allFeatures.push(...data.features);
   }
 }
 
-function showSawahRingLabels() {
-  clearSawahRingLabels();
+function showBlokNumbers() {
+  // Clear existing markers
+  blokNumberMarkers.forEach(m => m.remove());
+  blokNumberMarkers = [];
 
   allFeatures.forEach(f => {
-    const name = f.properties?.name || '';
-    if (!name.toLowerCase().includes('blok')) return;
+    const isSawahRing = f.properties._id?.startsWith('sawahring');
+    const blokNo = f.properties.blok_no;
 
-    const blokNo = parseBlokNumber(name);
-    if (!blokNo) return;
+    if (isSawahRing && blokNo) {
+      const center = turf.center(f).geometry.coordinates;
+      const el = document.createElement('div');
+      el.textContent = blokNo;
+      el.style.fontSize = '13px';
+      el.style.color = 'white';
+      el.style.fontWeight = 'bold';
+      el.style.textShadow = '1px 1px 2px black';
+      el.style.transform = 'translate(-50%, -50%)';
+      el.style.pointerEvents = 'none';
 
-    const center = turf.center(f).geometry.coordinates;
+      const marker = new maplibregl.Marker(el)
+        .setLngLat(center)
+        .addTo(map);
 
-    const label = document.createElement('div');
-    label.textContent = blokNo;
-    label.style.color = 'white';
-    label.style.fontSize = '13px';
-    label.style.fontWeight = 'bold';
-    label.style.textShadow = '0 0 3px black';
-    label.style.pointerEvents = 'none';
-    label.style.transform = 'translate(-50%, -50%)';
-
-    const marker = new maplibregl.Marker({ element: label })
-      .setLngLat(center)
-      .addTo(map);
-
-    sawahRingLabels.push(marker);
+      blokNumberMarkers.push(marker);
+    }
   });
 }
 
@@ -651,6 +643,16 @@ map.on('click', e => {
     });
     document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
   }
+});
+
+map.on('zoom', () => {
+  const zoom = map.getZoom();
+  const opacity = zoom >= 14 ? 1 : 0;
+  blokNumberMarkers.forEach(marker => {
+    if (marker.getElement()) {
+      marker.getElement().style.opacity = opacity;
+    }
+  });
 });
 
 // --- SEARCH ---
