@@ -352,10 +352,10 @@ async function loadGroup(group, files) {
     const data = await response.json();
     const sourceId = `${group}-${filename}`;
 
-    data.features.forEach((f, i) => f.properties._id = `${group}-${filename}-${i}`);
-    allFeatures.push(...data.features);
-    
-      // Add blok number using your function
+    data.features.forEach((f, i) => {
+  f.properties._id = `${group}-${filename}-${i}`;
+
+  // Add blok number using your function
   const name = f.properties?.name || '';
   const blokNo = parseBlokNumber(name);
   if (blokNo) {
