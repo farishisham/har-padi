@@ -331,6 +331,8 @@ const groups = {
   ]
 };
 
+let sawahRingLabels = [];
+
 let allFeatures = [];
 
 let activeWordFilter = null;
@@ -341,9 +343,9 @@ map.on('load', async ()=> {
   map.touchZoomRotate.enable();
 
   await loadGroup('sawahring', ['sawahring.json']);  // Always load sawahring first
-  await loadGroup('blok', [
-    'blok1.json'
-  ]);
+  await loadGroup('blok', ['blok1.json']);
+  showSawahRingLabels();
+
 });
 
 async function loadGroup(group, files) {
@@ -460,6 +462,40 @@ allFeatures.push(...data.features);
   // Otherwise, ignore the click
 });
   }
+}
+
+function showSawahRingLabels() {
+  clearSawahRingLabels();
+
+  allFeatures.forEach(f => {
+    const name = f.properties?.name || '';
+    if (!name.toLowerCase().includes('blok')) return;
+
+    const blokNo = parseBlokNumber(name);
+    if (!blokNo) return;
+
+    const center = turf.center(f).geometry.coordinates;
+
+    const label = document.createElement('div');
+    label.textContent = blokNo;
+    label.style.color = 'white';
+    label.style.fontSize = '13px';
+    label.style.fontWeight = 'bold';
+    label.style.textShadow = '0 0 3px black';
+    label.style.pointerEvents = 'none';
+    label.style.transform = 'translate(-50%, -50%)';
+
+    const marker = new maplibregl.Marker({ element: label })
+      .setLngLat(center)
+      .addTo(map);
+
+    sawahRingLabels.push(marker);
+  });
+}
+
+function clearSawahRingLabels() {
+  sawahRingLabels.forEach(m => m.remove());
+  sawahRingLabels = [];
 }
 
 function parseBlokNumber(name) {
