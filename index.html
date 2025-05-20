@@ -477,7 +477,8 @@ function showBlokNumbers() {
     const blokNo = f.properties.blok_no;
 
     if (isSawahRing && blokNo) {
-      const center = turf.center(f).geometry.coordinates;
+      //const center = turf.center(f).geometry.coordinates;
+      const center = turf.pointOnFeature(f).geometry.coordinates;
       const el = document.createElement('div');
       el.textContent = blokNo;
       el.style.fontSize = '13px';
@@ -588,7 +589,8 @@ function highlightFeature(fPartial) {
   gpsMode = 1;
   setIconColor();
 
-  const center = turf.center(f).geometry.coordinates;
+  //const center = turf.center(f).geometry.coordinates;
+  const center = turf.pointOnFeature(f).geometry.coordinates;
   map.fitBounds(turf.bbox(f), {
     padding: 100,
     maxZoom: 17.4,
@@ -997,7 +999,8 @@ function showCheckmarks(keyword) {
     const text = doc.body.textContent.toLowerCase();
 
     if (text.includes(keyword.toLowerCase())) {
-      const center = turf.center(f).geometry.coordinates;
+      //const center = turf.center(f).geometry.coordinates;
+      const center = turf.pointOnFeature(f).geometry.coordinates;
       
       const el = document.createElement('div');
       el.innerHTML = `
