@@ -354,6 +354,14 @@ async function loadGroup(group, files) {
 
     data.features.forEach((f, i) => f.properties._id = `${group}-${filename}-${i}`);
     allFeatures.push(...data.features);
+    
+      // Add blok number using your function
+  const name = f.properties?.name || '';
+  const blokNo = parseBlokNumber(name);
+  if (blokNo) {
+    f.properties.blok_no = blokNo;
+  }
+});
 
     map.addSource(sourceId, { type: 'geojson', data });
 
