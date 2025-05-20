@@ -352,8 +352,16 @@ async function loadGroup(group, files) {
     const data = await response.json();
     const sourceId = `${group}-${filename}`;
 
-    data.features.forEach((f, i) => f.properties._id = `${group}-${filename}-${i}`);
-    allFeatures.push(...data.features);
+    data.features.forEach((f, i) => {
+  f.properties._id = `${group}-${filename}-${i}`;
+
+  // Add blok number using your function
+  const name = f.properties?.name || '';
+  const blokNo = parseBlokNumber(name);
+  if (blokNo) {
+    f.properties.blok_no = blokNo;
+  }
+});
 
     map.addSource(sourceId, { type: 'geojson', data });
 
@@ -403,6 +411,30 @@ async function loadGroup(group, files) {
       },
       filter: ['==', '_id', '']
     });
+    
+    map.addLayer({
+  id: `${sourceId}-label`,
+  type: 'symbol',
+  source: sourceId,
+  layout: {
+    'text-field': ['get', 'blok_no'],
+    'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+    'text-size': 14,
+    'text-allow-overlap': true
+  },
+  paint: {
+    'text-color': '#ffffff',
+    'text-halo-color': '#000000',
+    'text-halo-width': 1.2,
+    'text-opacity': [
+      'interpolate', ['linear'], ['zoom'],
+      13, baseOpacity,
+      14, baseOpacity,
+      15, baseOpacity === 0.4 ? 0.2 : 0.2,
+      16, baseOpacity === 0.4 ? 0 : 0.4
+    ]
+  }
+});
 
     map.on('click', `${sourceId}-fill`, e => {
   const zoom = map.getZoom();
@@ -422,6 +454,12 @@ async function loadGroup(group, files) {
   // Otherwise, ignore the click
 });
   }
+}
+
+function parseBlokNumber(f) {
+  const name = f.properties?.name?.toLowerCase() || '';
+  const match = name.match(/blok\s+(\d+)/);
+  return match ? match[1] : null;
 }
 
 function parseTarikhTanam(f) {
