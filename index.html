@@ -274,6 +274,25 @@ function handleOrientation() {
   }
 }
 
+function updateLabelVisibility() {
+  const zoom = map.getZoom();
+  const opacity = zoom >= 14.5 ? 0 : 1;
+  const opacity2 = zoom >= 16 ? 1 : 0;
+
+  blokNumberMarkers.forEach(marker => {
+    if (marker.getElement()) {
+      marker.getElement().style.opacity = opacity;
+    }
+  });
+
+  blokNameMarkers.forEach(marker => {
+    if (marker.getElement()) {
+      marker.getElement().style.opacity = opacity2;
+    }
+  });
+}
+
+
 // GPS Button Click
 document.getElementById('gpsButton').addEventListener('click', () => {
   gpsMode = (gpsMode % 3) + 1;
@@ -351,6 +370,25 @@ map.on('load', async ()=> {
   await loadGroup('blok', ['blok1.json']);
   showBlokNumbers();
   showBlokNames();
+  updateLabelVisibility();
+  
+  // 🔽 Call zoom handler manually to set initial label visibility
+  const zoom = map.getZoom();
+  const opacity = zoom >= 14.5 ? 0 : 1;
+  const opacity2 = zoom >= 16 ? 1 : 0;
+
+  blokNumberMarkers.forEach(marker => {
+    if (marker.getElement()) {
+      marker.getElement().style.opacity = opacity;
+    }
+  });
+
+  blokNameMarkers.forEach(marker => {
+    if (marker.getElement()) {
+      marker.getElement().style.opacity = opacity2;
+    }
+  });
+});
 
 });
 
@@ -700,23 +738,9 @@ map.on('click', e => {
   }
 });
 
-map.on('zoom', () => {
-  const zoom = map.getZoom();
-  const opacity = zoom >= 14.5 ? 0 : 1; // blok number
-  const opacity2 = zoom >= 15.5 ? 1 : 0;  // blok name
 
-  blokNumberMarkers.forEach(marker => {
-    if (marker.getElement()) {
-      marker.getElement().style.opacity = opacity;
-    }
-  });
+map.on('zoom', updateLabelVisibility);
 
-  blokNameMarkers.forEach(marker => {
-    if (marker.getElement()) {
-      marker.getElement().style.opacity = opacity2;
-    }
-  });
-});
 
 // --- SEARCH ---
 const input = document.getElementById('searchInput');
