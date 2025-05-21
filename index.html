@@ -361,41 +361,19 @@ async function loadGroup(group, files) {
     const sourceId = `${group}-${filename}`;
 
     data.features.forEach((f, i) => {
-  f.properties._id = `${group}-${filename}-${i}`;
+      f.properties._id = `${group}-${filename}-${i}`;
 
-  if (group === 'sawahring') {
-    const name = f.properties?.name || '';
-    const blokNo = parseBlokNumber(name);
-    if (blokNo) {
-      f.properties.blok_no = blokNo;
-    }
-    
-  if (group === 'blok') {
-  data.features.forEach(f => {
-    const name = f.properties?.name || '';
-    const center = turf.center(f).geometry.coordinates;
+      if (group === 'sawahring') {
+        const name = f.properties?.name || '';
+        const blokNo = parseBlokNumber(name);
+        if (blokNo) {
+          f.properties.blok_no = blokNo;
+        }
+      }
+    });
 
-    const el = document.createElement('div');
-    el.textContent = name;
-    el.style.fontSize = '11px';
-    el.style.fontFamily = 'Helvetica, sans-serif';
-    el.style.color = 'white';
-    el.style.textShadow = '1px 1px 2px black';
-    el.style.padding = '2px 4px';
-    el.style.background = 'rgba(0,0,0,0.3)';
-    el.style.borderRadius = '3px';
-    el.style.opacity = '0'; // Hidden initially
-
-    const marker = new maplibregl.Marker({ element: el })
-      .setLngLat(center)
-      .addTo(map);
-
-    blokNameMarkers.push(marker);
-  });
-}
-
-// ✅ Important! Push to allFeatures after modifying
-allFeatures.push(...data.features);
+    // Push AFTER all modifications
+    allFeatures.push(...data.features);
 
     map.addSource(sourceId, { type: 'geojson', data });
 
@@ -462,6 +440,35 @@ allFeatures.push(...data.features);
     const f = e.features[0];
     highlightFeature(f);
   }
+  
+      // 🔽 Show name markers for blok group
+    if (group === 'blok') {
+      data.features.forEach(f => {
+        const name = f.properties?.name || '';
+        const center1 = turf.centroid(f).geometry.coordinates;
+        const center2 = turf.pointOnFeature(f).geometry.coordinates;
+        const center = [
+          (center1[0] + center2[0]) / 2,
+          (center1[1] + center2[1]) / 2
+        ];
+
+        const el = document.createElement('div');
+        el.textContent = name;
+        el.style.fontSize = '11px';
+        el.style.fontFamily = 'Helvetica, sans-serif';
+        el.style.color = 'white';
+        el.style.textShadow = '1px 1px 2px black';
+        el.style.padding = '2px 4px';
+        el.style.background = 'rgba(0,0,0,0.3)';
+        el.style.borderRadius = '3px';
+        el.style.opacity = '0'; // Hidden by default; will fade in on zoom
+
+        const marker = new maplibregl.Marker({ element: el })
+          .setLngLat(center)
+          .addTo(map);
+
+        blokNameMarkers.push(marker);
+
 
   // Otherwise, ignore the click
 });
