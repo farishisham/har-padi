@@ -410,6 +410,27 @@ allFeatures.push(...data.features);
       }
     });
     
+    const blokNameMarkers = [];
+
+data.features.forEach(f => {
+  const center = turf.center(f).geometry.coordinates;
+
+  const el = document.createElement('div');
+  el.textContent = f.properties.name;
+  el.style.fontSize = '10px';
+  el.style.color = 'white';
+  el.style.fontWeight = 'bold';
+  el.style.textShadow = '1px 1px 2px black';
+  el.style.pointerEvents = 'none';
+  el.style.opacity = map.getZoom() >= 15 ? '1' : '0';
+
+  const marker = new maplibregl.Marker(el)
+    .setLngLat(center)
+    .addTo(map);
+
+  blokNameMarkers.push(marker);
+});
+    
     if (group === 'sawahring') {
     map.addLayer({
       id: `${sourceId}-label`,
@@ -433,8 +454,6 @@ allFeatures.push(...data.features);
       }
     });
   }
-
- 
 
     map.addLayer({
       id: `${sourceId}-highlight`,
@@ -659,11 +678,19 @@ map.on('click', e => {
 
 map.on('zoom', () => {
   const zoom = map.getZoom();
-  const opacity = zoom >= 14.5 ? 0 : 1;
+
+  // Show blok numbers below zoom level 14.5
+  const blokNumberOpacity = zoom >= 14.5 ? 0 : 1;
   blokNumberMarkers.forEach(marker => {
-    if (marker.getElement()) {
-      marker.getElement().style.opacity = opacity;
-    }
+    const el = marker.getElement();
+    if (el) el.style.opacity = blokNumberOpacity;
+  });
+
+  // Show blok names at zoom level 15 and above
+  const blokNameOpacity = zoom >= 15 ? 1 : 0;
+  blokNameMarkers.forEach(marker => {
+    const el = marker.getElement();
+    if (el) el.style.opacity = blokNameOpacity;
   });
 });
 
