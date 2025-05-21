@@ -412,8 +412,6 @@ async function loadGroup(group, files) {
         'line-width': 2
       }
     });
-    
-    
 
     map.addLayer({
       id: `${sourceId}-highlight`,
@@ -426,22 +424,25 @@ async function loadGroup(group, files) {
       filter: ['==', '_id', '']
     });
     
-    map.on('click', `${sourceId}-fill`, e => {
-  const zoom = map.getZoom();
+        map.on('click', `${sourceId}-fill`, e => {
+      const zoom = map.getZoom();
 
-  // Only allow clicks on 'blok' at zoom ≥ 15
-  if (group === 'blok' && zoom >= 15) {
-    const f = e.features[0];
-    highlightFeature(f);
-  }
+      // Only allow clicks on 'blok' at zoom ≥ 15
+      if (group === 'blok' && zoom >= 15) {
+        const f = e.features[0];
+        highlightFeature(f);
+      }
 
-  // Only allow clicks on 'sawahring' at zoom < 15
-  if (group === 'sawahring' && zoom < 15) {
-    const f = e.features[0];
-    highlightFeature(f);
-  }
-  
-      // 🔽 Show name markers for blok group
+      // Only allow clicks on 'sawahring' at zoom < 15
+      if (group === 'sawahring' && zoom < 15) {
+        const f = e.features[0];
+        highlightFeature(f);
+      }
+
+      // Otherwise, ignore the click
+    });
+
+    // 🔽 Show name markers for blok group
     if (group === 'blok') {
       data.features.forEach(f => {
         const name = f.properties?.name || '';
@@ -468,10 +469,8 @@ async function loadGroup(group, files) {
           .addTo(map);
 
         blokNameMarkers.push(marker);
-
-
-  // Otherwise, ignore the click
-});
+      });
+    }
   }
 }
 
