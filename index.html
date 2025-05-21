@@ -336,6 +336,8 @@ const groups = {
 
 let blokNumberMarkers = [];
 
+let blokNameMarkers = [];
+
 let allFeatures = [];
 
 let activeWordFilter = null;
@@ -431,13 +433,13 @@ data.features.forEach(f => {
   blokNameMarkers.push(marker);
 });
     
-    if (group === 'sawahring') {
+    if (group === 'blok') {
     map.addLayer({
       id: `${sourceId}-label`,
       type: 'symbol',
       source: sourceId,
       layout: {
-        'text-field': ['get', 'blok_no'],
+        'text-field': ['get', 'name'],
         'text-font': ['Open Sans Bold'],
         'text-size': 14,
         'text-anchor': 'center'
@@ -518,6 +520,42 @@ function showBlokNumbers() {
         .addTo(map);
 
       blokNumberMarkers.push(marker);
+    }
+  });
+}
+
+function showBlokNames() {
+  // Clear existing markers
+  blokNameMarkers.forEach(m => m.remove());
+  blokNameMarkers = [];
+
+  allFeatures.forEach(f => {
+    const isBlok = f.properties._id?.startsWith('blok');
+    const blokName = f.properties.name;
+
+    if (isBlok && blokName) {
+      //const center = turf.center(f).geometry.coordinates;
+      const point = turf.pointOnFeature(f).geometry.coordinates;
+      //const offsetCenter = [point[0], point[1] - 0.0005];
+      const center1 = turf.centroid(f).geometry.coordinates;
+      const center2 = turf.pointOnFeature(f).geometry.coordinates;
+      const offsetCenter = [(center1[0] + center2[0]) / 2,(center1[1] + center2[1]) / 2];
+      const center = offsetCenter;
+      const el = document.createElement('div');
+      //el.style.transform = 'translate(-50%, -40%)';
+      el.textContent = blokName;
+      el.style.fontSize = '13px';
+      el.style.color = 'white';
+      el.style.fontWeight = 'bold';
+      el.style.textShadow = '1px 1px 2px black';
+      el.style.transform = 'translate(-50%, -50%)';
+      el.style.pointerEvents = 'none';
+
+      const marker = new maplibregl.Marker(el)
+        .setLngLat(center)
+        .addTo(map);
+
+      blokNameMarkers.push(marker);
     }
   });
 }
@@ -678,19 +716,19 @@ map.on('click', e => {
 
 map.on('zoom', () => {
   const zoom = map.getZoom();
-
-  // Show blok numbers below zoom level 14.5
-  const blokNumberOpacity = zoom >= 14.5 ? 0 : 1;
+  const opacity = zoom >= 14.5 ? 0 : 1;
+  const opacity2 = zoom >= 15 ? 0 : 1;
+  
   blokNumberMarkers.forEach(marker => {
-    const el = marker.getElement();
-    if (el) el.style.opacity = blokNumberOpacity;
-  });
-
-  // Show blok names at zoom level 15 and above
-  const blokNameOpacity = zoom >= 15 ? 1 : 0;
+    if (marker.getElement()) {
+      marker.getElement().style.opacity = opacity;
+      
   blokNameMarkers.forEach(marker => {
-    const el = marker.getElement();
-    if (el) el.style.opacity = blokNameOpacity;
+    if (marker.getElement()) {
+      marker.getElement().style.opacity = opacity2;
+      
+      
+    }
   });
 });
 
