@@ -361,35 +361,19 @@ let allFeatures = [];
 
 let activeWordFilter = null;
 
-map.on('load', async ()=> {
+// ⬅️ On load, load data and initialize
+map.on('load', async () => {
   map.dragPan.enable();
   map.scrollZoom.enable();
   map.touchZoomRotate.enable();
 
-  await loadGroup('sawahring', ['sawahring.json']);  // Always load sawahring first
+  await loadGroup('sawahring', ['sawahring.json']); // Always load first
   await loadGroup('blok', ['blok1.json']);
-  showBlokNumbers();
-  showBlokNames();
-  updateLabelVisibility();
-  
-  // 🔽 Call zoom handler manually to set initial label visibility
-  const zoom = map.getZoom();
-  const opacity = zoom >= 14.5 ? 0 : 1;
-  const opacity2 = zoom >= 16 ? 1 : 0;
 
-  blokNumberMarkers.forEach(marker => {
-    if (marker.getElement()) {
-      marker.getElement().style.opacity = opacity;
-    }
-  });
+  showBlokNumbers(); // Number label for sawahring
+  showBlokNames();   // Name label for blok
 
-  blokNameMarkers.forEach(marker => {
-    if (marker.getElement()) {
-      marker.getElement().style.opacity = opacity2;
-    }
-  });
-});
-
+  updateLabelVisibility(); // Set initial label visibility based on zoom
 });
 
 async function loadGroup(group, files) {
