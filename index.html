@@ -277,7 +277,7 @@ function handleOrientation() {
 function updateLabelVisibility() {
   const zoom = map.getZoom();
   const opacity = zoom >= 14.5 ? 0 : 1;
-  const opacity2 = zoom >= 16 ? 1 : 0;
+  const opacity2 = zoom >= 16.5 ? 1 : 0;
 
   blokNumberMarkers.forEach(marker => {
     if (marker.getElement()) {
