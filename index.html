@@ -368,32 +368,6 @@ async function loadGroup(group, files) {
     if (blokNo) {
       f.properties.blok_no = blokNo;
     }
-  }
-});
-
-if (group === 'blok') {
-  data.features.forEach(f => {
-    const name = f.properties?.name || '';
-    const center = turf.center(f).geometry.coordinates;
-
-    const el = document.createElement('div');
-    el.textContent = name;
-    el.style.fontSize = '11px';
-    el.style.fontFamily = 'Helvetica, sans-serif';
-    el.style.color = 'white';
-    el.style.textShadow = '1px 1px 2px black';
-    el.style.padding = '2px 4px';
-    el.style.background = 'rgba(0,0,0,0.3)';
-    el.style.borderRadius = '3px';
-    el.style.opacity = '0'; // Hidden initially
-
-    const marker = new maplibregl.Marker({ element: el })
-      .setLngLat(center)
-      .addTo(map);
-
-    blokNameMarkers.push(marker);
-  });
-}
 
 // ✅ Important! Push to allFeatures after modifying
 allFeatures.push(...data.features);
@@ -436,50 +410,7 @@ allFeatures.push(...data.features);
       }
     });
     
-    const blokNameMarkers = [];
-
-data.features.forEach(f => {
-  const center = turf.center(f).geometry.coordinates;
-
-  const el = document.createElement('div');
-  el.textContent = f.properties.name;
-  el.style.fontSize = '10px';
-  el.style.color = 'white';
-  el.style.fontWeight = 'bold';
-  el.style.textShadow = '1px 1px 2px black';
-  el.style.pointerEvents = 'none';
-  el.style.opacity = map.getZoom() >= 15 ? '1' : '0';
-
-  const marker = new maplibregl.Marker(el)
-    .setLngLat(center)
-    .addTo(map);
-
-  blokNameMarkers.push(marker);
-});
     
-    if (group === 'blok') {
-    map.addLayer({
-      id: `${sourceId}-label`,
-      type: 'symbol',
-      source: sourceId,
-      layout: {
-        'text-field': ['get', 'name'],
-        'text-font': ['Open Sans Bold'],
-        'text-size': 14,
-        'text-anchor': 'center'
-      },
-      paint: {
-        'text-color': 'white',
-        'text-halo-color': 'black',
-        'text-halo-width': 1.5,
-        'text-opacity': [
-          'interpolate', ['linear'], ['zoom'],
-          13, 1,
-          15, 0
-        ]
-      }
-    });
-  }
 
     map.addLayer({
       id: `${sourceId}-highlight`,
