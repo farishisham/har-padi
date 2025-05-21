@@ -455,7 +455,7 @@ async function loadGroup(group, files) {
 
         const el = document.createElement('div');
         el.textContent = name;
-        el.style.fontSize = '11px';
+        el.style.fontSize = '10px';
         el.style.fontFamily = 'Helvetica, sans-serif';
         el.style.color = 'white';
         el.style.textShadow = '1px 1px 2px black';
@@ -530,7 +530,7 @@ function showBlokNames() {
       const el = document.createElement('div');
       //el.style.transform = 'translate(-50%, -40%)';
       el.textContent = blokName;
-      el.style.fontSize = '13px';
+      el.style.fontSize = '10px';
       el.style.color = 'white';
       el.style.fontWeight = 'bold';
       el.style.textShadow = '1px 1px 2px black';
@@ -703,7 +703,7 @@ map.on('click', e => {
 map.on('zoom', () => {
   const zoom = map.getZoom();
   const opacity = zoom >= 14.5 ? 0 : 1; // blok number
-  const opacity2 = zoom >= 15 ? 1 : 0;  // blok name
+  const opacity2 = zoom >= 15.5 ? 1 : 0;  // blok name
 
   blokNumberMarkers.forEach(marker => {
     if (marker.getElement()) {
