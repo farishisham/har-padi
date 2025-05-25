@@ -769,8 +769,8 @@ map.on('click', e => {
 
 
 map.on('zoom', updateLabelVisibility);
-//map.on('move', updateFloatingHudVisibility);
-//map.on('zoomend', updateFloatingHudVisibility); // 👈 optional but better than repeated `zoom`
+map.on('move', updateFloatingHudVisibility);
+map.on('zoomend', updateFloatingHudVisibility); // 👈 optional but better than repeated `zoom`
 
 
 
