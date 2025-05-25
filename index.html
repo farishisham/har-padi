@@ -189,6 +189,22 @@
   </div>
 </div>
 
+<div id="floatingHud" style="
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-family: Helvetica, sans-serif;
+  font-size: 13px;
+  z-index: 1002;
+  display: none;
+  pointer-events: none;
+"></div>
+
 <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
@@ -708,6 +724,19 @@ function highlightFeature(fPartial) {
     .setHTML(popupHTML)
     .addTo(map)
     .getElement().classList.add('popup-no-x');
+    
+    const popup = new maplibregl.Popup({ closeButton: false })
+  .setLngLat(center)
+  .setHTML(popupHTML)
+  .addTo(map)
+  .getElement().classList.add('popup-no-x');
+
+// Store reference for tracking
+currentPopup = popup;
+currentPopupLngLat = center;
+
+const floatingHud = document.getElementById('floatingHud');
+floatingHud.innerHTML = popupHTML;
 }
 
 
@@ -732,7 +761,29 @@ map.on('click', e => {
 
 
 map.on('zoom', updateLabelVisibility);
+map.on('move', updateFloatingHudVisibility);
+map.on('zoom', updateFloatingHudVisibility);
 
+
+function updateFloatingHudVisibility() {
+  const hud = document.getElementById('floatingHud');
+  if (!currentPopup || !currentPopupLngLat) {
+    hud.style.display = 'none';
+    return;
+  }
+
+  const point = map.project(currentPopupLngLat); // Convert lngLat to screen position
+  const buffer = 50; // safe margin from screen edge
+  const mapCanvas = map.getCanvas();
+  const width = mapCanvas.clientWidth;
+  const height = mapCanvas.clientHeight;
+
+  const isOffscreen =
+    point.x < buffer || point.x > width - buffer ||
+    point.y < buffer || point.y > height - buffer;
+
+  hud.style.display = isOffscreen ? 'block' : 'none';
+}
 
 // --- SEARCH ---
 const input = document.getElementById('searchInput');
