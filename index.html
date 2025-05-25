@@ -745,18 +745,6 @@ function highlightFeature(fPartial) {
     .addTo(map)
     .getElement().classList.add('popup-no-x');
     
-    const popup = new maplibregl.Popup({ closeButton: false })
-  .setLngLat(center)
-  .setHTML(popupHTML)
-  .addTo(map)
-  .getElement().classList.add('popup-no-x');
-
-// Store reference for tracking
-currentPopup = popup;
-currentPopupLngLat = center;
-
-const floatingHud = document.getElementById('floatingHud');
-floatingHud.innerHTML = popupHTML;
 }
 
 
@@ -781,8 +769,8 @@ map.on('click', e => {
 
 
 map.on('zoom', updateLabelVisibility);
-map.on('move', updateFloatingHudVisibility);
-map.on('zoomend', updateFloatingHudVisibility); // 👈 optional but better than repeated `zoom`
+//map.on('move', updateFloatingHudVisibility);
+//map.on('zoomend', updateFloatingHudVisibility); // 👈 optional but better than repeated `zoom`
 
 
 
