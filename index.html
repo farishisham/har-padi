@@ -520,6 +520,26 @@ async function loadGroup(group, files) {
   }
 }
 
+function updateFloatingHudVisibility() {
+  const hud = document.getElementById('floatingHud');
+  if (!currentPopup || !currentPopupLngLat) {
+    hud.style.display = 'none';
+    return;
+  }
+
+  const point = map.project(currentPopupLngLat); // Convert lngLat to screen position
+  const buffer = 50; // safe margin from screen edge
+  const mapCanvas = map.getCanvas();
+  const width = mapCanvas.clientWidth;
+  const height = mapCanvas.clientHeight;
+
+  const isOffscreen =
+    point.x < buffer || point.x > width - buffer ||
+    point.y < buffer || point.y > height - buffer;
+
+  hud.style.display = isOffscreen ? 'block' : 'none';
+}
+
 function showBlokNumbers() {
   // Clear existing markers
   blokNumberMarkers.forEach(m => m.remove());
@@ -762,28 +782,10 @@ map.on('click', e => {
 
 map.on('zoom', updateLabelVisibility);
 map.on('move', updateFloatingHudVisibility);
-//map.on('zoomend', updateFloatingHudVisibility); // 👈 optional but better than repeated `zoom`
+map.on('zoomend', updateFloatingHudVisibility); // 👈 optional but better than repeated `zoom`
 
 
-function updateFloatingHudVisibility() {
-  const hud = document.getElementById('floatingHud');
-  if (!currentPopup || !currentPopupLngLat) {
-    hud.style.display = 'none';
-    return;
-  }
 
-  const point = map.project(currentPopupLngLat); // Convert lngLat to screen position
-  const buffer = 50; // safe margin from screen edge
-  const mapCanvas = map.getCanvas();
-  const width = mapCanvas.clientWidth;
-  const height = mapCanvas.clientHeight;
-
-  const isOffscreen =
-    point.x < buffer || point.x > width - buffer ||
-    point.y < buffer || point.y > height - buffer;
-
-  hud.style.display = isOffscreen ? 'block' : 'none';
-}
 
 // --- SEARCH ---
 const input = document.getElementById('searchInput');
