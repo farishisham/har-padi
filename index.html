@@ -588,13 +588,12 @@ function showBlokNames() {
     if (isBlok && blokName) {
       const center1 = turf.centroid(f).geometry.coordinates;
       const center2 = turf.pointOnFeature(f).geometry.coordinates;
-      const offsetCenter = [
+      const center = [
         (center1[0] + center2[0]) / 2,
         (center1[1] + center2[1]) / 2
       ];
-      const center = offsetCenter;
 
-      // 🟩 Extract benih type
+      // Extract benih type
       const rawHTML = f.properties?.description?.value || '';
       const parser = new DOMParser();
       const doc = parser.parseFromString(rawHTML, 'text/html');
@@ -602,16 +601,16 @@ function showBlokNames() {
       const match = text.match(/benih\s+(.+?)(?=\s+tarikh|$)/i);
       const benih = match ? match[1].trim().toUpperCase() : '';
 
+      // Create marker element
       const el = document.createElement('div');
       el.innerHTML = `
-        <div style="text-align:center;">
+        <div style="text-align:center; line-height:1.1;">
           <div style="font-weight:bold;">${blokName}</div>
-          <div style="font-size:10px;">${benih}</div>
+          <div style="font-weight:normal;">${benih}</div>
         </div>
       `;
       el.style.fontSize = '10px';
       el.style.color = 'white';
-      el.style.fontWeight = 'bold';
       el.style.textShadow = '1px 1px 2px black';
       el.style.transform = 'translate(-50%, -50%)';
       el.style.pointerEvents = 'none';
