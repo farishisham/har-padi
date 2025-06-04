@@ -1133,7 +1133,7 @@ function showCheckmarks(keyword) {
       //const center = turf.pointOnFeature(f).geometry.coordinates;
       const center1 = turf.centroid(f).geometry.coordinates;
       const center2 = turf.pointOnFeature(f).geometry.coordinates;
-      const offsetCenter = [(center1[0] + center2[0]) / 2,(center1[1] + center2[1]) / 2 + 0.0003];
+      const offsetCenter = [(center1[0] + center2[0]) / 2,(center1[1] + center2[1]) / 2 + 0.0001];
       const center = offsetCenter;
       
       const el = document.createElement('div');
