@@ -1133,7 +1133,7 @@ function showCheckmarks(keyword) {
       //const center = turf.pointOnFeature(f).geometry.coordinates;
       const center1 = turf.centroid(f).geometry.coordinates;
       const center2 = turf.pointOnFeature(f).geometry.coordinates;
-      const offsetCenter = [(center1[0] + center2[0]) / 2,(center1[1] + center2[1]) / 2];
+      const offsetCenter = [(center1[0] + center2[0]) / 2,(center1[1] + center2[1]) / 2 + 0.0003];
       const center = offsetCenter;
       
       const el = document.createElement('div');
@@ -1145,7 +1145,7 @@ function showCheckmarks(keyword) {
       fill="none" stroke="black" stroke-width="1.5"/>
   </svg>
 `;
-      el.style.transform = 'translate(-50%, -80%)';
+      el.style.transform = 'translate(-50%, -50%)';
       const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
       checkMarkers.push(marker);
     }
