@@ -768,3 +768,8 @@ uploadJsonBtn.addEventListener('click', () => {
 // Initialize state on page load
 updateLoginUI();
 
+const { data, error } = await supabase.auth.signInWithPassword({
+  email: username + "@company.local",
+  password: password
+});
+
