@@ -62,14 +62,15 @@
 
 <!-- Admin Login Modal (hidden on load) -->
 <div id="adminModal" class="modal" style="display:none;">
-  <div class="modal-content">
+  <div class="modal-content" style="position:relative;">
     <span id="closeLoginModal" style="
       position:absolute;
-      top:6px; right:10px;
-      font-size:18px;
+      top:6px; right:8px;
+      font-size:20px;
       font-weight:bold;
-      color:white;
+      color:#ccc;
       cursor:pointer;
+      transition: color 0.2s ease;
     ">&times;</span>
     <h2>Admin Login</h2>
     <input type="text" id="adminUser" placeholder="Username">
@@ -78,6 +79,7 @@
     <p id="loginError"></p>
   </div>
 </div>
+
 
 
 <!-- Admin Controls (only shown when logged in) -->
