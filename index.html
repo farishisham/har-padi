@@ -63,6 +63,14 @@
 <!-- Admin Login Modal (hidden on load) -->
 <div id="adminModal" class="modal" style="display:none;">
   <div class="modal-content">
+    <span id="closeLoginModal" style="
+      position:absolute;
+      top:6px; right:10px;
+      font-size:18px;
+      font-weight:bold;
+      color:white;
+      cursor:pointer;
+    ">&times;</span>
     <h2>Admin Login</h2>
     <input type="text" id="adminUser" placeholder="Username">
     <input type="password" id="adminPass" placeholder="Password">
@@ -70,6 +78,7 @@
     <p id="loginError"></p>
   </div>
 </div>
+
 
 <!-- Admin Controls (only shown when logged in) -->
 <div id="adminPanel" style="display:none; position:fixed; top:10px; left:10px; z-index:2000;">
