@@ -12,14 +12,19 @@
   <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
-  <!-- Your CSS -->
+  <!-- Your Styles -->
   <link rel="stylesheet" href="style/style.css" />
 </head>
 <body>
 
-  <div id="header"><h1>LOT KERJA HAR PADI ENTERPRISE</h1></div>
+  <div id="header">
+    <h1>LOT KERJA HAR PADI ENTERPRISE</h1>
+  </div>
+
   <div id="map"></div>
+
   <div id="footer">© 2025 Hisham</div>
+
   <div id="gpsMessage">Anda berada di luar kawasan..</div>
 
   <button id="gpsButton" title="Toggle GPS Mode">
@@ -37,52 +42,15 @@
     </button>
   </div>
 
-  <div id="tuaiLegend" style="
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background:#333;
-  padding: 8px 12px;
-  border-radius: 5px;
-  color: white;
-  font-family: Helvetica, sans-serif;
-  font-size: 12px;
-  z-index: 1002;
-  display: none;
-  pointer-events: none;
-">
-  <div style="display: flex; align-items: center; margin-bottom: 4px;">
-    <span style="background:#00cc00; display:inline-block; width:12px; height:12px; margin-right:6px;"></span>
-    Mentah
+  <div id="tuaiLegend">
+    <div><span class="color-box" style="background:#00cc00"></span> Mentah</div>
+    <div><span class="color-box" style="background:#b5a300"></span> Masak</div>
+    <div><span class="color-box" style="background:#802600"></span> Rentung</div>
   </div>
-  <div style="display: flex; align-items: center; margin-bottom: 4px;">
-    <span style="background:#b5a300; display:inline-block; width:12px; height:12px; margin-right:6px;"></span>
-    Masak
-  </div>
-  <div style="display: flex; align-items: center;">
-    <span style="background:#802600; display:inline-block; width:12px; height:12px; margin-right:6px;"></span>
-    Rentung
-  </div>
-</div>
 
-<div id="floatingHud" style="
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 5px;
-  font-family: Helvetica, sans-serif;
-  font-size: 13px;
-  z-index: 1002;
-  display: none;
-  pointer-events: none;
-"></div>
+  <div id="floatingHud"></div>
 
-  <!-- Your JS (last) -->
+  <!-- Your Script -->
   <script defer src="scripts/script.js"></script>
 </body>
 </html>
