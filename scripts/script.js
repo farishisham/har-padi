@@ -671,7 +671,7 @@ racunBtn.addEventListener('click', () => handleFilterClick('racun', racunBtn));
 
 setIconColor();
 
-// ===== ADMIN LOGIN (COOKIE VERSION + LOGIN BUTTON) =====
+// ===== ADMIN LOGIN (HIDDEN ON LOAD + LOGIN BUTTON) =====
 const loginToggleBtn = document.getElementById('loginToggleBtn');
 const adminModal = document.getElementById('adminModal');
 const adminPanel = document.getElementById('adminPanel');
@@ -681,12 +681,9 @@ const uploadJsonBtn = document.getElementById('uploadJsonBtn');
 const loginError = document.getElementById('loginError');
 
 const ADMIN_USER = 'admin';
-const ADMIN_PASS_HASH = '81dc9bdb52d04dc20036dbd8313ed055'; // "1234" hashed
+const ADMIN_PASS_HASH = '81dc9bdb52d04dc20036dbd8313ed055'; // "1234" hashed (MD5)
 
-function md5(str) {
-  return CryptoJS.MD5(str).toString();
-}
-
+// --- Cookie utilities ---
 function setCookie(name, value, days) {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
@@ -700,7 +697,11 @@ function getCookie(name) {
 function deleteCookie(name) {
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
 }
+function md5(str) {
+  return CryptoJS.MD5(str).toString();
+}
 
+// --- Update UI based on login state ---
 function updateLoginUI() {
   const session = getCookie('admin_session');
   if (session === 'valid_admin_session') {
@@ -709,20 +710,23 @@ function updateLoginUI() {
     loginToggleBtn.textContent = 'Admin';
   } else {
     adminPanel.style.display = 'none';
+    adminModal.style.display = 'none'; // make sure it's hidden by default
     loginToggleBtn.textContent = 'Login';
   }
 }
 
-// 🔘 Clicking the top-right button opens login (if not logged in)
+// --- When clicking top-right button ---
 loginToggleBtn.addEventListener('click', () => {
   const session = getCookie('admin_session');
   if (session === 'valid_admin_session') {
-    // Already logged in → maybe toggle admin panel later
+    // maybe later toggle admin panel visibility
   } else {
     adminModal.style.display = 'flex';
+    loginError.textContent = ''; // clear any old error
   }
 });
 
+// --- Login attempt ---
 loginBtn.addEventListener('click', () => {
   const user = document.getElementById('adminUser').value.trim();
   const pass = document.getElementById('adminPass').value.trim();
@@ -736,61 +740,17 @@ loginBtn.addEventListener('click', () => {
   }
 });
 
+// --- Logout ---
 logoutBtn.addEventListener('click', () => {
   deleteCookie('admin_session');
   updateLoginUI();
 });
 
+// --- Upload placeholder ---
 uploadJsonBtn.addEventListener('click', () => {
   alert('Upload JSON coming soon...');
 });
 
+// Initialize state on page load
 updateLoginUI();
 
-
-// Fake local admin credentials (can replace with Supabase later)
-const ADMIN_USER = 'admin';
-const ADMIN_PASS_HASH = '81dc9bdb52d04dc20036dbd8313ed055'; // "1234" (MD5)
-
-// Hash function using CryptoJS
-function md5(str) {
-  return CryptoJS.MD5(str).toString();
-}
-
-// Check login on page load
-function checkLogin() {
-  const sessionToken = getCookie('admin_session');
-  if (sessionToken === 'valid_admin_session') {
-    adminPanel.style.display = 'block';
-    adminModal.style.display = 'none';
-  } else {
-    adminModal.style.display = 'flex';
-  }
-}
-
-// Handle login
-loginBtn.addEventListener('click', () => {
-  const user = document.getElementById('adminUser').value.trim();
-  const pass = document.getElementById('adminPass').value.trim();
-
-  if (user === ADMIN_USER && md5(pass) === ADMIN_PASS_HASH) {
-    setCookie('admin_session', 'valid_admin_session', 1); // expires in 1 day
-    adminPanel.style.display = 'block';
-    adminModal.style.display = 'none';
-  } else {
-    loginError.textContent = 'Invalid username or password';
-  }
-});
-
-// Logout
-logoutBtn.addEventListener('click', () => {
-  deleteCookie('admin_session');
-  location.reload();
-});
-
-checkLogin();
-
-// Temporary placeholder
-uploadJsonBtn.addEventListener('click', () => {
-  alert('Upload JSON coming soon...');
-});
