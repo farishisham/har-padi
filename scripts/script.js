@@ -23,15 +23,6 @@ const map = new maplibregl.Map({
   maxZoom: 17.4
 });
 
-// Limit map bounds
-map.setMaxBounds([[102.66830, 2.21776], [102.69816, 2.25551]]);
-const boundsPolygon = turf.bboxPolygon([102.66830, 2.21776, 102.69816, 2.25551]);
-
-// GPS and Marker
-let gpsMode = 1, watchId = null, marker = null;
-const iconImg = document.getElementById('gpsIconImg');
-const gpsMsg = document.getElementById('gpsMessage');
-
 // ===== COOKIE UTILS =====
 function setCookie(name, value, days) {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
@@ -49,61 +40,15 @@ function deleteCookie(name) {
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
 }
 
-// ===== ADMIN LOGIN (COOKIE VERSION) =====
-const adminModal = document.getElementById('adminModal');
-const adminPanel = document.getElementById('adminPanel');
-const loginBtn = document.getElementById('loginBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-const uploadJsonBtn = document.getElementById('uploadJsonBtn');
-const loginError = document.getElementById('loginError');
 
-// Fake local admin credentials (can replace with Supabase later)
-const ADMIN_USER = 'admin';
-const ADMIN_PASS_HASH = '81dc9bdb52d04dc20036dbd8313ed055'; // "1234" (MD5)
+// Limit map bounds
+map.setMaxBounds([[102.66830, 2.21776], [102.69816, 2.25551]]);
+const boundsPolygon = turf.bboxPolygon([102.66830, 2.21776, 102.69816, 2.25551]);
 
-// Hash function using CryptoJS
-function md5(str) {
-  return CryptoJS.MD5(str).toString();
-}
-
-// Check login on page load
-function checkLogin() {
-  const sessionToken = getCookie('admin_session');
-  if (sessionToken === 'valid_admin_session') {
-    adminPanel.style.display = 'block';
-    adminModal.style.display = 'none';
-  } else {
-    adminModal.style.display = 'flex';
-  }
-}
-
-// Handle login
-loginBtn.addEventListener('click', () => {
-  const user = document.getElementById('adminUser').value.trim();
-  const pass = document.getElementById('adminPass').value.trim();
-
-  if (user === ADMIN_USER && md5(pass) === ADMIN_PASS_HASH) {
-    setCookie('admin_session', 'valid_admin_session', 1); // expires in 1 day
-    adminPanel.style.display = 'block';
-    adminModal.style.display = 'none';
-  } else {
-    loginError.textContent = 'Invalid username or password';
-  }
-});
-
-// Logout
-logoutBtn.addEventListener('click', () => {
-  deleteCookie('admin_session');
-  location.reload();
-});
-
-checkLogin();
-
-// Temporary placeholder
-uploadJsonBtn.addEventListener('click', () => {
-  alert('Upload JSON coming soon...');
-});
-
+// GPS and Marker
+let gpsMode = 1, watchId = null, marker = null;
+const iconImg = document.getElementById('gpsIconImg');
+const gpsMsg = document.getElementById('gpsMessage');
 
 // FUNCTIONS
 function setIconColor() {
@@ -725,3 +670,58 @@ calitBtn.addEventListener('click', () => handleFilterClick('calit', calitBtn));
 racunBtn.addEventListener('click', () => handleFilterClick('racun', racunBtn));
 
 setIconColor();
+
+// ===== ADMIN LOGIN (COOKIE VERSION) =====
+const adminModal = document.getElementById('adminModal');
+const adminPanel = document.getElementById('adminPanel');
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const uploadJsonBtn = document.getElementById('uploadJsonBtn');
+const loginError = document.getElementById('loginError');
+
+// Fake local admin credentials (can replace with Supabase later)
+const ADMIN_USER = 'admin';
+const ADMIN_PASS_HASH = '81dc9bdb52d04dc20036dbd8313ed055'; // "1234" (MD5)
+
+// Hash function using CryptoJS
+function md5(str) {
+  return CryptoJS.MD5(str).toString();
+}
+
+// Check login on page load
+function checkLogin() {
+  const sessionToken = getCookie('admin_session');
+  if (sessionToken === 'valid_admin_session') {
+    adminPanel.style.display = 'block';
+    adminModal.style.display = 'none';
+  } else {
+    adminModal.style.display = 'flex';
+  }
+}
+
+// Handle login
+loginBtn.addEventListener('click', () => {
+  const user = document.getElementById('adminUser').value.trim();
+  const pass = document.getElementById('adminPass').value.trim();
+
+  if (user === ADMIN_USER && md5(pass) === ADMIN_PASS_HASH) {
+    setCookie('admin_session', 'valid_admin_session', 1); // expires in 1 day
+    adminPanel.style.display = 'block';
+    adminModal.style.display = 'none';
+  } else {
+    loginError.textContent = 'Invalid username or password';
+  }
+});
+
+// Logout
+logoutBtn.addEventListener('click', () => {
+  deleteCookie('admin_session');
+  location.reload();
+});
+
+checkLogin();
+
+// Temporary placeholder
+uploadJsonBtn.addEventListener('click', () => {
+  alert('Upload JSON coming soon...');
+});
