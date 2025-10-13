@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ----------------------------
   // GLOBAL STATE (same names/order)
   // ----------------------------
-  let gpsMode = 1, watchId = null, marker = null;
+  let Mode = 1, watchId = null, marker = null;
   let blokNumberMarkers = [];
   let blokNameMarkers = [];
   let allFeatures = [];
@@ -441,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const tray = Math.round(area * 35);
       const tarikhTanam = parseTarikhTanam(f);
       const usiaText = formatUsiaBenih(tarikhTanam);
-      html += `<br>Benih: ${benih || 'Tiada info'}`;
+      html += `<br>Benih: ${benih || 'Tiada info'}<br>${tray} tray atau ${tray * 3} gulung`;
       if (tabur) html += `<br>${tabur}`;
 
       const raw = (f.properties.description?.value || f.properties.description || '').toLowerCase();
