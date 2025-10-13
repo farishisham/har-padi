@@ -7,12 +7,10 @@
   <link rel="apple-touch-icon" sizes="180x180" href="harpadi.png">
   <link rel="icon" href="favicon.png" type="image/png">
 
-  <!-- MapLibre and Turf -->
+  <!-- MapLibre CSS -->
   <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
-  <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
-  <!-- Your Styles -->
+  <!-- Custom CSS -->
   <link rel="stylesheet" href="style/style.css" />
 </head>
 <body>
@@ -28,7 +26,9 @@
   <div id="gpsMessage">Anda berada di luar kawasan..</div>
 
   <button id="gpsButton" title="Toggle GPS Mode">
-    <img id="gpsIconImg" src="https://www.svgrepo.com/download/421169/gps-navigation-position.svg" alt="GPS"/>
+    <img id="gpsIconImg"
+         src="https://www.svgrepo.com/download/421169/gps-navigation-position.svg"
+         alt="GPS"/>
   </button>
 
   <div class="search-container" id="searchContainer">
@@ -43,14 +43,18 @@
   </div>
 
   <div id="tuaiLegend">
-    <div><span class="color-box" style="background:#00cc00"></span> Mentah</div>
-    <div><span class="color-box" style="background:#b5a300"></span> Masak</div>
-    <div><span class="color-box" style="background:#802600"></span> Rentung</div>
+    <div><span style="background:#00cc00;"></span> Mentah</div>
+    <div><span style="background:#b5a300;"></span> Masak</div>
+    <div><span style="background:#802600;"></span> Rentung</div>
   </div>
 
   <div id="floatingHud"></div>
 
-  <!-- Your Script -->
-  <script defer src="scripts/script.js"></script>
+  <!-- MapLibre JS -->
+  <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+  <!-- Your custom script -->
+  <script src="scripts/script.js"></script>
 </body>
 </html>
