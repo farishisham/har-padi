@@ -671,13 +671,82 @@ racunBtn.addEventListener('click', () => handleFilterClick('racun', racunBtn));
 
 setIconColor();
 
-// ===== ADMIN LOGIN (COOKIE VERSION) =====
+// ===== ADMIN LOGIN (COOKIE VERSION + LOGIN BUTTON) =====
+const loginToggleBtn = document.getElementById('loginToggleBtn');
 const adminModal = document.getElementById('adminModal');
 const adminPanel = document.getElementById('adminPanel');
 const loginBtn = document.getElementById('loginBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 const uploadJsonBtn = document.getElementById('uploadJsonBtn');
 const loginError = document.getElementById('loginError');
+
+const ADMIN_USER = 'admin';
+const ADMIN_PASS_HASH = '81dc9bdb52d04dc20036dbd8313ed055'; // "1234" hashed
+
+function md5(str) {
+  return CryptoJS.MD5(str).toString();
+}
+
+function setCookie(name, value, days) {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+}
+function getCookie(name) {
+  return document.cookie.split('; ').reduce((r, v) => {
+    const parts = v.split('=');
+    return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+  }, '');
+}
+function deleteCookie(name) {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+}
+
+function updateLoginUI() {
+  const session = getCookie('admin_session');
+  if (session === 'valid_admin_session') {
+    adminPanel.style.display = 'block';
+    adminModal.style.display = 'none';
+    loginToggleBtn.textContent = 'Admin';
+  } else {
+    adminPanel.style.display = 'none';
+    loginToggleBtn.textContent = 'Login';
+  }
+}
+
+// 🔘 Clicking the top-right button opens login (if not logged in)
+loginToggleBtn.addEventListener('click', () => {
+  const session = getCookie('admin_session');
+  if (session === 'valid_admin_session') {
+    // Already logged in → maybe toggle admin panel later
+  } else {
+    adminModal.style.display = 'flex';
+  }
+});
+
+loginBtn.addEventListener('click', () => {
+  const user = document.getElementById('adminUser').value.trim();
+  const pass = document.getElementById('adminPass').value.trim();
+
+  if (user === ADMIN_USER && md5(pass) === ADMIN_PASS_HASH) {
+    setCookie('admin_session', 'valid_admin_session', 1);
+    adminModal.style.display = 'none';
+    updateLoginUI();
+  } else {
+    loginError.textContent = 'Invalid username or password';
+  }
+});
+
+logoutBtn.addEventListener('click', () => {
+  deleteCookie('admin_session');
+  updateLoginUI();
+});
+
+uploadJsonBtn.addEventListener('click', () => {
+  alert('Upload JSON coming soon...');
+});
+
+updateLoginUI();
+
 
 // Fake local admin credentials (can replace with Supabase later)
 const ADMIN_USER = 'admin';
