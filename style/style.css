@@ -1,3 +1,4 @@
+/* ==== GENERAL LAYOUT ==== */
 html, body {
   margin: 0;
   padding: 0;
@@ -11,6 +12,7 @@ html, body {
   height: 100%;
 }
 
+/* ==== HEADER & FOOTER ==== */
 #header, #footer {
   position: fixed;
   width: 100%;
@@ -42,7 +44,7 @@ html, body {
   background: transparent;
 }
 
-/* GPS button */
+/* ==== GPS BUTTON ==== */
 #gpsButton {
   position: fixed;
   bottom: 35px;
@@ -57,11 +59,13 @@ html, body {
   justify-content: center;
   cursor: pointer;
   z-index: 1001;
+  touch-action: none;
 }
 
 #gpsIconImg {
   width: 20px;
   height: 20px;
+  touch-action: none;
 }
 
 .gps-marker {
@@ -80,6 +84,7 @@ html, body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  z-index: 2;
 }
 
 .gps-marker .triangle {
@@ -92,12 +97,15 @@ html, body {
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
   border-bottom: 11px solid white;
+  z-index: 1;
 }
 
+/* ==== POPUP ==== */
 .popup-no-x .maplibregl-popup-close-button {
   display: none;
 }
 
+/* ==== SEARCH BAR ==== */
 .search-container {
   position: absolute;
   top: 44px;
@@ -106,12 +114,13 @@ html, body {
   z-index: 1003;
 }
 
-/* Search styles */
 .search-btn, .close-btn {
   position: absolute;
   right: 0;
+  z-index: 1002;
   width: 50px;
   height: 50px;
+  padding: 0;
   border: none;
   border-radius: 50%;
   background: #333;
@@ -119,6 +128,8 @@ html, body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .search-btn svg, .close-btn svg {
@@ -130,14 +141,18 @@ html, body {
 .search-input {
   position: absolute;
   right: 0;
+  z-index: 1001;
   width: 0;
   opacity: 0;
   height: 45px;
+  top: 50%;
+  transform: translateY(-50%) translateX(2px);
   padding-left: 10px;
   padding-right: 50px;
   border-radius: 30px;
   border: 1px solid #ccc;
   background: white;
+  outline: none;
   transition: all 0.3s ease;
 }
 
@@ -150,12 +165,12 @@ html, body {
   display: none;
 }
 
-.close-btn {
-  display: none;
-}
-
 .search-container.active .close-btn {
   display: flex;
+}
+
+.close-btn {
+  display: none;
 }
 
 #suggestions {
@@ -169,7 +184,8 @@ html, body {
   border-radius: 5px;
   font-family: Helvetica, sans-serif;
   font-size: 13px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  z-index: 1002;
 }
 
 #suggestions div {
@@ -181,6 +197,7 @@ html, body {
   background: #eee;
 }
 
+/* ==== GPS MESSAGE ==== */
 #gpsMessage {
   position: fixed;
   bottom: 105px;
@@ -196,6 +213,12 @@ html, body {
   display: none;
 }
 
+/* ==== BUTTONS ==== */
+button:focus {
+  outline: none;
+}
+
+/* ==== TUAi LEGEND ==== */
 #tuaiLegend {
   position: fixed;
   bottom: 20px;
@@ -212,13 +235,24 @@ html, body {
   pointer-events: none;
 }
 
-#tuaiLegend .color-box {
+#tuaiLegend div {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+#tuaiLegend div:last-child {
+  margin-bottom: 0;
+}
+
+#tuaiLegend span {
   display: inline-block;
   width: 12px;
   height: 12px;
   margin-right: 6px;
 }
 
+/* ==== FLOATING HUD ==== */
 #floatingHud {
   position: fixed;
   bottom: 80px;
