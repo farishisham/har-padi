@@ -1,4 +1,8 @@
-// --- MAP INITIALIZATION ---
+window.addEventListener("DOMContentLoaded", () => {
+
+// ===============================
+// MAP INITIALIZATION
+// ===============================
 const map = new maplibregl.Map({
   container: 'map',
   style: {
@@ -24,16 +28,19 @@ const map = new maplibregl.Map({
   maxZoom: 17.4
 });
 
-// Limit map bounds
+// Limit bounds
 map.setMaxBounds([[102.66830, 2.21776], [102.69816, 2.25551]]);
 const boundsPolygon = turf.bboxPolygon([102.66830, 2.21776, 102.69816, 2.25551]);
 
-// --- GPS VARIABLES ---
-let gpsMode = 1, watchId = null, marker = null;
+// ===============================
+// GPS SYSTEM
+// ===============================
+let gpsMode = 1;
+let watchId = null;
+let marker = null;
 const iconImg = document.getElementById('gpsIconImg');
 const gpsMsg = document.getElementById('gpsMessage');
 
-// --- GPS FUNCTIONS ---
 function setIconColor() {
   iconImg.style.filter =
     gpsMode === 1 ? 'invert(100%)' :
@@ -54,11 +61,8 @@ function createMarker(lng, lat) {
 }
 
 function updateMarker(lng, lat) {
-  if (marker) {
-    marker.setLngLat([lng, lat]);
-  } else {
-    createMarker(lng, lat);
-  }
+  if (marker) marker.setLngLat([lng, lat]);
+  else createMarker(lng, lat);
   if (gpsMode === 3) map.setCenter([lng, lat]);
 }
 
@@ -80,7 +84,6 @@ function handleOrientation() {
   }
 }
 
-// --- GPS BUTTON ---
 document.getElementById('gpsButton').addEventListener('click', () => {
   gpsMode = (gpsMode % 3) + 1;
   setIconColor();
@@ -108,10 +111,7 @@ document.getElementById('gpsButton').addEventListener('click', () => {
   if (gpsMode === 3) handleOrientation();
 });
 
-// Disable GPS mode on drag/touch
-map.on('dragstart', stopGPS);
-map.on('touchstart', stopGPS);
-function stopGPS() {
+map.on('dragstart', () => {
   if (gpsMode !== 1) {
     gpsMode = 1;
     setIconColor();
@@ -119,9 +119,23 @@ function stopGPS() {
     watchId = null;
     window.removeEventListener('deviceorientation', rotateMap);
   }
-}
+});
 
-// --- POLYGON DATA GROUPS ---
+map.on('touchstart', () => {
+  if (gpsMode !== 1) {
+    gpsMode = 1;
+    setIconColor();
+    if (watchId) navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+    window.removeEventListener('deviceorientation', rotateMap);
+  }
+});
+
+setIconColor();
+
+// ===============================
+// GEOJSON GROUPS
+// ===============================
 const groups = {
   sawahring: 'sawahring.json',
   blok: ['blok1.json']
@@ -131,49 +145,31 @@ let blokNumberMarkers = [];
 let blokNameMarkers = [];
 let allFeatures = [];
 
-// --- LABEL VISIBILITY BASED ON ZOOM ---
-function updateLabelVisibility() {
-  const zoom = map.getZoom();
-  const opacityNum = zoom >= 14.5 ? 0 : 1;
-  const opacityName = zoom >= 16.2 ? 1 : 0;
-
-  blokNumberMarkers.forEach(m => m.getElement().style.opacity = opacityNum);
-  blokNameMarkers.forEach(m => m.getElement().style.opacity = opacityName);
-}
-
-map.on('zoom', updateLabelVisibility);
-
-// --- MAP LOAD ---
 map.on('load', async () => {
+  map.dragPan.enable();
+  map.scrollZoom.enable();
+  map.touchZoomRotate.enable();
+
   await loadGroup('sawahring', ['sawahring.json']);
   await loadGroup('blok', ['blok1.json']);
+
   showBlokNumbers();
   showBlokNames();
   updateLabelVisibility();
 });
 
-// --- LOAD GEOJSON GROUPS ---
 async function loadGroup(group, files) {
   for (const filename of files) {
     const response = await fetch(filename);
     const data = await response.json();
     const sourceId = `${group}-${filename}`;
-
-    data.features.forEach((f, i) => {
-      f.properties._id = `${group}-${filename}-${i}`;
-      if (group === 'sawahring') {
-        const name = f.properties?.name || '';
-        const match = name.toLowerCase().match(/blok\s+(\d+)/);
-        if (match) f.properties.blok_no = match[1];
-      }
-    });
-
+    data.features.forEach((f, i) => f.properties._id = `${group}-${filename}-${i}`);
     allFeatures.push(...data.features);
+
     map.addSource(sourceId, { type: 'geojson', data });
 
     const baseOpacity = group === 'sawahring' ? 0.4 : 0;
 
-    // Fill Layer
     map.addLayer({
       id: `${sourceId}-fill`,
       type: 'fill',
@@ -182,25 +178,23 @@ async function loadGroup(group, files) {
         'fill-color': ['get', 'fill'],
         'fill-opacity': [
           'interpolate', ['linear'], ['zoom'],
-          13, baseOpacity, 14, baseOpacity,
-          15, 0.2, 16, 0.4
+          13, baseOpacity,
+          16, baseOpacity === 0.4 ? 0 : 0.4
         ]
       }
     });
 
-    // Line Layer
     map.addLayer({
       id: `${sourceId}-line`,
       type: 'line',
       source: sourceId,
       paint: {
         'line-color': '#004d26',
-        'line-width': 1,
-        'line-opacity': 1
+        'line-opacity': 1,
+        'line-width': 1
       }
     });
 
-    // Highlight Layer
     map.addLayer({
       id: `${sourceId}-highlight`,
       type: 'line',
@@ -208,118 +202,251 @@ async function loadGroup(group, files) {
       paint: { 'line-color': '#ffcc00', 'line-width': 4 },
       filter: ['==', '_id', '']
     });
-
-    // Click highlight logic
-    map.on('click', `${sourceId}-fill`, e => {
-      const zoom = map.getZoom();
-      const f = e.features[0];
-      if ((group === 'blok' && zoom >= 15) ||
-          (group === 'sawahring' && zoom < 15)) highlightFeature(f);
-    });
   }
 }
 
-// --- SHOW LABELS ---
+// ===============================
+// LABEL VISIBILITY HANDLING
+// ===============================
+function updateLabelVisibility() {
+  const zoom = map.getZoom();
+  const opacityLow = zoom >= 14.5 ? 0 : 1;
+  const opacityHigh = zoom >= 16.2 ? 1 : 0;
+
+  blokNumberMarkers.forEach(m => {
+    if (m.getElement()) m.getElement().style.opacity = opacityLow;
+  });
+  blokNameMarkers.forEach(m => {
+    if (m.getElement()) m.getElement().style.opacity = opacityHigh;
+  });
+}
+
+map.on('zoom', updateLabelVisibility);
+
+// ===============================
+// PARSING HELPERS
+// ===============================
+function parseBlokNumber(name) {
+  const match = (name || '').toLowerCase().match(/blok\s+(\d+)/);
+  return match ? match[1] : null;
+}
+
+function parseTarikhTanam(f) {
+  const rawHTML = f.properties?.description?.value || f.properties?.description || '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(rawHTML, 'text/html');
+  const text = doc.body.textContent.toLowerCase().replace(/\s+/g, ' ').trim();
+  const match = text.match(/tarikh tanam\s+(\d{1,2}\/\d{1,2}\/\d{4})/);
+  if (!match) return 'Tiada info';
+  const [day, month, year] = match[1].split('/').map(Number);
+  const d = String(day).padStart(2, '0');
+  const m = String(month).padStart(2, '0');
+  return `${d}/${m}/${year}`;
+}
+
+function parseTaburInfo(f) {
+  const rawHTML = f.properties?.description?.value || f.properties?.description || '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(rawHTML, 'text/html');
+  const text = doc.body.textContent.toLowerCase();
+  const match = text.match(/tabur\s+\d+\s+beg/i);
+  return match ? match[0].charAt(0).toUpperCase() + match[0].slice(1) : null;
+}
+
+function parseBenihType(f) {
+  const rawHTML = f.properties?.description?.value || f.properties?.description || '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(rawHTML, 'text/html');
+  const text = doc.body.textContent.toLowerCase().replace(/\s+/g, ' ').trim();
+  const match = text.match(/benih\s+(.+?)(?=\s+tarikh|$)/i);
+  return match ? match[1].trim().toUpperCase() : null;
+}
+
+function getDaysSinceTanam(tarikhStr) {
+  if (!tarikhStr || tarikhStr === 'Tiada info') return null;
+  const [day, month, year] = tarikhStr.split('/').map(Number);
+  const tanamDate = new Date(year, month - 1, day);
+  const today = new Date();
+  const diffTime = today - tanamDate;
+  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+}
+
+function formatUsiaBenih(tarikhStr) {
+  const days = getDaysSinceTanam(tarikhStr);
+  return (days === null || isNaN(days)) ? 'Tiada info' : `${days} hari`;
+}
+
+// ===============================
+// SAWAH RING NUMBERS (Bxx)
+// ===============================
 function showBlokNumbers() {
   blokNumberMarkers.forEach(m => m.remove());
   blokNumberMarkers = [];
 
   allFeatures.forEach(f => {
-    if (!f.properties._id.startsWith('sawahring')) return;
-    const num = f.properties.blok_no;
-    if (!num) return;
-    const center = turf.centroid(f).geometry.coordinates;
+    const isSawahRing = f.properties._id?.startsWith('sawahring');
+    const blokNo = f.properties.blok_no || parseBlokNumber(f.properties?.name || '');
+    if (!isSawahRing || !blokNo) return;
+
+    const c1 = turf.centroid(f).geometry.coordinates;
+    const c2 = turf.pointOnFeature(f).geometry.coordinates;
+    const center = [(c1[0] + c2[0]) / 2, (c1[1] + c2[1]) / 2];
+
     const el = document.createElement('div');
-    el.textContent = `B${num}`;
-    Object.assign(el.style, {
-      fontSize: '13px', color: 'white', fontWeight: 'bold',
-      textShadow: '1px 1px 2px black', transform: 'translate(-50%, -50%)'
-    });
-    blokNumberMarkers.push(new maplibregl.Marker(el).setLngLat(center).addTo(map));
+    el.textContent = `B${blokNo}`;
+    el.style.fontSize = '13px';
+    el.style.color = 'white';
+    el.style.fontWeight = 'bold';
+    el.style.textShadow = '1px 1px 2px black';
+    el.style.transform = 'translate(-50%, -50%)';
+    el.style.pointerEvents = 'none';
+
+    const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
+    blokNumberMarkers.push(marker);
   });
 }
 
+// ===============================
+// BLOK NAMES + BENIH
+// ===============================
 function showBlokNames() {
   blokNameMarkers.forEach(m => m.remove());
   blokNameMarkers = [];
 
   allFeatures.forEach(f => {
-    if (!f.properties._id.startsWith('blok')) return;
-    const center = turf.centroid(f).geometry.coordinates;
-    const rawHTML = f.properties?.description?.value || '';
+    const isBlok = f.properties._id?.startsWith('blok');
+    const blokName = f.properties.name;
+    if (!isBlok || !blokName) return;
+
+    const c1 = turf.centroid(f).geometry.coordinates;
+    const c2 = turf.pointOnFeature(f).geometry.coordinates;
+    const center = [(c1[0] + c2[0]) / 2, (c1[1] + c2[1]) / 2];
+
+    const rawHTML = f.properties?.description?.value || f.properties?.description || '';
     const parser = new DOMParser();
     const doc = parser.parseFromString(rawHTML, 'text/html');
     const text = doc.body.textContent.toLowerCase();
-    const benihMatch = text.match(/benih\s+(.+?)(?=\s+tarikh|$)/i);
-    const benih = benihMatch ? benihMatch[1].trim().toUpperCase() : '';
+    const match = text.match(/benih\s+(.+?)(?=\s+tarikh|$)/i);
+    const benih = match ? match[1].trim().toUpperCase() : '';
 
     const el = document.createElement('div');
-    el.innerHTML = `<div style="text-align:center;">
-        <div style="font-weight:bold;">${f.properties.name}</div>
-        <div>${benih}</div></div>`;
-    Object.assign(el.style, {
-      fontSize: '10px', color: 'white',
-      textShadow: '1px 1px 2px black', transform: 'translate(-50%, -50%)'
-    });
-    blokNameMarkers.push(new maplibregl.Marker(el).setLngLat(center).addTo(map));
+    el.innerHTML = `
+      <div style="text-align:center; line-height:1.1;">
+        <div style="font-weight:bold;">${blokName}</div>
+        <div style="font-weight:normal;">${benih}</div>
+      </div>
+    `;
+    el.style.fontSize = '10px';
+    el.style.color = 'white';
+    el.style.textShadow = '1px 1px 2px black';
+    el.style.transform = 'translate(-50%, -50%)';
+    el.style.pointerEvents = 'none';
+
+    const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
+    blokNameMarkers.push(marker);
   });
 }
+// ===============================
+// HIGHLIGHT & POPUPS
+// ===============================
+function highlightFeature(fPartial) {
+  const f = allFeatures.find(feat => feat.properties._id === fPartial.properties._id);
+  if (!f) return;
 
-// --- POPUP HIGHLIGHT ---
-function highlightFeature(f) {
-  Object.entries(groups).forEach(([g, files]) => {
-    (Array.isArray(files) ? files : [files]).forEach(file => {
-      const id = `${g}-${file}`;
-      map.setFilter(`${id}-highlight`,
-        f.properties._id.startsWith(id) ? ['==', '_id', f.properties._id] : ['==', '_id', '']);
-    });
+  // Toggle highlight filters
+  const groupIds = {};
+  allFeatures.forEach(feat => {
+    const idPrefix = feat.properties._id.split('-').slice(0, 2).join('-'); // e.g., "sawahring-sawahring.json"
+    groupIds[idPrefix] = true;
   });
 
-  document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
+  Object.keys(groupIds).forEach(idPrefix => {
+    const highlightId = `${idPrefix}-highlight`;
+    const should = f.properties._id.startsWith(idPrefix);
+    map.setFilter(highlightId, should ? ['==', '_id', f.properties._id] : ['==', '_id', '']);
+  });
 
-  const center = turf.centroid(f).geometry.coordinates;
-  const areaEkar = (turf.area(f) / 4046.86).toFixed(2);
-  const areaHek = (turf.area(f) * 0.405 / 4046.86).toFixed(2);
+  // Close GPS following on selection
+  gpsMode = 1;
+  setIconColor();
 
-  let html = `<strong>${f.properties.name}</strong><br>${areaEkar} ekar atau ${areaHek} hektar`;
+  // Fit & popup
+  const c1 = turf.centroid(f).geometry.coordinates;
+  const c2 = turf.pointOnFeature(f).geometry.coordinates;
+  const center = [(c1[0] + c2[0]) / 2, (c1[1] + c2[1]) / 2];
 
-  const desc = f.properties?.description?.value || '';
-  if (/benih/i.test(desc)) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(desc, 'text/html');
-    const text = doc.body.textContent.toLowerCase();
-    const tarikhMatch = text.match(/tarikh tanam\s+(\d{1,2}\/\d{1,2}\/\d{4})/);
-    const tarikh = tarikhMatch ? tarikhMatch[1] : null;
-    const days = tarikh ? Math.floor((new Date() - new Date(tarikh.split('/').reverse().join('-'))) / 86400000) : null;
-    html += tarikh ? `<br>Tarikh tanam: ${tarikh}<br>Usia: ${days} hari` : '';
+  map.fitBounds(turf.bbox(f), {
+    padding: 100,
+    maxZoom: 17.4,
+    bearing: map.getBearing()
+  });
+
+  const areaAcre = (turf.area(f) / 4046.86).toFixed(2);
+  const areaHectare = (turf.area(f) * 0.405 / 4046.86).toFixed(2);
+
+  const isBlockPolygon = !String(f.properties.name || '').toLowerCase().includes('blok');
+
+  let html = `<strong>${f.properties.name}</strong><br>${areaAcre} ekar atau ${areaHectare} hektar`;
+
+  if (isBlockPolygon) {
+    const benih = parseBenihType(f);
+    const tabur = parseTaburInfo(f);
+    const tray = Math.round(areaAcre * 35);
+    const tarikhTanam = parseTarikhTanam(f);
+    const usiaText = formatUsiaBenih(tarikhTanam);
+
+    html += `<br>Benih: ${benih || 'Tiada info'}`;
+    if (tabur) html += `<br>${tabur}`;
+
+    const hasCalit = (f.properties?.description?.value || f.properties?.description || '')
+                      .toLowerCase().includes('calit');
+
+    if (hasCalit) {
+      html += `<br>${tray} tray atau ${tray * 3} gulung<br>Tarikh tanam: ${tarikhTanam}<br>HLT: ${usiaText}`;
+    }
   }
 
+  document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
   new maplibregl.Popup({ closeButton: false })
-    .setLngLat(center).setHTML(html).addTo(map)
-    .getElement().classList.add('popup-no-x');
+    .setLngLat(center)
+    .setHTML(html)
+    .addTo(map)
+    .getElement()
+    .classList.add('popup-no-x');
 }
 
-// Clear highlight on empty click
-map.on('click', e => {
-  const features = map.queryRenderedFeatures(e.point);
-  if (features.length === 0) {
-    Object.entries(groups).forEach(([g, files]) => {
-      (Array.isArray(files) ? files : [files])
-        .forEach(f => map.setFilter(`${g}-${f}-highlight`, ['==', '_id', '']));
+// Clear highlight when clicking empty area
+map.on('click', (e) => {
+  // Collect all fill layers
+  const fillLayers = [];
+  map.getStyle().layers.forEach(l => {
+    if (l.id.endsWith('-fill')) fillLayers.push(l.id);
+  });
+
+  const f = map.queryRenderedFeatures(e.point, { layers: fillLayers })[0];
+  if (!f) {
+    // reset all highlights
+    map.getStyle().layers.forEach(l => {
+      if (l.id.endsWith('-highlight')) {
+        map.setFilter(l.id, ['==', '_id', '']);
+      }
     });
     document.querySelectorAll('.maplibregl-popup').forEach(p => p.remove());
   }
 });
 
-// --- SEARCH ---
+// ===============================
+// SEARCH UI
+// ===============================
 const input = document.getElementById('searchInput');
 const container = document.getElementById('searchContainer');
 const suggestions = document.getElementById('suggestions');
+
 input.addEventListener('input', () => {
   const q = input.value.trim().toLowerCase();
   suggestions.innerHTML = '';
   if (!q) return;
-  const matches = allFeatures.filter(f => f.properties.name?.toLowerCase().includes(q));
+  const matches = allFeatures.filter(f => (f.properties.name || '').toLowerCase().includes(q));
   matches.forEach(f => {
     const div = document.createElement('div');
     div.textContent = f.properties.name;
@@ -332,123 +459,270 @@ input.addEventListener('input', () => {
     suggestions.appendChild(div);
   });
 });
+
 document.getElementById('searchBtn').addEventListener('click', () => {
-  container.classList.add('active'); input.focus();
+  container.classList.add('active');
+  input.focus();
 });
+
 document.getElementById('closeBtn').addEventListener('click', () => {
   container.classList.remove('active');
-  input.value = ''; suggestions.innerHTML = '';
+  input.value = '';
+  suggestions.innerHTML = '';
 });
+
+// Close search when tapping the map
 map.getCanvas().addEventListener('click', () => {
   container.classList.remove('active');
-  input.value = ''; suggestions.innerHTML = '';
+  input.value = '';
+  suggestions.innerHTML = '';
 });
-
-// --- FILTERS + TUAI BUTTON ---
+// ===============================
+// FILTER BUTTONS (UI)
+// ===============================
 const filterContainer = document.createElement('div');
-Object.assign(filterContainer.style, {
-  position: 'absolute', top: '100px', right: '15px',
-  display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 1004
-});
+filterContainer.style.position = 'absolute';
+filterContainer.style.top = '100px';
+filterContainer.style.right = '15px';
+filterContainer.style.display = 'flex';
+filterContainer.style.flexDirection = 'column';
+filterContainer.style.gap = '8px';
+filterContainer.style.zIndex = 1004;
 document.body.appendChild(filterContainer);
 
-function createFilterButton(label) {
-  const b = document.createElement('button');
-  Object.assign(b.style, {
-    width: '50px', height: '50px', borderRadius: '50%',
-    background: '#333', color: 'white', border: 'none',
-    cursor: 'pointer', fontSize: '12px'
-  });
-  b.textContent = label;
-  return b;
+function createFilterButton(label, id) {
+  const btn = document.createElement('button');
+  btn.textContent = label;
+  btn.id = id;
+  btn.style.width = '50px';
+  btn.style.height = '50px';
+  btn.style.borderRadius = '50%';
+  btn.style.border = 'none';
+  btn.style.background = '#333';
+  btn.style.color = 'white';
+  btn.style.fontSize = '12px';
+  btn.style.cursor = 'pointer';
+  btn.style.display = 'flex';
+  btn.style.alignItems = 'center';
+  btn.style.justifyContent = 'center';
+  btn.style.userSelect = 'none';
+  btn.style.transition = 'color 0.3s ease, background 0.3s ease';
+  return btn;
 }
-const bajakBtn = createFilterButton('Bajak');
-const calitBtn = createFilterButton('Calit');
-const racunBtn = createFilterButton('Racun');
-const tuaiBtn = createFilterButton('Tuai');
-filterContainer.append(bajakBtn, calitBtn, racunBtn);
+
+const bajakBtn = createFilterButton('Bajak', 'bajakFilter');
+const calitBtn = createFilterButton('Calit', 'calitFilter');
+const racunBtn = createFilterButton('Racun', 'racunFilter');
+filterContainer.appendChild(bajakBtn);
+filterContainer.appendChild(calitBtn);
+filterContainer.appendChild(racunBtn);
+
+// TUAI button (fixed bottom-left)
+const tuaiBtn = document.createElement('button');
+tuaiBtn.textContent = 'Tuai';
+tuaiBtn.style.position = 'fixed';
+tuaiBtn.style.bottom = '35px';
+tuaiBtn.style.left = '15px';
+tuaiBtn.style.width = '50px';
+tuaiBtn.style.height = '50px';
+tuaiBtn.style.borderRadius = '50%';
+tuaiBtn.style.border = 'none';
+tuaiBtn.style.background = '#333';
+tuaiBtn.style.color = 'white';
+tuaiBtn.style.fontSize = '12px';
+tuaiBtn.style.cursor = 'pointer';
+tuaiBtn.style.display = 'flex';
+tuaiBtn.style.alignItems = 'center';
+tuaiBtn.style.justifyContent = 'center';
+tuaiBtn.style.zIndex = 1001;
 document.body.appendChild(tuaiBtn);
 
+const tuaiLegend = document.getElementById('tuaiLegend');
+
+// ===============================
+// CHECKMARK OVERLAYS FOR KEYWORDS
+// ===============================
 let checkMarkers = [];
-function clearCheckMarkers() { checkMarkers.forEach(m => m.remove()); checkMarkers = []; }
+function clearCheckMarkers() {
+  checkMarkers.forEach(m => m.remove());
+  checkMarkers = [];
+}
 
 function showCheckmarks(keyword) {
   clearCheckMarkers();
+  const key = String(keyword || '').toLowerCase();
+
   allFeatures.forEach(f => {
-    const desc = (f.properties?.description?.value || '').toLowerCase();
-    if (!desc.includes(keyword.toLowerCase())) return;
-    const center = turf.centroid(f).geometry.coordinates;
+    const rawHTML = f.properties?.description?.value || f.properties?.description || '';
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(rawHTML, 'text/html');
+    const text = doc.body.textContent.toLowerCase();
+    if (!text.includes(key)) return;
+
+    const c1 = turf.centroid(f).geometry.coordinates;
+    const c2 = turf.pointOnFeature(f).geometry.coordinates;
+    const center = [(c1[0] + c2[0]) / 2, (c1[1] + c2[1]) / 2 + 0.00005];
+
     const el = document.createElement('div');
-    el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
-      <path d="M18.047,4,22,8.325,9.3,20,2,12.68,6.136,8.533,9.474,11.88Z"
-        fill="limegreen" stroke="black" stroke-width="1.5"/></svg>`;
+    el.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
+        <path d="M18.047,4,22,8.325,9.3,20,2,12.68,6.136,8.533,9.474,11.88Z" fill="limegreen" />
+        <path d="M18.047,4,22,8.325,9.3,20,2,12.68,6.136,8.533,9.474,11.88Z" fill="none" stroke="black" stroke-width="1.5"/>
+      </svg>
+    `;
     el.style.transform = 'translate(-50%, -50%)';
-    checkMarkers.push(new maplibregl.Marker(el).setLngLat(center).addTo(map));
+
+    const marker = new maplibregl.Marker(el).setLngLat(center).addTo(map);
+    checkMarkers.push(marker);
   });
 }
 
-let activeKeyword = null;
-function handleFilterClick(keyword, btn) {
-  const same = activeKeyword === keyword;
-  clearCheckMarkers(); resetAllFilterButtons();
-  if (!same) {
-    activeKeyword = keyword;
-    btn.style.color = 'limegreen';
-    showCheckmarks(keyword);
-  } else activeKeyword = null;
-}
-bajakBtn.onclick = () => handleFilterClick('bajak', bajakBtn);
-calitBtn.onclick = () => handleFilterClick('calit', calitBtn);
-racunBtn.onclick = () => handleFilterClick('racun', racunBtn);
-function resetAllFilterButtons() {
-  [bajakBtn, calitBtn, racunBtn].forEach(b => b.style.color = 'white');
+let activeKeywordBtn = null;
+function resetFilterBtnColors() {
+  bajakBtn.style.color = 'white';
+  calitBtn.style.color = 'white';
+  racunBtn.style.color = 'white';
 }
 
-// --- TUAI COLOR LOGIC ---
-const tuaiLegend = document.getElementById('tuaiLegend');
+function attachKeywordButton(btn, keyword) {
+  btn.addEventListener('click', () => {
+    const isActive = activeKeywordBtn === btn;
+    clearCheckMarkers();
+    resetFilterBtnColors();
+    if (isActive) {
+      activeKeywordBtn = null;
+    } else {
+      activeKeywordBtn = btn;
+      btn.style.color = 'limegreen';
+      showCheckmarks(keyword);
+    }
+  });
+}
+
+attachKeywordButton(bajakBtn, 'bajak');
+attachKeywordButton(calitBtn, 'calit');
+attachKeywordButton(racunBtn, 'racun');
+
+// ===============================
+// TUAI COLOR MODE
+// ===============================
 let tuaiActive = false;
-tuaiBtn.onclick = () => {
+
+function getRipenessColor(days, ripeDays) {
+  if (days < 0) return '#999999';
+  if (days < ripeDays * 0.25) return '#00cc00'; // early green
+  if (days < ripeDays * 0.5) return '#00cc00';
+  if (days < ripeDays * 0.75) return '#00cc00';
+  if (days < ripeDays) return '#00cc00'; // ripe (you used green variants)
+  if (days < ripeDays + 10) return '#ffd700'; // still okay
+  return '#802600'; // overripe
+}
+
+function extractDescriptionText(f) {
+  const rawHTML = f.properties?.description?.value || f.properties?.description || '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(rawHTML, 'text/html');
+  return doc.body.textContent?.toLowerCase() || '';
+}
+
+function toggleTuai() {
   tuaiActive = !tuaiActive;
   tuaiBtn.style.color = tuaiActive ? 'limegreen' : 'white';
   tuaiLegend.style.display = tuaiActive ? 'block' : 'none';
-  applyTuaiColors();
-};
 
-function getRipenessColor(days, ripeDays) {
-  if (days < 0) return '#999';
-  if (days < ripeDays) return '#00cc00';
-  if (days < ripeDays + 10) return '#b5a300';
-  return '#802600';
-}
+  // For each source, recolor features and adjust layer opacities
+  const style = map.getStyle();
+  const sourceIds = new Set();
+  style.layers.forEach(l => {
+    // layer ids are like "sawahring-sawahring.json-fill"
+    if (l.id.endsWith('-fill')) {
+      const base = l.id.replace(/-fill$/, '');
+      sourceIds.add(base);
+    }
+  });
 
-function applyTuaiColors() {
-  Object.entries(groups).forEach(([group, files]) => {
-    (Array.isArray(files) ? files : [files]).forEach(filename => {
-      const srcId = `${group}-${filename}`;
-      const src = map.getSource(srcId);
-      if (!src || !src._data) return;
+  sourceIds.forEach(base => {
+    const source = map.getSource(base);
+    if (!source || !source._data) return;
 
-      const updated = src._data.features.map(f => {
-        const html = f.properties?.description?.value || '';
-        const matchBenih = html.match(/benih\s+([A-Za-z0-9]+)/i);
-        const benih = matchBenih ? matchBenih[1].toUpperCase() : '';
-        const ripeMap = { CL: 100, 269: 104, 467: 110, 297: 110, HYBRID: 104 };
-        const ripeDays = ripeMap[benih] || 110;
-        const tarikh = html.match(/tarikh\s+tanam\s+(\d{1,2}\/\d{1,2}\/\d{4})/i);
-        let color = f.properties.originalFill || '#888';
-        if (tarikh) {
-          const [d, m, y] = tarikh[1].split('/').map(Number);
-          const days = Math.floor((new Date() - new Date(y, m - 1, d)) / 86400000);
-          color = getRipenessColor(days, ripeDays);
-        }
+    const updated = source._data.features.map(f => {
+      if (!tuaiActive) {
         return {
-          ...f, properties: { ...f.properties, fill: color }
+          ...f,
+          properties: {
+            ...f.properties,
+            fill: f.properties.originalFill || f.properties.fill || '#ffffff'
+          }
         };
-      });
-      src.setData({ type: 'FeatureCollection', features: updated });
+      }
+
+      const descText = extractDescriptionText(f);
+      const benihMatch = descText.match(/benih\s+([^\s]+)/i);
+      const benih = benihMatch ? benihMatch[1].toUpperCase() : null;
+
+      const tarikhMatch = descText.match(/tarikh\s+tanam\s+(\d{1,2}\/\d{1,2}\/\d{4})/i);
+      const tarikhStr = tarikhMatch ? tarikhMatch[1] : null;
+
+      const ripeDaysMap = {
+        'CL': 100,
+        '269': 104,
+        '467': 110,
+        '297': 110,
+        'HYBRID': 104
+      };
+      const ripeDays = ripeDaysMap[benih] || 110;
+      let color = '#888';
+
+      if (tarikhStr) {
+        const [d, m, y] = tarikhStr.split('/').map(Number);
+        const tanamDate = new Date(y, m - 1, d);
+        const now = new Date();
+        const days = Math.floor((now - tanamDate) / (1000 * 60 * 60 * 24));
+        color = getRipenessColor(days, ripeDays);
+      }
+
+      return {
+        ...f,
+        properties: {
+          ...f.properties,
+          originalFill: f.properties.fill || '#ffffff',
+          fill: color
+        }
+      };
     });
+
+    source.setData({ type: 'FeatureCollection', features: updated });
+
+    // Adjust opacity on the corresponding layers
+    const fillId = `${base}-fill`;
+    const lineId = `${base}-line`;
+
+    if (map.getLayer(fillId)) {
+      map.setPaintProperty(fillId, 'fill-opacity',
+        tuaiActive ? 0.5 : [
+          'interpolate', ['linear'], ['zoom'],
+          13, base.includes('sawahring') ? 0.4 : 0,
+          16, base.includes('sawahring') ? 0 : 0.4
+        ]
+      );
+    }
+    if (map.getLayer(lineId)) {
+      if (tuaiActive) {
+        map.setPaintProperty(lineId, 'line-opacity', base.includes('sawahring') ? 0 : 1);
+        map.setPaintProperty(lineId, 'line-width', base.includes('sawahring') ? 0 : 1);
+      } else {
+        map.setPaintProperty(lineId, 'line-opacity', 1);
+        map.setPaintProperty(lineId, 'line-width', 1);
+      }
+    }
   });
 }
 
-setIconColor();
+tuaiBtn.addEventListener('click', toggleTuai);
 
+// ===============================
+// END DOM READY
+// ===============================
+}); // DOMContentLoaded end
+
+                        
