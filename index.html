@@ -50,6 +50,7 @@
   </div>
 
     <div id="floatingHud"></div>
+  
 <!-- 🔒 Login Button (always visible in top-right corner) -->
 <button id="loginToggleBtn"
   style="position:fixed; top:10px; right:15px; z-index:2000;
@@ -59,8 +60,8 @@
   Login
 </button>
 
-<!-- Admin Login Modal -->
-<div id="adminModal" class="modal">
+<!-- Admin Login Modal (hidden on load) -->
+<div id="adminModal" class="modal" style="display:none;">
   <div class="modal-content">
     <h2>Admin Login</h2>
     <input type="text" id="adminUser" placeholder="Username">
@@ -75,6 +76,7 @@
   <button id="logoutBtn">Logout</button>
   <button id="uploadJsonBtn">Upload JSON</button>
 </div>
+
 
    <!-- External libraries -->
   <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
