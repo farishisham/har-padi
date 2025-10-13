@@ -744,7 +744,7 @@ function highlightFeature(fPartial) {
     const tarikhTanam = parseTarikhTanam(f);
     const usiaText = formatUsiaBenih(tarikhTanam);
 //console.log(days); // e.g. → 16 (if today is 18 May 2025)
-    popupHTML += `<br>Benih: ${benih || 'Tiada info'}`;
+    popupHTML += `<br>Benih: ${benih || 'Tiada info'}<br>${tray} tray atau ${tray*3} gulung`;
     
     if (tabur) popupHTML += `<br>${tabur}`;
     //if (benih) popupHTML += `<br>Benih: ${benih}<br>${tray} tray atau ${tray*3} gulung`
