@@ -730,6 +730,8 @@ loginToggleBtn.addEventListener('click', () => {
 loginBtn.addEventListener('click', () => {
   const user = document.getElementById('adminUser').value.trim();
   const pass = document.getElementById('adminPass').value.trim();
+  const closeLoginModal = document.getElementById('closeLoginModal');
+
 
   if (user === ADMIN_USER && md5(pass) === ADMIN_PASS_HASH) {
     setCookie('admin_session', 'valid_admin_session', 1);
@@ -737,6 +739,18 @@ loginBtn.addEventListener('click', () => {
     updateLoginUI();
   } else {
     loginError.textContent = 'Invalid username or password';
+  }
+});
+
+// --- Close modal when "×" is clicked ---
+closeLoginModal.addEventListener('click', () => {
+  adminModal.style.display = 'none';
+});
+
+// --- Close modal when clicking outside ---
+window.addEventListener('click', (e) => {
+  if (e.target === adminModal) {
+    adminModal.style.display = 'none';
   }
 });
 
