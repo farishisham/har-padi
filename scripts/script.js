@@ -1,9 +1,3 @@
-// Initialize Supabase client
-const SUPABASE_URL = "https://rtuygtlvnabdsohmttxz.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0dXlndGx2bmFiZHNvaG10dHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDgwOTksImV4cCI6MjA3NTkyNDA5OX0.1t4JaSHZOm5S1zPnuItsYpRA5ewgqM3FpCusXna5TtY";
-
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 const map = new maplibregl.Map({
   container: 'map',
   style: {
@@ -28,69 +22,6 @@ const map = new maplibregl.Map({
   minZoom: 13,
   maxZoom: 17.4
 });
-
-
-
-async function loginUser() {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value.trim();
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    alert("Login failed: " + error.message);
-    return;
-  }
-
-  const user = data.user;
-  console.log("Logged in user:", user);
-
-  // Fetch role from user_roles table
-  const { data: roleData, error: roleError } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", user.id)
-    .single();
-
-  if (roleError) {
-    console.error("Error fetching role:", roleError);
-    alert("Login success but role missing.");
-    return;
-  }
-
-  // Save in cookie or memory
-  document.cookie = `user_role=${roleData.role}; path=/; max-age=${60 * 60 * 6}`;
-  document.cookie = `username=${user.email}; path=/; max-age=${60 * 60 * 6}`;
-
-  alert(`Welcome ${user.email} (${roleData.role})`);
-  updateUIBasedOnRole(roleData.role);
-}
-
-async function logoutUser() {
-  await supabase.auth.signOut();
-  document.cookie = "user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-  document.cookie = "username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-  alert("Logged out");
-  location.reload();
-}
-
-window.addEventListener("DOMContentLoaded", async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (user) {
-    const { data: roleData } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .single();
-
-    if (roleData) updateUIBasedOnRole(roleData.role);
-  }
-});
-
 
 // ===== COOKIE UTILS =====
 function setCookie(name, value, days) {
