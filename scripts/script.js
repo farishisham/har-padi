@@ -1,3 +1,9 @@
+// Initialize Supabase client
+const SUPABASE_URL = "https://rtuygtlvnabdsohmttxz.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0dXlndGx2bmFiZHNvaG10dHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDgwOTksImV4cCI6MjA3NTkyNDA5OX0.1t4JaSHZOm5S1zPnuItsYpRA5ewgqM3FpCusXna5TtY";
+
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const map = new maplibregl.Map({
   container: 'map',
   style: {
@@ -23,11 +29,7 @@ const map = new maplibregl.Map({
   maxZoom: 17.4
 });
 
-// Initialize Supabase client
-const SUPABASE_URL = "https://rtuygtlvnabdsohmttxz.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0dXlndGx2bmFiZHNvaG10dHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzNDgwOTksImV4cCI6MjA3NTkyNDA5OX0.1t4JaSHZOm5S1zPnuItsYpRA5ewgqM3FpCusXna5TtY";
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 async function loginUser() {
   const email = document.getElementById("loginEmail").value.trim();
