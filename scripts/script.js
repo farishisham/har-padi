@@ -680,8 +680,8 @@ const logoutBtn = document.getElementById('logoutBtn');
 const uploadJsonBtn = document.getElementById('uploadJsonBtn');
 const loginError = document.getElementById('loginError');
 
-const ADMIN_USER = 'admin';
-const ADMIN_PASS_HASH = '81dc9bdb52d04dc20036dbd8313ed055'; // "1234" hashed (MD5)
+const ADMIN_USER = 'harpadi';
+const ADMIN_PASS_HASH = '81dc9bdb52d04dc20036dbd8313ed055'; // "110110" hashed (MD5)
 
 // --- Cookie utilities ---
 function setCookie(name, value, days) {
