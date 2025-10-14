@@ -835,5 +835,8 @@ uploadJsonBtn.addEventListener('click', () => {
 // Initialize state on page load
 updateLoginUI();
 
+const email = username + "@padi.local";
+
+
 
 
