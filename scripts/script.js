@@ -398,14 +398,14 @@ function highlightFeature(fPartial) {
   const areahectare = (turf.area(f) * 0.405 / 4046.86).toFixed(2);
   const isBlok = !f.properties.name?.toLowerCase().includes('blok');
 
-  let popupHTML = `<strong>${f.properties.name}</strong><br>${area} ekar atau [${areahectare} hektar]`;
+  let popupHTML = `<strong>${f.properties.name}</strong><br>${area} ekar [${areahectare} hektar]`;
   if (isBlok) {
     const benih = parseBenihType(f);
     const tabur = parseTaburInfo(f);
     const tray = Math.round(area * 35);
     const tarikhTanam = parseTarikhTanam(f);
     const usiaText = formatUsiaBenih(tarikhTanam);
-    popupHTML += `<br>Benih: ${benih || 'Tiada info'}<br>${tray} tray atau ${tray * 3} gulung`;
+    popupHTML += `<br>Benih: ${benih || 'Tiada info'}<br>${tray} tray [${tray * 3} gulung]`;
     if (tabur) popupHTML += `<br>${tabur}`;
     if (f.properties.description?.value?.toLowerCase().includes('calit'))
       popupHTML += `<br>Tarikh tanam: ${tarikhTanam}<br>HLT: ${usiaText}`;
