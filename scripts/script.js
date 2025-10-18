@@ -398,7 +398,7 @@ function highlightFeature(fPartial) {
   const areahectare = (turf.area(f) * 0.405 / 4046.86).toFixed(2);
   const isBlok = !f.properties.name?.toLowerCase().includes('blok');
 
-  let popupHTML = `<strong>${f.properties.name}</strong><br>${area} ekar atau ${areahectare} hektar`;
+  let popupHTML = `<strong>${f.properties.name}</strong><br>${area} ekar atau [${areahectare} hektar]`;
   if (isBlok) {
     const benih = parseBenihType(f);
     const tabur = parseTaburInfo(f);
@@ -408,7 +408,7 @@ function highlightFeature(fPartial) {
     popupHTML += `<br>Benih: ${benih || 'Tiada info'}<br>${tray} tray atau ${tray * 3} gulung`;
     if (tabur) popupHTML += `<br>${tabur}`;
     if (f.properties.description?.value?.toLowerCase().includes('calit'))
-      popupHTML += `<br>${tray} tray atau ${tray * 3} gulung<br>Tarikh tanam: ${tarikhTanam}<br>HLT: ${usiaText}`;
+      popupHTML += `<br>Tarikh tanam: ${tarikhTanam}<br>HLT: ${usiaText}`;
   }
 
   new maplibregl.Popup({ closeButton: false })
