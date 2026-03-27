@@ -305,13 +305,9 @@ function showBlokNames() {
       const benih = match ? match[1].trim().toUpperCase() : '';
       const el = document.createElement('div');
       el.innerHTML = `
-  <div style="text-align:center; line-height:1.2;">
-    <div style="font-weight:bold; font-size:15px;">
-      ${blokName}
-    </div>
-    <div style="font-size:12px;">
-      ${benih}
-    </div>
+  <div style="text-align:center; line-height:1.1;">
+          <div style="font-weight:bold;">${blokName}</div>
+          <div style="font-weight:normal;">${area} ekar [${areahectare} hektar</div>
   </div>
 `;
       `;
