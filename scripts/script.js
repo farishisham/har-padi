@@ -306,8 +306,8 @@ function showBlokNames() {
       const el = document.createElement('div');
       el.innerHTML = `
         <div style="text-align:center; line-height:1.1;">
-          <div style="font-weight:bold;font-size:14px;">${blokName}</div>
-          <div style="font-weight:normal;font-size:12px;">${area} ekar [${areahectare} hektar</div>
+          <div style="font-weight:bold;">${blokName}</div>
+          <div style="font-weight:normal;">${area} ekar [${areahectare} hektar]</div>
         </div>
       `;
       el.style.fontSize = '10px';
