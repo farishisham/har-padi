@@ -307,7 +307,7 @@ function showBlokNames() {
       el.innerHTML = `
       <div style="text-align:center; line-height:1.1;">
       <div style="font-weight:bold;">${blokName}</div>
-      <div style="font-weight:normal;">${area}</div>
+      <div style="font-weight:normal;">${benih}</div>
       </div>
 
       `;
