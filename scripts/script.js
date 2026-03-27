@@ -310,7 +310,7 @@ function showBlokNames() {
       ${blokName}
     </div>
     <div style="font-size:12px;">
-      ${area} ekar [${areahectare} hektar]
+      ${benih}
     </div>
   </div>
 `;
